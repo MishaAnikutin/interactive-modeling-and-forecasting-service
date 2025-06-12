@@ -1,14 +1,14 @@
 {
   "main": {
-    "id": "1d229b70a785107e",
+    "id": "56a7774681464480",
     "type": "split",
     "children": [
       {
-        "id": "12a4331f59e7ff72",
+        "id": "5d9a860a181281db",
         "type": "tabs",
         "children": [
           {
-            "id": "14f568f9d735735a",
+            "id": "2eba55693b5b167a",
             "type": "leaf",
             "state": {
               "type": "empty",
@@ -23,15 +23,15 @@
     "direction": "vertical"
   },
   "left": {
-    "id": "41d81f930ca3cc6d",
+    "id": "10aafa662c7759c6",
     "type": "split",
     "children": [
       {
-        "id": "bcfa44f2acfddd60",
+        "id": "21bb4566d71b8a7b",
         "type": "tabs",
         "children": [
           {
-            "id": "45a8e82a93055c9d",
+            "id": "5758a30707b6cfb2",
             "type": "leaf",
             "state": {
               "type": "file-explorer",
@@ -44,7 +44,7 @@
             }
           },
           {
-            "id": "4b65dcf6a3b9dc3a",
+            "id": "70a87d3524e3f6d1",
             "type": "leaf",
             "state": {
               "type": "search",
@@ -61,7 +61,7 @@
             }
           },
           {
-            "id": "53682a5f17234c46",
+            "id": "ba92cefca34ec43b",
             "type": "leaf",
             "state": {
               "type": "bookmarks",
@@ -77,15 +77,15 @@
     "width": 300
   },
   "right": {
-    "id": "d98ca5676a068ab8",
+    "id": "81256c0f84704346",
     "type": "split",
     "children": [
       {
-        "id": "c6218ed63e0d23ce",
+        "id": "412604591f142320",
         "type": "tabs",
         "children": [
           {
-            "id": "c71bdc17dc7f0559",
+            "id": "fc5d43da4b9939b8",
             "type": "leaf",
             "state": {
               "type": "backlink",
@@ -103,7 +103,7 @@
             }
           },
           {
-            "id": "bff04e173fca3230",
+            "id": "0b32d9486fa52d00",
             "type": "leaf",
             "state": {
               "type": "outgoing-link",
@@ -116,7 +116,7 @@
             }
           },
           {
-            "id": "f31eb38ce477afcf",
+            "id": "d14432f069d8c41b",
             "type": "leaf",
             "state": {
               "type": "tag",
@@ -131,7 +131,7 @@
             }
           },
           {
-            "id": "c569240ceaa7e6cc",
+            "id": "d8848862012f3aea",
             "type": "leaf",
             "state": {
               "type": "outline",
@@ -161,34 +161,19 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "14f568f9d735735a",
+  "active": "2eba55693b5b167a",
   "lastOpenFiles": [
-    "entities/Coefficient.md",
-    "v1/entities/Timeseries.md",
-    "v1/entities/README.md",
-    "v1/entities/Preprocess.md",
-    "v1/entities/Metric.md",
-    "v1/entities/Forecasts.md",
-    "v1/entities/Coefficient.md",
-    "v1/entities/ArimaxParams.md",
-    "v1/entities",
-    "v1/use cases/Получение предобработанного ряда.md",
+    "docs/v1/entities/Forecasts.md",
     "v1/use cases/Оценка модели и получение её прогноза.md",
     "v1/use cases/README.md",
-    "v1/use cases",
-    "v1",
-    "entities/ArimaxParams.md",
-    "entities/README.md",
-    "entities/ArimaxFitResult.md",
-    "use cases/Оценка модели и получение её прогноза.md",
-    "entities/Timeseries.md",
-    "use cases/Получение предобработанного ряда.md",
-    "entities/VariableRequest.md",
-    "entities/Preprocess.md",
-    "entities/Metric.md",
-    "entities/Forecasts.md",
-    "use cases/README.md",
-    "entities/ArimaxFitRequest.md",
-    "entities/ForecastModel.md"
+    "v1/use cases/Получение предобработанного ряда.md",
+    "docs/v1/use 1.md",
+    "docs/v1/use.md",
+    "v1/entities/README.md",
+    "v1/entities/Timeseries.md",
+    "docs/v1/entities/Timeseries.md",
+    "docs/v1/entities",
+    "docs/v1",
+    "docs"
   ]
 }
