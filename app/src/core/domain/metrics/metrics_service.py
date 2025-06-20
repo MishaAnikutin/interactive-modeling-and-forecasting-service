@@ -1,6 +1,7 @@
 from abc import ABC
 
-from src.shared.schemas import Timeseries, Metric
+from .metric import Metric
+from src.core.domain.timeseries import Timeseries
 
 
 class MetricServiceI(ABC):

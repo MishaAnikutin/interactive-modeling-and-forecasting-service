@@ -1,20 +1,20 @@
-from src.api.v1.building_model.schemas import ArimaxFitRequest, ArimaxFitResult
-
-from src.infrastructure.adapters import (
-    ArimaxAdapter,
+from src.core.application.building_model.schemas.arimax import ArimaxFitRequest, ArimaxFitResult
+from src.infrastructure.adapters.timeseries import (
     PandasTimeseriesAdapter,
     TimeseriesAlignment,
-    IModelStorage,
 )
+
+from src.infrastructure.adapters.modeling import ArimaxAdapter
+from src.infrastructure.adapters.model_storage import IModelStorage
 
 
 class FitArimaxUC:
     def __init__(
         self,
-        ts_adapter: PandasTimeseriesAdapter,
-        model_adapter: ArimaxAdapter,
         storage: IModelStorage,
+        model_adapter: ArimaxAdapter,
         ts_aligner: TimeseriesAlignment,
+        ts_adapter: PandasTimeseriesAdapter,
     ):
         self._ts_adapter = ts_adapter
         self._ts_aligner = ts_aligner
@@ -22,16 +22,11 @@ class FitArimaxUC:
         self._storage = storage
 
     def execute(self, request: ArimaxFitRequest) -> ArimaxFitResult:
-        target_df = self._ts_adapter.to_dataframe(request.dependent_variable)
-        exog_df = None
+        target_df = self._ts_adapter.to_dataframe(request.dependent_variables)
 
-        if request.explanatory_variables is not None:
-            exog_df = self._ts_aligner.compare(
-                timeseries_list=[
-                    self._ts_adapter.to_dataframe(ts)
-                    for ts in request.explanatory_variables
-                ]
-            )
+        exog_df = (None
+                   if request.explanatory_variables is None
+                   else self._ts_aligner.compare(timeseries_list=request.explanatory_variables))
 
         model_result: ArimaxFitResult = self._model_adapter.fit(
             target=target_df,

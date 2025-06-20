@@ -1,1 +1,1 @@
-from arimax import ArimaxAdapter
+from .arimax import ArimaxAdapter

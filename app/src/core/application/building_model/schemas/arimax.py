@@ -2,8 +2,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
-from .schemas import Forecasts, ModelMetrics, FitParams
-from src.shared.schemas import Coefficient, Timeseries
+from src.core.domain import Timeseries, FitParams, Forecasts, Coefficient, ModelMetrics
 
 
 class ArimaxParams(BaseModel):

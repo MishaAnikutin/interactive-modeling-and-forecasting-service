@@ -1,4 +1,4 @@
-from src.shared.schemas import Timeseries, Metric
+from src.core.domain import Timeseries, Metric
 from src.core.domain.metrics.metrics_service import MetricServiceI
 
 

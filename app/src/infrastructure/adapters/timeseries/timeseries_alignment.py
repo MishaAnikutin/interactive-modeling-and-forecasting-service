@@ -3,7 +3,7 @@ from typing import List
 
 import pandas as pd
 
-from src.shared.schemas import Timeseries
+from src.core.domain import Timeseries
 from .frequency_determiner import FrequencyDeterminer
 
 

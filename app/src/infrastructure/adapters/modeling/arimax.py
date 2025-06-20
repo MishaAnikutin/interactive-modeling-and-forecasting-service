@@ -2,16 +2,11 @@ import pandas as pd
 from typing import List
 import statsmodels.api as sm
 
-from src.infrastructure.adapters import TimeseriesTrainTestSplit, MetricsFactory
-from src.shared.schemas import Coefficient
-from src.api.v1.building_model.schemas import (
-    ArimaxParams,
-    ArimaxFitResult,
-    Forecasts,
-    FitParams,
-    ModelMetrics,
-    Timeseries,
-)
+from src.core.domain import FitParams, ModelMetrics, Forecasts, Coefficient, Timeseries
+from src.core.application.building_model.schemas.arimax import ArimaxParams, ArimaxFitResult
+
+from src.infrastructure.adapters.timeseries import TimeseriesTrainTestSplit
+from src.infrastructure.adapters.metrics import MetricsFactory
 
 
 class ArimaxAdapter:

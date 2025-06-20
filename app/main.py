@@ -1,5 +1,4 @@
 import uvicorn
-from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
@@ -10,7 +9,7 @@ from src.api import container, router
 
 
 def create_fastapi_app() -> FastAPI:
-    app = FastAPI(title="Сервис моделирования и прогнозирования", lifespan=lifespan)
+    app = FastAPI(title="Сервис моделирования и прогнозирования")
     app.include_router(router)
 
     app.add_middleware(
@@ -22,12 +21,6 @@ def create_fastapi_app() -> FastAPI:
     )
 
     return app
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    yield
-    app.state.dishka_container.close()
 
 
 def create_app():

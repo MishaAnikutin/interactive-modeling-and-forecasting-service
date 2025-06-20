@@ -1,6 +1,6 @@
 from dishka import Provider, Scope, provide
 
-from src.core import FitArimaxUC
+from src.core.application.building_model.use_cases.fit_arimax import FitArimaxUC
 
 
 class CoreProvider(Provider):

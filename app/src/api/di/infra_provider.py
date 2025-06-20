@@ -1,14 +1,13 @@
 from dishka import Provider, Scope, provide
 
-from src.infrastructure import (
+from src.infrastructure.adapters.metrics import MetricsFactory
+from src.infrastructure.adapters.model_storage import IModelStorage, MockModelStorage
+from src.infrastructure.adapters.modeling import ArimaxAdapter
+from src.infrastructure.adapters.timeseries import (
     PandasTimeseriesAdapter,
     TimeseriesAlignment,
     FrequencyDeterminer,
     TimeseriesTrainTestSplit,
-    ArimaxAdapter,
-    IModelStorage,
-    MockModelStorage,
-    MetricsFactory,
 )
 
 

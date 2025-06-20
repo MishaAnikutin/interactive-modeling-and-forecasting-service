@@ -1,6 +1,6 @@
 import pandas as pd
 
-from src.shared.schemas import Timeseries
+from src.core.domain import Timeseries
 
 
 class PandasTimeseriesAdapter:

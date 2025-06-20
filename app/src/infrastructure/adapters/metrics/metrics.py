@@ -1,5 +1,6 @@
-from src.shared.schemas import Metric
 from .factory import MetricsFactory
+
+from src.core.domain import Metric
 from src.core.domain.metrics.metrics_service import MetricServiceI
 
 from sklearn.metrics import (
