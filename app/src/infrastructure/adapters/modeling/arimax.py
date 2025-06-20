@@ -1,6 +1,7 @@
 import pandas as pd
 from typing import List
 import statsmodels.api as sm
+from logs import logger
 
 from src.core.domain import FitParams, ModelMetrics, Forecasts, Coefficient, Timeseries
 from src.core.application.building_model.schemas.arimax import ArimaxParams, ArimaxFitResult
@@ -19,6 +20,7 @@ class ArimaxAdapter:
     ):
         self._metric_factory = metric_factory
         self._ts_spliter = ts_train_test_split
+        self._log = logger.getChild(self.__class__.__name__)
 
     def fit(
         self,
@@ -27,6 +29,10 @@ class ArimaxAdapter:
         arimax_params: ArimaxParams,
         fit_params: FitParams,
     ) -> ArimaxFitResult:
+        self._log.debug(
+            "Старт обучения ARIMAX",
+            extra = {"target_shape": target.shape, "exog_shape": getattr(exog, "shape", None)},
+        )
 
         # Делим выборку на обучающую и тестовую
         exog_train, train_target, exog_test, test_target = self._ts_spliter.split(
@@ -40,6 +46,8 @@ class ArimaxAdapter:
             order=(arimax_params.p, arimax_params.d, arimax_params.q),
         )
         results = model.fit()
+
+        self._log.info("Модель обучена", extra={"aic": results.aic, "bic": results.bic})
 
         # Строим прогноз на обучающей выборке
         train_predict = results.get_prediction().predicted_mean

@@ -6,6 +6,7 @@ from dishka.integrations.fastapi import setup_dishka
 
 from config import Config
 from src.api import container, router
+from src.api.logs import RequestLoggingMiddleware
 
 
 def create_fastapi_app() -> FastAPI:
@@ -19,6 +20,8 @@ def create_fastapi_app() -> FastAPI:
         allow_methods=Config.ALLOW_METHODS.split(),
         allow_headers=Config.ALLOW_HEADERS.split(),
     )
+
+    app.add_middleware(RequestLoggingMiddleware)
 
     return app
 
