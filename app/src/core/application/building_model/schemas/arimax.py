@@ -6,9 +6,9 @@ from src.core.domain import Timeseries, FitParams, Forecasts, Coefficient, Model
 
 
 class ArimaxParams(BaseModel):
-    p: int = Field(gte=0)
-    d: int = Field(gte=0)
-    q: int = Field(gte=0)
+    p: int = Field(default=0, ge=0)
+    d: int = Field(default=0, ge=0)
+    q: int = Field(default=0, ge=0)
 
 
 class ArimaxFitRequest(BaseModel):
