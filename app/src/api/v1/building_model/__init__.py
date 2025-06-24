@@ -1,1 +1,2 @@
-from .handlers import fit_model_router
+from .fit import fit_model_router
+from .params import params_router
