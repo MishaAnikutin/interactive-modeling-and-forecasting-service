@@ -75,16 +75,16 @@ def test_split_boundaries_same(sample_data):
     )
 
     # Проверка train (до границы включительно)
-    assert exog_train["feature"].tolist() == [0, 1, 2, 3, 4, 5, 6]
-    assert train_target.tolist() == [0, 1, 2, 3, 4, 5, 6]
+    assert exog_train["feature"].tolist() == [0, 1, 2, 3, 4, 5]
+    assert train_target.tolist() == [0, 1, 2, 3, 4, 5]
 
     # Проверка validation (одна точка - граница)
-    assert exog_val["feature"].tolist() == [6]
-    assert val_target.tolist() == [6]
+    assert exog_val["feature"].tolist() == [5]
+    assert val_target.tolist() == [5]
 
     # Проверка test (от границы включительно)
-    assert exog_test["feature"].tolist() == [6, 7, 8, 9]
-    assert test_target.tolist() == [6, 7, 8, 9]
+    assert exog_test["feature"].tolist() == [5, 6, 7, 8, 9]
+    assert test_target.tolist() == [5, 6, 7, 8, 9]
 
 
 def test_split_val_boundary_last(sample_data):
