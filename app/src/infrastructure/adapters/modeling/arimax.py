@@ -34,9 +34,19 @@ class ArimaxAdapter:
             extra = {"target_shape": target.shape, "exog_shape": getattr(exog, "shape", None)},
         )
 
-        # Делим выборку на обучающую и тестовую
-        exog_train, train_target, exog_test, test_target = self._ts_spliter.split(
-            train_boundary=fit_params.train_boundary, target=target, exog=exog
+        # Делим выборку на train / val / test
+        (
+            exog_train,
+            train_target,
+            exog_val,
+            val_target,
+            exog_test,
+            test_target,
+        ) = self._ts_spliter.split(
+            train_boundary=fit_params.train_boundary,
+            val_boundary=fit_params.val_boundary,
+            target=target,
+            exog=exog,
         )
 
         # Создаем и обучаем модель
