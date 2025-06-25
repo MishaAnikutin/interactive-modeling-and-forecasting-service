@@ -15,15 +15,15 @@ class MetricsFactory:
 
     @classmethod
     def create(
-        cls, metric_type: str, y_pred: Timeseries, y_true: Timeseries
+        cls, metric_type: str
     ) -> MetricServiceI:
-        return cls.registry[metric_type](y_pred=y_pred, y_true=y_true)
+        return cls.registry[metric_type]()
 
     @classmethod
     def apply(
-        cls, metrics: list[str], y_pred: Timeseries, y_true: Timeseries
+        cls, metrics: list[str], **kwargs
     ) -> list[Metric]:
         return [
-            cls.registry[metric_type](y_pred=y_pred, y_true=y_true).apply()
+            cls.registry[metric_type]().apply(kwargs)
             for metric_type in metrics
         ]
