@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import Tuple, TypeVar, Optional
 
+import pandas as pd
+
 Xtype = TypeVar("Xtype")
 Ytype = TypeVar("Ytype")
 
@@ -13,6 +15,17 @@ class TimeseriesTrainTestSplit:
     val_boundary   – последний момент, попадающий в validation.
                      Всё, что идёт после val_boundary, считается test-частью.
     """
+    @staticmethod
+    def split_ts(
+            ts: pd.Series,
+            train_boundary: datetime,
+            val_boundary: datetime
+    ) -> Tuple[pd.Series, pd.Series, pd.Series]:
+        train_target = ts.loc[:train_boundary]
+        val_target = ts.loc[train_boundary:val_boundary]
+        test_target = ts.loc[val_boundary:]
+        return train_target, val_target, test_target
+
     def split(
         self,
         train_boundary: datetime,
@@ -26,17 +39,12 @@ class TimeseriesTrainTestSplit:
     ]:
 
         # --- целевая переменная ---
-        train_target = target.loc[:train_boundary]
-        val_target = target.loc[train_boundary:val_boundary]
-        test_target = target.loc[val_boundary:]
+        train_target, val_target, test_target = self.split_ts(target, train_boundary, val_boundary)
 
         # --- экзогенные признаки (если есть) ---
+        exog_train = exog_val = exog_test = None
         if exog is not None:
-            exog_train = exog.loc[:train_boundary]
-            exog_val = exog.loc[train_boundary:val_boundary]
-            exog_test = exog.loc[val_boundary:]
-        else:
-            exog_train = exog_val = exog_test = None
+            exog_train, exog_val, exog_test = self.split_ts(exog, train_boundary, val_boundary)
 
         return (
             exog_train,
