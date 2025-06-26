@@ -1,16 +1,15 @@
 from abc import ABC
+from typing import Callable, Optional
 
 from .metric import Metric
-from src.core.domain.timeseries import Timeseries
-
 
 class MetricServiceI(ABC):
-    strategy = None
+    strategy: Optional[Callable[..., float]] = None
 
-    def apply(self, *args, **kwargs) -> Metric:
+    def apply(self, **kwargs) -> Metric:
         if self.strategy is not None:
             return Metric(
                 type=self.__class__.__name__,
-                value=self.strategy(kwargs),
+                value=type(self).strategy(**kwargs),  # ← ключевая строка
             )
         raise NotImplementedError
