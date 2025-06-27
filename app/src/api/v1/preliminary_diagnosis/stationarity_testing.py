@@ -8,10 +8,10 @@ from src.core.application.preliminary_diagnosis.use_cases.stats_test import Stat
 stationary_testing_router = APIRouter(prefix="/stationary_testing", tags=["Анализ ряда на стационарность"])
 
 
-@stationary_testing_router.get("/")
+@stationary_testing_router.post("/")
 @inject_sync
 def stationary_testing(
     request: StatTestRequest,
     stationary_testing_uc: FromDishka[StationarityUC]
-) -> StatTestResult:
+) -> list[StatTestResult]:
     return stationary_testing_uc.execute(request=request)
