@@ -1,6 +1,7 @@
 .idea/
 app/.idea/
 *.log
+app/.idea/misc.xml
 # документация обсидиан
 .trash/
 .obsidian/
