@@ -14,10 +14,6 @@ class MetricsFactory:
         return wrapper
 
     @classmethod
-    def create(cls, metric_type: str) -> MetricServiceI:
-        return cls.registry[metric_type]()
-
-    @classmethod
     def apply(cls, metrics: list[str], **kwargs) -> list[Metric]:
         return [
             cls.registry[metric_type]().apply(**kwargs)
