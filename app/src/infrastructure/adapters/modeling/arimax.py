@@ -90,8 +90,10 @@ class ArimaxAdapter:
 
         return ArimaxFitResult(
             coefficients=coefficients,
-            metrics=metrics,
+            model_metrics=metrics,
             forecasts=forecasts,
+            weight_path=fit_params.weight_path,
+            model_id=fit_params.model_id,
         )
 
     def _parse_coefficients(self, results) -> List[Coefficient]:
