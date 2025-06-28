@@ -1,10 +1,7 @@
 import uuid
-from pathlib import Path
-from typing import Dict, Any, List
 
 import pandas as pd
 from neuralforecast import NeuralForecast
-from neuralforecast.losses.pytorch import DistributionLoss
 from neuralforecast.models import NHITS
 
 from logs import logger
@@ -13,23 +10,23 @@ from src.core.application.building_model.schemas.nhits import (
     NhitsFitResult,
 )
 
-from src.core.domain import FitParams, Forecasts, Timeseries, ModelMetrics
+from src.core.domain import FitParams
 from src.infrastructure.adapters.metrics import MetricsFactory
+from src.infrastructure.adapters.modeling.interface import MlAdapterInterface
 from src.infrastructure.adapters.timeseries import TimeseriesTrainTestSplit
 import os
 os.environ.setdefault("PYTORCH_ENABLE_MPS_FALLBACK", "1")
 
 
-class NhitsAdapter:
-    metrics =()
+class NhitsAdapter(MlAdapterInterface):
+    metrics = ()
 
     def __init__(
             self,
             metric_factory: MetricsFactory,
             ts_train_test_split: TimeseriesTrainTestSplit,
-    ) -> None:
-        self._metric_factory = metric_factory
-        self._ts_spliter = ts_train_test_split
+    ):
+        super().__init__(metric_factory, ts_train_test_split)
         self._log = logger.getChild(self.__class__.__name__)
 
     @staticmethod
@@ -48,55 +45,6 @@ class NhitsAdapter:
         if exog is not None and not exog.empty:
             df = pd.concat([df.reset_index(drop=True), exog.reset_index(drop=True)], axis=1)
         return df
-
-    @staticmethod
-    def _build_nhits(params: NhitsParams) -> NHITS:
-        # базовые обязательные аргументы
-        nhits_kwargs: dict[str, Any] = {
-            "h": params.h,
-            "input_size": params.input_size,
-            "max_steps": params.max_steps,
-            "early_stop_patience_steps": params.early_stop_patience_steps,
-            "learning_rate": params.learning_rate,
-            "scaler_type": params.scaler_type,
-            "accelerator": "cpu",
-        }
-        return NHITS(**nhits_kwargs)
-
-    def _generate_forecasts(
-        self, train_predict: pd.Series, test_predict: pd.Series, forecast: pd.Series
-    ) -> Forecasts:
-        return Forecasts(
-            train_predict=Timeseries(
-                dates=train_predict.index.tolist(),
-                values=train_predict.values.tolist(),
-            ),
-            test_predict=Timeseries(
-                dates=test_predict.index.tolist(),
-                values=test_predict.values.tolist(),
-            ),
-            forecast=Timeseries(
-                dates=forecast.index.tolist(),
-                values=forecast.values.tolist(),
-            ),
-        )
-
-    def _calculate_metrics(
-        self,
-        y_train_true: pd.Series,
-        y_train_pred: pd.Series,
-        y_test_true: pd.Series,
-        y_test_pred: pd.Series,
-    ) -> ModelMetrics:
-
-        train_metrics = self._metric_factory.apply(
-            metrics=self.metrics, y_pred=y_train_pred, y_true=y_train_true
-        )
-        test_metrics = self._metric_factory.apply(
-            metrics=self.metrics, y_pred=y_test_pred, y_true=y_test_true
-        )
-
-        return ModelMetrics(train_metrics=train_metrics, test_metrics=test_metrics)
 
     def fit(
             self,
@@ -138,9 +86,7 @@ class NhitsAdapter:
             ).drop(columns=["y"])
 
         # 3. Создаём и обучаем модель -------------------------------------------------
-        model = self._build_nhits(
-            params=nhits_params
-        )
+        model = NHITS(accelerator='cpu', **nhits_params.model_dump())
         nf = NeuralForecast(models=[model], freq=pd.infer_freq(target.index) or "D")
 
         nf.fit(df=df_train_val, val_size=val_size)

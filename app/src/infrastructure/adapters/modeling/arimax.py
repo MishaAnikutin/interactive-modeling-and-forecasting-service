@@ -3,14 +3,15 @@ from typing import List
 import statsmodels.api as sm
 from logs import logger
 
-from src.core.domain import FitParams, ModelMetrics, Forecasts, Coefficient, Timeseries
+from src.core.domain import FitParams, Coefficient
 from src.core.application.building_model.schemas.arimax import ArimaxParams, ArimaxFitResult
+from src.infrastructure.adapters.modeling.interface import MlAdapterInterface
 
 from src.infrastructure.adapters.timeseries import TimeseriesTrainTestSplit
 from src.infrastructure.adapters.metrics import MetricsFactory
 
 
-class ArimaxAdapter:
+class ArimaxAdapter(MlAdapterInterface):
     metrics = ("RMSE", "MAPE", "R2")
 
     def __init__(
@@ -18,8 +19,7 @@ class ArimaxAdapter:
         metric_factory: MetricsFactory,
         ts_train_test_split: TimeseriesTrainTestSplit,
     ):
-        self._metric_factory = metric_factory
-        self._ts_spliter = ts_train_test_split
+        super().__init__(metric_factory, ts_train_test_split)
         self._log = logger.getChild(self.__class__.__name__)
 
     def fit(
@@ -65,7 +65,7 @@ class ArimaxAdapter:
             steps=len(test_target), exog=exog_test
         ).predicted_mean
 
-        # 4.3 будущий out-of-sample прогноз (если надо)
+        # 4.3 out-of-sample прогноз (если надо)
         forecast = (
             None
             if exog is not None
@@ -103,38 +103,3 @@ class ArimaxAdapter:
             Coefficient(name=name, value=value, p_value=results.pvalues[name])
             for name, value in results.params.items()
         ]
-
-    def _calculate_metrics(
-        self,
-        y_train_true: pd.Series,
-        y_train_pred: pd.Series,
-        y_test_true: pd.Series,
-        y_test_pred: pd.Series,
-    ) -> ModelMetrics:
-
-        train_metrics = self._metric_factory.apply(
-            metrics=self.metrics, y_pred=y_train_pred, y_true=y_train_true
-        )
-        test_metrics = self._metric_factory.apply(
-            metrics=self.metrics, y_pred=y_test_pred, y_true=y_test_true
-        )
-
-        return ModelMetrics(train_metrics=train_metrics, test_metrics=test_metrics)
-
-    def _generate_forecasts(
-        self, train_predict: pd.Series, test_predict: pd.Series, forecast: pd.Series
-    ) -> Forecasts:
-        return Forecasts(
-            train_predict=Timeseries(
-                dates=train_predict.index.tolist(),
-                values=train_predict.values.tolist(),
-            ),
-            test_predict=Timeseries(
-                dates=test_predict.index.tolist(),
-                values=test_predict.values.tolist(),
-            ),
-            forecast=Timeseries(
-                dates=forecast.index.tolist(),
-                values=forecast.values.tolist(),
-            ),
-        )
