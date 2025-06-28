@@ -10,6 +10,6 @@ class MetricServiceI(ABC):
         if self.strategy is not None:
             return Metric(
                 type=self.__class__.__name__,
-                value=type(self).strategy(**kwargs),  # ← ключевая строка
+                value=type(self).strategy(**kwargs),
             )
         raise NotImplementedError
