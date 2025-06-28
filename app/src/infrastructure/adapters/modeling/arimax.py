@@ -29,12 +29,9 @@ class ArimaxAdapter:
         arimax_params: ArimaxParams,
         fit_params: FitParams,
     ) -> ArimaxFitResult:
-        self._log.debug(
-            "Старт обучения ARIMAX",
-            extra = {"target_shape": target.shape, "exog_shape": getattr(exog, "shape", None)},
-        )
+        self._log.debug("Старт обучения ARIMAX")
 
-        # Делим выборку на train / val / test
+        # 1. Train / val / test split -------------------------------------------------
         (
             exog_train,
             train_target,
@@ -48,8 +45,8 @@ class ArimaxAdapter:
             target=target,
             exog=exog,
         )
-
-        # Создаем и обучаем модель
+        # 2. Подготовка данных --------------------------------------------------------
+        # 3. Создаём и обучаем модель -------------------------------------------------
         model = sm.tsa.ARIMA(
             endog=train_target,
             exog=exog_train,
@@ -59,26 +56,30 @@ class ArimaxAdapter:
 
         self._log.info("Модель обучена", extra={"aic": results.aic, "bic": results.bic})
 
-        # Строим прогноз на обучающей выборке
+        # 4. Прогнозы -----------------------------------------------------------------
+        # 4.1 train
         train_predict = results.get_prediction().predicted_mean
 
-        # Тестовой выборке
+        # 4.2 test
         test_predict = results.get_forecast(
             steps=len(test_target), exog=exog_test
         ).predicted_mean
 
-        # и вневыборочный прогноз (если нет экзогенных переменных)
+        # 4.3 будущий out-of-sample прогноз (если надо)
         forecast = (
             None
             if exog is not None
             else results.forecast(steps=fit_params.forecast_horizon)
         )
 
-        # Собираем все ответы вместе
+        # ---------- формируем объект Forecasts -----------------------------------
         forecasts = self._generate_forecasts(
-            train_predict=train_predict, test_predict=test_predict, forecast=forecast
+            train_predict=train_predict,
+            test_predict=test_predict,
+            forecast=forecast
         )
 
+        # 5. Метрики ------------------------------------------------------------------
         metrics = self._calculate_metrics(
             y_train_true=train_target,
             y_train_pred=train_predict,
@@ -88,6 +89,7 @@ class ArimaxAdapter:
 
         coefficients = self._parse_coefficients(results)
 
+        # 6. Результат ----------------------------------------------------------------
         return ArimaxFitResult(
             coefficients=coefficients,
             model_metrics=metrics,
