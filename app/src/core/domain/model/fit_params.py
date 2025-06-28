@@ -6,6 +6,7 @@ from src.core.domain.timeseries.data_frequency import DataFrequency
 
 
 class FitParams(BaseModel):
+    val_boundary: datetime
     train_boundary: datetime
     forecast_horizon: int
     data_frequency: DataFrequency
