@@ -19,7 +19,7 @@ def fit_arimax(
     return fit_arimax_uc.execute(request=request)
 
 
-@fit_model_router.get("/nhits/fit")
+@fit_model_router.post("/nhits/fit")
 @inject_sync
 def fit_nhits(
     request: NhitsFitRequest,

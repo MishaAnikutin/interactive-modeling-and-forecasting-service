@@ -3,6 +3,7 @@ from dishka import Provider, Scope, provide
 from src.infrastructure.adapters.metrics import MetricsFactory
 from src.infrastructure.adapters.model_storage import IModelStorage, MockModelStorage
 from src.infrastructure.adapters.modeling import ArimaxAdapter
+from src.infrastructure.adapters.modeling.nhits import NhitsAdapter
 from src.infrastructure.adapters.stationarity_testing.factory import StationarityTestsFactory
 from src.infrastructure.adapters.timeseries import (
     PandasTimeseriesAdapter,
@@ -23,6 +24,7 @@ class InfraProvider(Provider):
     ts_spliter = provide(TimeseriesTrainTestSplit, provides=TimeseriesTrainTestSplit)
 
     arimax = provide(ArimaxAdapter, provides=ArimaxAdapter)
+    nhits = provide(NhitsAdapter, provides=NhitsAdapter)
 
     model_storage = provide(MockModelStorage, provides=IModelStorage)
 
