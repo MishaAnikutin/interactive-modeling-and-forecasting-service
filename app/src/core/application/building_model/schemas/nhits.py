@@ -22,14 +22,6 @@ class NhitsParams(BaseModel):
     early_stop_patience_steps: int = Field(default=10, ge=0, description="Patience для early-stopping")
     learning_rate: float = Field(default=1e-3, gt=0, description="Шаг обучения")
     scaler_type: str = Field(default="robust", description="Тип скейлера")
-    n_freq_downsample: Optional[List[int]] = Field(
-        default=None, description="Разрежение частот в блоках"
-    )
-    loss_distribution: str | None = Field(
-        default=None,
-        description="Название распределения для DistributionLoss "
-                    "(None – стандартная MSE)",
-    )
 
 
 class NhitsFitRequest(BaseModel):
