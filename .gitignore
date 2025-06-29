@@ -2,6 +2,7 @@
 app/.idea/
 *.log
 app/.idea/misc.xml
+lightning_logs/
 # документация обсидиан
 .trash/
 .obsidian/
