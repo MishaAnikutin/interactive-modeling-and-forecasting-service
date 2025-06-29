@@ -13,7 +13,7 @@ class TimeseriesAlignment:
 
     def _convert_date_(self, dt: datetime, freq_type: str) -> datetime:
         """Преобразует дату в соответствии с типом временного ряда"""
-        if freq_type == "monthly":
+        if freq_type == "M":
             if dt.day != 1:
                 # Переносим на первый день следующего месяца
                 next_month = dt.replace(day=28) + timedelta(
@@ -21,7 +21,7 @@ class TimeseriesAlignment:
                 )  # Переход на следующий месяц
                 return next_month.replace(day=1)
             return dt
-        elif freq_type == "hourly":
+        elif freq_type == "H":
             next_day = dt + timedelta(days=1)
             return next_day.replace(hour=0, minute=0, second=0, microsecond=0)
         else:  # daily
@@ -35,7 +35,7 @@ class TimeseriesAlignment:
 
             # Применяем преобразование дат
             converted_dates = [
-                self._convert_date_(dt, freq_type) for dt in ts_obj.dates
+                self._convert_date_(dt, freq_type.value) for dt in ts_obj.dates
             ]
 
             # Создаем временной ряд
