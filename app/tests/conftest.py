@@ -2,11 +2,24 @@ import pytest
 import pandas as pd
 
 
+
+# ---------- Зависимости ----------
 @pytest.fixture
 def metrics_factory():
     from src.infrastructure.adapters.metrics import MetricsFactory
     return MetricsFactory
 
+@pytest.fixture
+def ts_splitter():
+    from src.infrastructure.adapters.timeseries import TimeseriesTrainTestSplit
+    return TimeseriesTrainTestSplit()
+
+@pytest.fixture
+def ts_alignment():
+    from src.infrastructure.adapters.timeseries import TimeseriesAlignment
+    return TimeseriesAlignment()
+
+# ---------- Данные ----------
 @pytest.fixture
 def sample_data():
     return {

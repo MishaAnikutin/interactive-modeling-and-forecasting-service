@@ -49,3 +49,5 @@ class TimeseriesAlignment:
 
         # Форматируем даты в единый строковый формат
         df.index = df.index.strftime("%d.%m.%Y %H:%M:%S")
+
+        return df
