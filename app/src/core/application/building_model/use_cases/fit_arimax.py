@@ -39,7 +39,7 @@ class FitArimaxUC:
 
         return ArimaxFitResult(
             forecasts=model_result.forecasts,
-            fit_result=model_result.coefficients,
+            coefficients=model_result.coefficients,
             model_metrics=model_result.model_metrics,
             weight_path=model_path,
             model_id=model_id,
