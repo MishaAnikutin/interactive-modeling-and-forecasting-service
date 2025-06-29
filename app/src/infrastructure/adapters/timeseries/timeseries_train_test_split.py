@@ -11,19 +11,35 @@ class TimeseriesTrainTestSplit:
     """
     Делит временной ряд на обучающую, валидационную и тестовую части.
 
-    train_boundary – последний момент, попадающий в train.
-    val_boundary   – последний момент, попадающий в validation.
-                     Всё, что идёт после val_boundary, считается test-частью.
+    Правила разбиения
+    -----------------
+    train_boundary – последний момент, попадающий в train  (<=).
+    val_boundary   – последний момент, попадающий в val   (<=).
+                     Всё, что строго позже val_boundary, относится к test.
+    ┌────────────┬──────────────────────────────┐
+    │   train    │ ts.index <= train_boundary   │
+    ├────────────┼──────────────────────────────┤
+    │    val     │ train_boundary < ts.index <= val_boundary │
+    ├────────────┼──────────────────────────────┤
+    │    test    │ ts.index  >  val_boundary    │
+    └────────────┴──────────────────────────────┘
     """
+
     @staticmethod
     def split_ts(
             ts: pd.Series,
             train_boundary: datetime,
             val_boundary: datetime
     ) -> Tuple[pd.Series, pd.Series, pd.Series]:
-        train_target = ts.loc[:train_boundary]
-        val_target = ts.loc[train_boundary:val_boundary]
-        test_target = ts.loc[val_boundary:]
+        """Разбивает Series без перекрытия границ."""
+        idx = ts.index
+        train_mask = idx <= train_boundary
+        val_mask = (idx > train_boundary) & (idx <= val_boundary)
+        test_mask = idx > val_boundary
+
+        train_target = ts.loc[train_mask]
+        val_target = ts.loc[val_mask]
+        test_target = ts.loc[test_mask]
         return train_target, val_target, test_target
 
     def split(

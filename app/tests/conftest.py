@@ -28,6 +28,13 @@ def sample_data():
     }
 
 @pytest.fixture
+def sample_data_to_split():
+    index = pd.date_range(start="2020-01-01", end="2020-01-10", freq="D")
+    target = pd.Series(range(10), index=index, name="target")
+    exog = pd.DataFrame({"feature": range(10)}, index=index)
+    return target, exog
+
+@pytest.fixture
 def mase_context():
     return {
         'y_true_i': pd.Series([3, -0.5, 2, 7]),
