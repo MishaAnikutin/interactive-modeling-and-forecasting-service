@@ -94,11 +94,18 @@ class NhitsAdapter(MlAdapterInterface):
 
         # 4. Прогнозы -----------------------------------------------------------------
         # 4.1 train
-        fcst_train_val: pd.Series = train_target.copy()
+        fcst_insample_df = nf.predict_insample()
+        fcst_insample_s = (
+            fcst_insample_df
+            .drop_duplicates(subset="ds", keep="last")  # убираем дубликаты дат
+            .set_index("ds")["NHITS"]
+        )
+        fcst_train: pd.Series = fcst_insample_s.loc[train_target.index]
 
         # 4.2 test
         fcst_test = pd.Series(dtype=float)
         if futr_df_test is not None:
+            futr_df_test = futr_df_test.iloc[:model.h]
             fcst_test_df = nf.predict(futr_df=futr_df_test).set_index("ds")
             fcst_test = fcst_test_df["NHITS"]
 
@@ -110,14 +117,13 @@ class NhitsAdapter(MlAdapterInterface):
 
         # ---------- формируем объект Forecasts -----------------------------------
         forecasts = self._generate_forecasts(
-            train_predict=fcst_train_val,
+            train_predict=fcst_train,
             test_predict=fcst_test,
             forecast=fcst_future,
         )
 
         # 5. Метрики ------------------------------------------------------------------
-        train_predict = fcst_train_val.loc[train_target.index]
-        y_train_true, y_train_pred = (train_target, train_predict)
+        y_train_true, y_train_pred = (train_target, fcst_train)
 
         test_target = test_target if test_target is not None else pd.Series(dtype=float)
         test_predict = fcst_test if not fcst_test.empty else pd.Series(dtype=float)
