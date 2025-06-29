@@ -22,3 +22,5 @@ def test_nhits_adapter_fit_without_exog(
     assert result.model_metrics.test_metrics, "Test-метрики не рассчитаны"
 
     assert result.weight_path, "Путь к весам пуст"
+
+    print(result.model_metrics)

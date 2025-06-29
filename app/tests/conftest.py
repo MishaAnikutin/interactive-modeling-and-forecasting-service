@@ -46,7 +46,7 @@ def nhits_params_base():
 
     return NhitsParams(
         input_size=24,                   # окно в два года (для месячных данных)
-        max_steps=300,                   # ограничиваем итерации обучения
+        max_steps=30,                   # ограничиваем итерации обучения
         early_stop_patience_steps=20,    # patience для early-stopping
         learning_rate=1e-3,              # шаг обучения
         scaler_type="robust",            # робастный скейлер
