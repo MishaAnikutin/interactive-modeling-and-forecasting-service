@@ -1,6 +1,7 @@
+from datetime import datetime
+
 import pytest
 import pandas as pd
-
 
 
 # ---------- Зависимости ----------
@@ -19,7 +20,50 @@ def ts_alignment():
     from src.infrastructure.adapters.timeseries import TimeseriesAlignment
     return TimeseriesAlignment()
 
+@pytest.fixture
+def nhits_adapter(metrics_factory, ts_splitter):
+    from src.infrastructure.adapters.modeling.nhits import NhitsAdapter
+    adapter = NhitsAdapter(
+        metric_factory=metrics_factory(),
+        ts_train_test_split=ts_splitter,
+    )
+    return adapter
+
 # ---------- Данные ----------
+@pytest.fixture
+def ipp_eu():
+    df = pd.read_csv(
+        "/Users/oleg/projects/interactive-modeling-and-forecasting-service/app/tests/data/ipc_eu.csv",
+        sep=";"
+    )
+    df['date'] = pd.to_datetime(df['date'])
+    target = pd.Series(data=df['value'].to_list(), index=df['date'].to_list())
+    return target
+
+@pytest.fixture
+def nhits_params_base():
+    from src.infrastructure.adapters.modeling.nhits import NhitsParams
+
+    return NhitsParams(
+        input_size=24,                   # окно в два года (для месячных данных)
+        max_steps=300,                   # ограничиваем итерации обучения
+        early_stop_patience_steps=20,    # patience для early-stopping
+        learning_rate=1e-3,              # шаг обучения
+        scaler_type="robust",            # робастный скейлер
+    )
+
+
+@pytest.fixture
+def fit_params_base():
+    from src.core.domain import FitParams, DataFrequency
+    return FitParams(
+        train_boundary=datetime(2017, 6, 30),
+        val_boundary=datetime(2022, 5, 31),
+        forecast_horizon=36,
+        data_frequency=DataFrequency.month
+    )
+
+
 @pytest.fixture
 def sample_data():
     return {

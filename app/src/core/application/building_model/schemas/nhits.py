@@ -16,7 +16,6 @@ class NhitsParams(BaseModel):
 
     Можно уточнять/расширять по необходимости.
     """
-    h: int = Field(..., gt=0, description="Горизонт прогноза")
     input_size: int = Field(..., gt=0, description="Длина входного окна")
     max_steps: int = Field(default=500, gt=0, description="Максимум итераций обучения")
     early_stop_patience_steps: int = Field(default=10, ge=0, description="Patience для early-stopping")
