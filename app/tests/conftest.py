@@ -45,11 +45,11 @@ def nhits_params_base():
     from src.infrastructure.adapters.modeling.nhits import NhitsParams
 
     return NhitsParams(
-        input_size=24,                   # окно в два года (для месячных данных)
-        max_steps=30,                   # ограничиваем итерации обучения
-        early_stop_patience_steps=20,    # patience для early-stopping
-        learning_rate=1e-3,              # шаг обучения
-        scaler_type="robust",            # робастный скейлер
+        max_steps=30,
+        early_stop_patience_steps=3,
+        val_check_steps=50,
+        learning_rate=1e-3,
+        scaler_type="robust",
     )
 
 
@@ -57,8 +57,8 @@ def nhits_params_base():
 def fit_params_base():
     from src.core.domain import FitParams, DataFrequency
     return FitParams(
-        train_boundary=datetime(2017, 6, 30),
-        val_boundary=datetime(2022, 5, 31),
+        train_boundary=datetime(2016, 6, 30),
+        val_boundary=datetime(2018, 5, 31),
         forecast_horizon=36,
         data_frequency=DataFrequency.month
     )

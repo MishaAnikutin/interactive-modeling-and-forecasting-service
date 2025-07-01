@@ -32,18 +32,17 @@ class NhitsAdapter(MlAdapterInterface):
     @staticmethod
     def _to_panel(
         target: pd.Series,
-        exog: pd.DataFrame | None,
-        unique_id: str,
+        exog: pd.DataFrame | None = None,
     ) -> pd.DataFrame:
         df = pd.DataFrame(
             {
-                "unique_id": unique_id,
+                "unique_id": 'ts',
                 "ds": target.index,
                 "y": target.values,
             }
         )
         if exog is not None and not exog.empty:
-            df = pd.concat([df.reset_index(drop=True), exog.reset_index(drop=True)], axis=1)
+            raise NotImplementedError("Необходимо реализовать логику построения данных с экз переменными")
         return df
 
     def fit(
@@ -71,49 +70,41 @@ class NhitsAdapter(MlAdapterInterface):
         )
 
         # 2. Подготовка данных --------------------------------------------------------
-        uid = "ts"
-        df_train_val = self._to_panel(
-            pd.concat([train_target, val_target]),
-            pd.concat([exog_train, exog_val]) if exog is not None else None,
-            unique_id=uid,
+        train_df = self._to_panel(
+            target=pd.concat([train_target, val_target]),
+            exog=None
         )
-        val_size = len(val_target)
+        val_size = val_target.shape[0]
+        test_size = test_target.shape[0]
 
-        futr_df_test = None
-        if test_target is not None and len(test_target) > 0:
-            futr_df_test = self._to_panel(
-                test_target, exog_test, unique_id=uid
-            ).drop(columns=["y"])
+        future_df = self._to_panel(
+            target=test_target,
+            exog=None
+        )
 
         # 3. Создаём и обучаем модель -------------------------------------------------
-        model = NHITS(accelerator='cpu', h=fit_params.forecast_horizon, **nhits_params.model_dump())
-        nf = NeuralForecast(models=[model], freq=pd.infer_freq(target.index) or "D")
+        model = NHITS(
+            accelerator='cpu',
+            h=test_size,
+            input_size=test_size*3,
+            **nhits_params.model_dump()
+        )
+        nf = NeuralForecast(models=[model], freq="ME")
 
-        nf.fit(df=df_train_val, val_size=val_size)
+        nf.fit(df=train_df, val_size=val_size)
         self._log.info("Модель NHiTS обучена")
 
         # 4. Прогнозы -----------------------------------------------------------------
         # 4.1 train
         fcst_insample_df = nf.predict_insample()
-        fcst_insample_s = (
-            fcst_insample_df
-            .drop_duplicates(subset="ds", keep="last")  # убираем дубликаты дат
-            .set_index("ds")["NHITS"]
-        )
-        fcst_train: pd.Series = fcst_insample_s.loc[train_target.index]
+        fcst_train = fcst_insample_df.drop_duplicates(subset="ds", keep="last").set_index("ds")['NHITS']
 
         # 4.2 test
-        fcst_test = pd.Series(dtype=float)
-        if futr_df_test is not None:
-            futr_df_test = futr_df_test.iloc[:model.h]
-            fcst_test_df = nf.predict(futr_df=futr_df_test).set_index("ds")
-            fcst_test = fcst_test_df["NHITS"]
+        forecasts = nf.predict(futr_df=future_df)
+        fcst_test = forecasts['NHITS']
 
-        # 4.3 будущий out-of-sample прогноз (если надо)
-        fcst_future = pd.Series(dtype=float)
-        if futr_df_test is None and nhits_params.h > 0:
-            fcst_future_df = nf.predict().set_index("ds")
-            fcst_future = fcst_future_df["NHITS"]
+        # 4.3 future
+        fcst_future = nf.predict().set_index("ds")['NHITS']
 
         # ---------- формируем объект Forecasts -----------------------------------
         forecasts = self._generate_forecasts(
@@ -123,17 +114,11 @@ class NhitsAdapter(MlAdapterInterface):
         )
 
         # 5. Метрики ------------------------------------------------------------------
-        y_train_true, y_train_pred = (train_target, fcst_train)
-
-        test_target = test_target if test_target is not None else pd.Series(dtype=float)
-        test_predict = fcst_test if not fcst_test.empty else pd.Series(dtype=float)
-        y_test_true, y_test_pred = (test_target, test_predict)
-
         metrics = self._calculate_metrics(
-            y_train_true=y_train_true,
-            y_train_pred=y_train_pred,
-            y_test_true=y_test_true,
-            y_test_pred=y_test_pred,
+            y_train_true=train_df['y'],
+            y_train_pred=fcst_train,
+            y_test_true=test_target,
+            y_test_pred=fcst_test,
         )
 
         # 6. Результат ----------------------------------------------------------------

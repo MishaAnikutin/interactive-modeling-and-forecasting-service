@@ -23,4 +23,11 @@ def test_nhits_adapter_fit_without_exog(
 
     assert result.weight_path, "Путь к весам пуст"
 
-    print(result.model_metrics)
+    metrics = result.model_metrics.test_metrics
+    for m in metrics:
+        if m.type == "R2":
+            assert m.value > 0, "Что-то не так с моделью, R2 меньше нуля, походу был шок в данных"
+        elif m.type == "MAPE":
+            assert m.value < 1
+        elif m.type == "RMSE":
+            assert m.value > 0.5, "Что-то не так с моделью, RMSE маленькое"
