@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 from typing import Tuple, TypeVar, Optional
 
@@ -27,12 +28,16 @@ class TimeseriesTrainTestSplit:
 
     @staticmethod
     def split_ts(
-            ts: pd.Series,
-            train_boundary: datetime,
-            val_boundary: datetime
+        ts: pd.Series, train_boundary: datetime, val_boundary: datetime
     ) -> Tuple[pd.Series, pd.Series, pd.Series]:
         """Разбивает Series без перекрытия границ."""
-        idx = ts.index
+        # преобразуем в datetime
+        idx = pd.to_datetime(ts.index)
+
+        # Удалим временную зону
+        train_boundary = train_boundary.replace(tzinfo=None)
+        val_boundary = val_boundary.replace(tzinfo=None)
+
         train_mask = idx <= train_boundary
         val_mask = (idx > train_boundary) & (idx <= val_boundary)
         test_mask = idx > val_boundary
@@ -49,18 +54,25 @@ class TimeseriesTrainTestSplit:
         target: Ytype,
         exog: Optional[Xtype] = None,
     ) -> Tuple[
-        Optional[Xtype], Ytype,           # train exog / target
-        Optional[Xtype], Ytype,           # val   exog / target
-        Optional[Xtype], Ytype            # test  exog / target
+        Optional[Xtype],
+        Ytype,  # train exog / target
+        Optional[Xtype],
+        Ytype,  # val   exog / target
+        Optional[Xtype],
+        Ytype,  # test  exog / target
     ]:
 
         # --- целевая переменная ---
-        train_target, val_target, test_target = self.split_ts(target, train_boundary, val_boundary)
+        train_target, val_target, test_target = self.split_ts(
+            target, train_boundary, val_boundary
+        )
 
         # --- экзогенные признаки (если есть) ---
         exog_train = exog_val = exog_test = None
         if exog is not None:
-            exog_train, exog_val, exog_test = self.split_ts(exog, train_boundary, val_boundary)
+            exog_train, exog_val, exog_test = self.split_ts(
+                exog, train_boundary, val_boundary
+            )
 
         return (
             exog_train,
