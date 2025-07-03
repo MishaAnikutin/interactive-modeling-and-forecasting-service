@@ -1,13 +1,18 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Optional
 import numpy as np
+import pandas as pd          # ← добавили pandas для удобной генерации month-end дат
 from pydantic import BaseModel, Field
 
-n = 120
+n = 100
 
-def gen_dates():
-    dates =[datetime(2023, 1, 1) + timedelta(days=i*30) for i in range(n)]
-    return dates
+
+def gen_dates() -> list[datetime]:
+    """Возвращает n дат типа «month ending», начиная с 31-01-2023."""
+    dates_idx = pd.date_range(start="2023-01-31", periods=n, freq="ME")
+    # Преобразуем каждый pandas.Timestamp → datetime
+    return [d.to_pydatetime() for d in dates_idx]
+
 
 def gen_values():
     pageviews = np.random.randint(1000, 5000, size=n)
