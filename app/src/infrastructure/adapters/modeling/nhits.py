@@ -135,16 +135,27 @@ class NhitsAdapter(MlAdapterInterface):
                 status_code=400,
             )
 
+        if val_size == 0 and nhits_params.early_stop_patience_steps > 0:
+            raise HTTPException(
+                detail="Валидационная выборка должна быть не пустой, "
+                       "если ранняя остановка включена (early_stop_patience_steps > 0)",
+                status_code=400,
+            )
+
         # 2. Подготовка данных --------------------------------------------------------
         train_df = self._to_panel(
-            target=pd.concat([train_target, val_target]),
+            target=pd.concat([train_target, val_target]) if val_size != 0 else train_target,
             exog=None
-        ) # TODO: обработать случай когда здесь размерность 0
+        )
         future_df = self._future_df(
             future_size=fit_params.forecast_horizon,
             freq=fit_params.data_frequency,
             test_target=test_target
         )
+
+        assert future_df.shape[0] == h
+        assert train_df.shape[0] == (train_target.shape[0] + val_target.shape[0])
+        assert test_size + train_df.shape[0] == target.shape[0]
 
         # 3. Создаём и обучаем модель -------------------------------------------------
         model = NHITS(
