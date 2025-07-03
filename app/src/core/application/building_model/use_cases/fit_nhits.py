@@ -1,3 +1,5 @@
+import pandas as pd
+
 from src.core.application.building_model.schemas.nhits import NhitsParams, NhitsFitResult, NhitsFitRequest
 from src.infrastructure.adapters.model_storage import IModelStorage
 from src.infrastructure.adapters.modeling.nhits import NhitsAdapter
@@ -18,15 +20,19 @@ class FitNhitsUC:
         self._storage = storage
 
     def execute(self, request: NhitsFitRequest) -> NhitsFitResult:
-        target_df = self._ts_adapter.to_dataframe(request.dependent_variables)
+        target = pd.Series(
+            index=request.dependent_variables.dates,
+            data=request.dependent_variables.values,
+            name=request.dependent_variables.name
+        )
         exog_df = (
             None if request.explanatory_variables is None
             else self._ts_aligner.compare(timeseries_list=request.explanatory_variables)
         )
 
         model_result: NhitsFitResult = self._model_adapter.fit(
-            target=target_df,
-            exog=exog_df,
+            target=target,
+            exog=None,
             nhits_params=request.hyperparameters,
             fit_params=request.fit_params,
         )
