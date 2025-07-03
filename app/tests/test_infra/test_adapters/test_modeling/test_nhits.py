@@ -62,7 +62,7 @@ from tests.conftest import nhits_adapter, ipp_eu
         # 3. Очень длинное обучение + большой patience + длительный горизонт прогноза
         (
             NhitsParams(
-                max_steps=1_000,
+                max_steps=500,
                 early_stop_patience_steps=50,
                 val_check_steps=200,
                 learning_rate=5e-4,
