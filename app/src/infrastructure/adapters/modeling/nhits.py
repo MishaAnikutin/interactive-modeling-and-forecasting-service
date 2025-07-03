@@ -108,8 +108,6 @@ class NhitsAdapter(MlAdapterInterface):
             nhits_params: NhitsParams,
             fit_params: FitParams,
     ) -> NhitsFitResult:
-        self._log.debug("Старт обучения NHiTS")
-
         # 1. Train / val / test split -------------------------------------------------
         (
             exog_train,
@@ -126,38 +124,37 @@ class NhitsAdapter(MlAdapterInterface):
         )
         test_size = test_target.shape[0]
         val_size = val_target.shape[0]
-        future_size = fit_params.forecast_horizon - test_size
 
-        if future_size < 0:
+        h = fit_params.forecast_horizon + test_size
+
+        if val_size != 0 and val_size < h:
             raise HTTPException(
-                detail="Горизонт прогнозирования должен быть больше или равен размеру тестовой выборки "
-                f"({fit_params.forecast_horizon} < {test_size})",
+                detail="Размер валидационной выборки должен быть 0 "
+                       "или больше или равен величины горизонт прогнозирования + размер тестовой выборки "
+                       f"({val_size} < {h})",
                 status_code=400,
             )
-
-        if val_size != 0 and val_size < fit_params.forecast_horizon:
-            raise HTTPException(
-                detail="Размер валидационной выборки должен быть 0 или больше или равен горизонту прогнозирования "
-                f"({val_size} < {fit_params.forecast_horizon})",
-                status_code=400,
-            )
-
 
         # 2. Подготовка данных --------------------------------------------------------
-        train_df = self._to_panel(target=pd.concat([train_target, val_target]), exog=None)
-        future_df = self._future_df(future_size=future_size, freq=fit_params.data_frequency, test_target=test_target)
+        train_df = self._to_panel(
+            target=pd.concat([train_target, val_target]),
+            exog=None
+        ) # TODO: обработать случай когда здесь размерность 0
+        future_df = self._future_df(
+            future_size=fit_params.forecast_horizon,
+            freq=fit_params.data_frequency,
+            test_target=test_target
+        )
 
         # 3. Создаём и обучаем модель -------------------------------------------------
         model = NHITS(
             accelerator='cpu',
-            h=fit_params.forecast_horizon,
-            input_size=fit_params.forecast_horizon * 3,
+            h=h,
+            input_size=h * 3,
             **nhits_params.model_dump()
         )
         nf = NeuralForecast(models=[model], freq=fit_params.data_frequency)
-
         nf.fit(df=train_df, val_size=val_size)
-        self._log.info("Модель NHiTS обучена")
 
         # 4. Прогнозы -----------------------------------------------------------------
         # 4.1 train
