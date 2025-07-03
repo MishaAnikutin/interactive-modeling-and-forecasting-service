@@ -31,3 +31,10 @@ def test_nhits_adapter_fit_without_exog(
             assert m.value < 1
         elif m.type == "RMSE":
             assert m.value > 0.5, "Что-то не так с моделью, RMSE маленькое"
+
+    # Проверка прогнозов
+    train_predict_len = len(result.forecasts.train_predict.dates)
+    test_predict_len = len(result.forecasts.test_predict.dates)
+    future_predict_len = len(result.forecasts.forecast.dates)
+    assert train_predict_len + test_predict_len == ipp_eu.shape[0]
+    assert future_predict_len == fit_params_base.forecast_horizon - test_predict_len

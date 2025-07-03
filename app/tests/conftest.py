@@ -59,7 +59,7 @@ def fit_params_base():
     return FitParams(
         train_boundary=datetime(2016, 6, 30),
         val_boundary=datetime(2018, 5, 31),
-        forecast_horizon=36,
+        forecast_horizon=20,
         data_frequency=DataFrequency.month
     )
 
