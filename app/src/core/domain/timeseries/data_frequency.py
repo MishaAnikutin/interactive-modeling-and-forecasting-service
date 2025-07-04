@@ -6,5 +6,3 @@ class DataFrequency(str, Enum):
     month = "M"
     quart = "Q"
     day = "D"
-    hour = "H"
-    minute = "Min"
