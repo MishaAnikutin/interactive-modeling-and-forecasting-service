@@ -75,7 +75,7 @@ def sample_data():
 def sample_data_to_split():
     index = pd.date_range(start="2020-01-01", end="2020-01-10", freq="D")
     target = pd.Series(range(10), index=index, name="target")
-    exog = pd.DataFrame({"feature": range(10)}, index=index)
+    exog = pd.DataFrame({"feature": range(10), "feature 2": range(10, 20)}, index=index)
     return target, exog
 
 @pytest.fixture

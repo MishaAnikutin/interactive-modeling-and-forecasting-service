@@ -46,14 +46,17 @@ def test_split_with_exog(sample_data_to_split, ts_splitter):
 
     # Проверка train
     assert exog_train["feature"].tolist() == [0, 1, 2]
+    assert exog_train['feature 2'].tolist() == [10, 11, 12]
     assert train_target.tolist() == [0, 1, 2]
 
     # Проверка validation
     assert exog_val["feature"].tolist() == [3, 4, 5]
+    assert exog_val['feature 2'].tolist() == [13, 14, 15]
     assert val_target.tolist() == [3, 4, 5]
 
     # Проверка test
     assert exog_test["feature"].tolist() == [6, 7, 8, 9]
+    assert exog_test['feature 2'].tolist() == [16, 17, 18, 19]
     assert test_target.tolist() == [6, 7, 8, 9]
 
 

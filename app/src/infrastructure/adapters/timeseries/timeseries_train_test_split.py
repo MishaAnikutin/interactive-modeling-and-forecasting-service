@@ -28,7 +28,7 @@ class TimeseriesTrainTestSplit:
 
     @staticmethod
     def split_ts(
-        ts: pd.Series, train_boundary: datetime, val_boundary: datetime
+        ts: pd.Series | pd.DataFrame, train_boundary: datetime, val_boundary: datetime
     ) -> Tuple[pd.Series, pd.Series, pd.Series]:
         """Разбивает Series без перекрытия границ."""
         # преобразуем в datetime
@@ -51,15 +51,15 @@ class TimeseriesTrainTestSplit:
         self,
         train_boundary: datetime,
         val_boundary: datetime,
-        target: Ytype,
-        exog: Optional[Xtype] = None,
+        target: pd.Series,
+        exog: Optional[pd.DataFrame] = None,
     ) -> Tuple[
-        Optional[Xtype],
-        Ytype,  # train exog / target
-        Optional[Xtype],
-        Ytype,  # val   exog / target
-        Optional[Xtype],
-        Ytype,  # test  exog / target
+        Optional[pd.DataFrame],
+        pd.Series,  # train exog / target
+        Optional[pd.DataFrame],
+        pd.Series,  # val   exog / target
+        Optional[pd.DataFrame],
+        pd.Series,  # test  exog / target
     ]:
 
         # --- целевая переменная ---
@@ -68,17 +68,24 @@ class TimeseriesTrainTestSplit:
         )
 
         # --- экзогенные признаки (если есть) ---
-        exog_train = exog_val = exog_test = None
         if exog is not None:
             exog_train, exog_val, exog_test = self.split_ts(
                 exog, train_boundary, val_boundary
             )
+            return (
+                exog_train,
+                train_target,
+                exog_val,
+                val_target,
+                exog_test,
+                test_target,
+            )
 
         return (
-            exog_train,
+            None,
             train_target,
-            exog_val,
+            None,
             val_target,
-            exog_test,
+            None,
             test_target,
         )
