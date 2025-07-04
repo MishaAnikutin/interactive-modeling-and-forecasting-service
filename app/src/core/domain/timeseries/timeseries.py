@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import Optional
 import numpy as np
-import pandas as pd          # ← добавили pandas для удобной генерации month-end дат
+import pandas as pd
 from pydantic import BaseModel, Field
+from src.core.domain.timeseries.data_frequency import DataFrequency
 
 n = 100
 
@@ -30,4 +31,9 @@ class Timeseries(BaseModel):
     values: list[Optional[float]] = Field(
         title="Значения",
         default=gen_values()
+    )
+
+    data_frequency: DataFrequency = Field(
+        default=DataFrequency.month,
+        title="Частотность ряда"
     )
