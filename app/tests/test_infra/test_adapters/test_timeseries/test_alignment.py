@@ -75,4 +75,4 @@ def test_alignment_different_dates(ts_alignment, u_total, u_men, u_women):
     )
     exog = [u_men_last_20, u_women]
     df = ts_alignment.compare(timeseries_list=exog, target=u_total_first_20)
-    assert df.index.to_list() == u_women.dates[12:20]
+    assert df.index.to_list() == u_women.dates[len(u_women.dates) - 20: 20]
