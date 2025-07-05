@@ -3,7 +3,7 @@ from typing import List
 import pandas as pd
 from fastapi import HTTPException
 
-from src.core.domain import Timeseries
+from src.core.domain import Timeseries, DataFrequency
 from . import PandasTimeseriesAdapter
 from .frequency_determiner import FrequencyDeterminer
 
@@ -13,25 +13,27 @@ class TimeseriesAlignment:
         self._freq_determiner = FrequencyDeterminer()
         self._pandas_adapter = PandasTimeseriesAdapter()
 
+    def _is_ts_freq_equal_to_expected(self, ts) -> DataFrequency:
+        freq_type = self._freq_determiner.determine(ts.dates)
+        if freq_type != ts.data_frequency:
+            raise HTTPException(
+                detail=f"Не соответствует полученных тип ряда и заявленный для {ts.name}. "
+                       f"Определенное системой: {freq_type}, Заявленное: {ts.data_frequency}",
+                status_code=400
+            )
+        return freq_type
+
     def compare(self, timeseries_list: List[Timeseries], target: Timeseries) -> pd.DataFrame:
+        target_data_frequency = self._is_ts_freq_equal_to_expected(target)
         series_list = [self._pandas_adapter.to_series(target)]
         for ts_obj in timeseries_list:
-            # Определяем тип временного ряда
-            freq_type = self._freq_determiner.determine(ts_obj.dates)
-
-            if freq_type != ts_obj.data_frequency:
-                raise HTTPException(
-                    detail=f"Не соответствует полученных тип ряда и заявленный для {ts_obj.name}. "
-                           f"Определенное системой: {freq_type}, Заявленное: {ts_obj.data_frequency}",
-                    status_code=400
-                )
+            freq_type = self._is_ts_freq_equal_to_expected(ts_obj)
             if freq_type != target.data_frequency:
                 raise HTTPException(
                     detail=f"Частотность экзогенной переменной {ts_obj.name} не соответствует частотности целевой переменной. "
-                           f"Экзогенная переменная: {freq_type}, Целевая переменная: {target.data_frequency}",
+                           f"Экзогенная переменная: {freq_type}, Целевая переменная: {target_data_frequency}",
                     status_code=400
                 )
-
             # Создаем временной ряд
             series_list.append(self._pandas_adapter.to_series(ts_obj))
 

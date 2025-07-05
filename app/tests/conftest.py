@@ -3,6 +3,8 @@ from datetime import datetime
 import pytest
 import pandas as pd
 
+from src.core.domain import Timeseries, DataFrequency
+
 
 # ---------- Зависимости ----------
 @pytest.fixture
@@ -46,6 +48,73 @@ def ipp_eu():
     return target
 
 @pytest.fixture
+def ipp_eu_ts():
+    df = pd.read_csv(
+        "/Users/oleg/projects/interactive-modeling-and-forecasting-service/app/tests/data/month/ipc_eu.csv",
+        sep=";"
+    )
+    df['date'] = pd.to_datetime(df['date'])
+    target = Timeseries(
+        values=df['value'].to_list(),
+        dates=df['date'].to_list(),
+        name="ipp_eu",
+        data_frequency=DataFrequency.month,
+    )
+    assert len(target.values) == len(target.dates)
+    return target
+
+
+@pytest.fixture
+def u_total():
+    df = pd.read_csv(
+        "/Users/oleg/projects/interactive-modeling-and-forecasting-service/app/tests/data/year/u_total.csv",
+        sep=";"
+    )
+    df['date'] = pd.to_datetime(df['date'])
+    target = Timeseries(
+        values=df['value1'].to_list(),
+        dates=df['date'].to_list(),
+        name="u_total",
+        data_frequency=DataFrequency.year,
+    )
+    assert len(target.values) == len(target.dates)
+    return target
+
+
+@pytest.fixture
+def u_women():
+    df = pd.read_csv(
+        "/Users/oleg/projects/interactive-modeling-and-forecasting-service/app/tests/data/year/u_women.csv",
+        sep=";"
+    )
+    df['date'] = pd.to_datetime(df['date'])
+    target = Timeseries(
+        values=df['value1'].to_list(),
+        dates=df['date'].to_list(),
+        name="u_women",
+        data_frequency=DataFrequency.year,
+    )
+    assert len(target.values) == len(target.dates)
+    return target
+
+
+@pytest.fixture
+def u_men():
+    df = pd.read_csv(
+        "/Users/oleg/projects/interactive-modeling-and-forecasting-service/app/tests/data/year/u_men.csv",
+        sep=";"
+    )
+    target = Timeseries(
+        values=df['value1'].to_list(),
+        dates=df['date'].to_list(),
+        name="u_men",
+        data_frequency=DataFrequency.year,
+    )
+    assert len(target.values) == len(target.dates)
+    return target
+
+
+@pytest.fixture
 def nhits_params_base():
     from src.infrastructure.adapters.modeling.nhits import NhitsParams
 
@@ -60,12 +129,11 @@ def nhits_params_base():
 
 @pytest.fixture
 def fit_params_base():
-    from src.core.domain import FitParams, DataFrequency
+    from src.core.domain import FitParams
     return FitParams(
         train_boundary=datetime(2016, 6, 30),
         val_boundary=datetime(2018, 5, 31),
-        forecast_horizon=20,
-        data_frequency=DataFrequency.month
+        forecast_horizon=20
     )
 
 

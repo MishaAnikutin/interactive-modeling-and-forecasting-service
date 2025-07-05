@@ -20,3 +20,11 @@ class PandasTimeseriesAdapter:
         return pd.Series(
             data=ts_obj.values, index=ts_obj.dates, name=ts_obj.name
         )
+
+    @staticmethod
+    def from_series(series: pd.Series) -> Timeseries:
+        return Timeseries(
+            name=series.name,
+            dates=series.index.to_list(),
+            values=series.values.to_list()
+        )

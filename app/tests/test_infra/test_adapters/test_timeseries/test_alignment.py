@@ -1,134 +1,78 @@
 import pandas as pd
 from datetime import datetime
 
-from src.core.domain import Timeseries
-from tests.conftest import ts_alignment
+import pytest
+from fastapi import HTTPException
+
+from src.core.domain import Timeseries, DataFrequency
+from tests.conftest import ts_alignment, u_total, u_women, u_men, ipp_eu_ts
 
 
-def test_alignment_base(ts_alignment):
-    exog = [
-        Timeseries(
-            dates=[
-                datetime(2017, 1, 1),
-                datetime(2017, 2, 1),
-                datetime(2017, 3, 1)
-            ],
-            values=[1.0, 2.0, 3.0],
-            name='Ряд 1'
-        ),
-        Timeseries(
-            dates=[
-                datetime(2016, 12, 31),
-                datetime(2017, 1, 30),
-                datetime(2017, 2, 27)
-            ],
-            values=[4.0, 5.0, 6.0],
-            name='Ряд 2'
-        ),
-    ]
-    df = ts_alignment.compare(exog)
+def test_alignment_base(ts_alignment, u_total, u_women, u_men):
+    exog = [u_men, u_women]
+    df = ts_alignment.compare(timeseries_list=exog, target=u_total)
+    assert df.shape == (len(u_total.dates), 3)
+    assert df.index.to_list() == u_total.dates
+    assert df.columns.to_list() == [u_total.name, u_men.name, u_women.name]
+    assert df.index.to_list() == u_men.dates
+    assert df.index.to_list() == u_women.dates
 
-    df_expected = pd.DataFrame(
-        index=['01.01.2017 00:00:00', '01.02.2017 00:00:00', '01.03.2017 00:00:00'],
-        columns=['Ряд 1', 'Ряд 2']
+
+def test_alignment_different_frequencies_exog(ts_alignment, u_total, u_men, ipp_eu_ts):
+    exog = [u_men, ipp_eu_ts]
+    with pytest.raises(HTTPException) as exc:
+        ts_alignment.compare(timeseries_list=exog, target=u_total)
+    assert exc.value.status_code == 400
+    assert (
+        "Частотность экзогенной переменной ipp_eu не соответствует частотности целевой переменной"
+        in exc.value.detail
     )
-    df_expected['Ряд 1'] = [1.0, 2.0, 3.0]
-    df_expected['Ряд 2'] = [4.0, 5.0, 6.0]
 
-    pd.testing.assert_frame_equal(df, df_expected)
-
-
-def test_alignment_biased(ts_alignment):
-    exog = [
-        Timeseries(
-            dates=[
-                datetime(2017, 2, 1),
-                datetime(2017, 3, 1),
-                datetime(2017, 4, 1)
-            ],
-            values=[1.0, 2.0, 3.0],
-            name='Ряд 1'
-        ),
-        Timeseries(
-            dates=[
-                datetime(2016, 12, 31),
-                datetime(2017, 1, 30),
-                datetime(2017, 2, 27)
-            ],
-            values=[4.0, 5.0, 6.0],
-            name='Ряд 2'
-        ),
-    ]
-    df = ts_alignment.compare(exog)
-
-    df_expected = pd.DataFrame(
-        index=['01.02.2017 00:00:00', '01.03.2017 00:00:00'],
-        columns=['Ряд 1', 'Ряд 2']
+def test_alignment_broken_frequencies(ts_alignment, u_total, u_men):
+    u_men_broken = Timeseries(
+        name=u_men.name,
+        dates=u_men.dates,
+        values=u_men.values,
+        data_frequency=DataFrequency.month # поменял тут на месячный
     )
-    df_expected['Ряд 1'] = [1.0, 2.0]
-    df_expected['Ряд 2'] = [5.0, 6.0]
-
-    pd.testing.assert_frame_equal(df, df_expected)
-
-
-def test_alignment_day_data(ts_alignment):
-    exog = [
-        Timeseries(
-            dates=[
-                datetime(2017, 1, 1),
-                datetime(2017, 1, 2),
-                datetime(2017, 1, 3)
-            ],
-            values=[1.0, 2.0, 3.0],
-            name='Ряд 1'
-        ),
-        Timeseries(
-            dates=[
-                datetime(2017, 1, 1),
-                datetime(2017, 1, 2),
-                datetime(2017, 1, 3)
-            ],
-            values=[4.0, 5.0, 6.0],
-            name='Ряд 2'
-        ),
-    ]
-    df = ts_alignment.compare(exog)
-    df_expected = pd.DataFrame(
-        index=['01.01.2017 00:00:00', '02.01.2017 00:00:00', '03.01.2017 00:00:00'],
-        columns=['Ряд 1', 'Ряд 2']
+    u_total_broken = Timeseries(
+        name=u_total.name,
+        dates=u_total.dates,
+        values=u_total.values,
+        data_frequency=DataFrequency.month
     )
-    df_expected['Ряд 1'] = [1.0, 2.0, 3.0]
-    df_expected['Ряд 2'] = [4.0, 5.0, 6.0]
-    pd.testing.assert_frame_equal(df, df_expected)
-
-
-def test_alignment_day_data_sec(ts_alignment):
-    exog = [
-        Timeseries(
-            dates=[
-                datetime(2017, 1, 1, 12, 30, 31),
-                datetime(2017, 1, 2, 14, 41, 21),
-                datetime(2017, 1, 3, 2, 15, 43)
-            ],
-            values=[1.0, 2.0, 3.0],
-            name='Ряд 1'
-        ),
-        Timeseries(
-            dates=[
-                datetime(2017, 1, 1, 11, 30, 21),
-                datetime(2017, 1, 2, 3, 3, 3),
-                datetime(2017, 1, 3, 21, 40, 4)
-            ],
-            values=[4.0, 5.0, 6.0],
-            name='Ряд 2'
-        ),
-    ]
-    df = ts_alignment.compare(exog)
-    df_expected = pd.DataFrame(
-        index=['02.01.2017 00:00:00', '03.01.2017 00:00:00', '04.01.2017 00:00:00'],
-        columns=['Ряд 1', 'Ряд 2']
+    # случай когда экзогенная переменная сломана
+    exog = [u_men_broken]
+    with pytest.raises(HTTPException) as exc:
+        ts_alignment.compare(timeseries_list=exog, target=u_total)
+    assert exc.value.status_code == 400
+    assert (
+        "Не соответствует полученных тип ряда и заявленный"
+        in exc.value.detail
     )
-    df_expected['Ряд 1'] = [1.0, 2.0, 3.0]
-    df_expected['Ряд 2'] = [4.0, 5.0, 6.0]
-    pd.testing.assert_frame_equal(df, df_expected)
+    # случай когда таргет сломан
+    exog = [u_men]
+    with pytest.raises(HTTPException) as exc:
+        ts_alignment.compare(timeseries_list=exog, target=u_total_broken)
+    assert exc.value.status_code == 400
+    assert (
+            "Не соответствует полученных тип ряда и заявленный"
+            in exc.value.detail
+    )
 
+def test_alignment_different_dates(ts_alignment, u_total, u_men, u_women):
+    u_total_first_20 = Timeseries(
+        name=u_total.name,
+        data_frequency=u_total.data_frequency,
+        dates=u_total.dates[:20],
+        values=u_total.values[:20],
+    )
+    u_men_last_20 = Timeseries(
+        name=u_men.name,
+        data_frequency=u_men.data_frequency,
+        dates=u_men.dates[-20:],
+        values=u_men.values[-20:],
+    )
+    exog = [u_men_last_20, u_women]
+    df = ts_alignment.compare(timeseries_list=exog, target=u_total_first_20)
+    assert df.index.to_list() == u_women.dates[12:20]
