@@ -1,69 +1,120 @@
 from datetime import datetime, timedelta
 from typing import List
 
+from fastapi import HTTPException
+
 from src.core.domain import DataFrequency
 
 
 class FrequencyDeterminer:
     """
     Класс-утилита, определяющий дискретность временного ряда.
-    Алгоритм очень «инженерный» и опирается только на минимальный
-    шаг между соседними метками.
+    Алгоритм анализирует минимальный шаг между соседними метками в днях.
     """
 
-    # Границы (в секундах) между разными частотами
-    _ONE_MINUTE = 60
-    _ONE_HOUR = 60 * 60
-    _ONE_DAY = 24 * _ONE_HOUR
-    _ONE_MONTH = 28 * _ONE_DAY          # ~ 1 месяц
-    _ONE_QUARTER = 80 * _ONE_DAY        # ~ квартал
-    _ONE_YEAR = 300 * _ONE_DAY          # ~ год
-
-    @classmethod
-    def determine(cls, timestamps: List[datetime]) -> DataFrequency:
-        """
-        Определяет частоту временного ряда.
-        Возвращает значение перечисления DataFrequency.
-        """
+    def _first_check_timestamps(self, timestamps: List[datetime]) -> None:
         if not timestamps:
-            # Пустой ряд — наиболее частый вариант «по умолчанию»
-            return DataFrequency.day
+            raise HTTPException(
+                status_code=400,
+                detail="Ряд должен быть не пустой"
+            )
+        for ts in timestamps:
+            if ts.time() != datetime.min.time():
+                raise HTTPException(
+                    status_code=400,
+                    detail="Даты должны быть без времени (часы:минуты:секунды = 00:00:00)"
+                )
+        return None
 
-        # Если присутствует время, отличное от 00:00:00,
-        # значит, данные как минимум почасовые (или чаще).
+    def _is_last_day_of_month(self, date: datetime) -> bool:
+        """Проверяет, является ли дата последним днем месяца."""
+        next_day = date + timedelta(days=1)
+        return next_day.month != date.month
 
-        # Сортируем для корректного поиска минимального шага
+    def _validate_dates(self, timestamps: List[datetime], freq: DataFrequency) -> None:
+        """Проверяет формат дат в соответствии с частотностью."""
+        if freq != DataFrequency.day:
+            for ts in timestamps:
+                if not self._is_last_day_of_month(ts):
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Дата {ts} не является последним днем месяца"
+                    )
+        return None
+
+    def _check_day_freq(self, deltas: list[int]) -> None:
+        for d in deltas:
+            if d != 1:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Ряд не постоянной частотности: ожидаются ежедневные данные (шаг 1 день)"
+                )
+        return None
+
+    def _check_month_freq(self, deltas: list[int]) -> None:
+        for d in deltas:
+            if not (28 <= d <= 31):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Ряд не постоянной частотности: ожидаются ежемесячные данные (шаг 28-31 день)"
+                )
+        return None
+
+    def _check_quarter_freq(self, deltas: list[int]) -> None:
+        for d in deltas:
+            if not (89 <= d <= 92):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Ряд не постоянной частотности: ожидаются квартальные данные (шаг 89-92 дня)"
+                )
+        return None
+
+    def _check_year_freq(self, deltas: list[int]) -> None:
+        for d in deltas:
+            if not (365 <= d <= 366):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Ряд не постоянной частотности: ожидаются годовые данные (шаг 365-366 дней)"
+                )
+        return None
+
+    def determine(self, timestamps: List[datetime]) -> DataFrequency:
+        self._first_check_timestamps(timestamps)
+
         sorted_ts = sorted(timestamps)
+
+        # Обработка ряда из одной даты
         if len(sorted_ts) == 1:
-            # Одиночная точка. Считаем, что это «месячное» наблюдение
-            return DataFrequency.month
-
-        # Минимальный шаг между соседними метками
-        min_delta: timedelta = min(
-            (sorted_ts[i] - sorted_ts[i - 1]) for i in range(1, len(sorted_ts))
-        )
-        min_seconds = min_delta.total_seconds()
-
-        # ───────────────────────────────────────────────────────
-        # Логика классификации
-        # ───────────────────────────────────────────────────────
-        if min_seconds < cls._ONE_MINUTE:
-            return DataFrequency.minute
-
-        if min_seconds < cls._ONE_HOUR:
-            # Шаг ≥ 1 мин и < 1 ч
-            return DataFrequency.minute
-
-        if min_seconds < cls._ONE_DAY:
-            return DataFrequency.hour
-
-        if min_seconds < cls._ONE_MONTH:
             return DataFrequency.day
 
-        if min_seconds < cls._ONE_QUARTER:
-            return DataFrequency.month
+        # Вычисление разниц между датами в днях
+        deltas_days = []
+        for i in range(1, len(sorted_ts)):
+            delta = sorted_ts[i] - sorted_ts[i - 1]
+            deltas_days.append(delta.days)
 
-        if min_seconds < cls._ONE_YEAR:
-            return DataFrequency.quart
+        # Определение частотности по первой разнице
+        first_delta = deltas_days[0]
 
-        return DataFrequency.year
+        if first_delta == 1:
+            freq = DataFrequency.day
+            self._check_day_freq(deltas_days)
+        elif 28 <= first_delta <= 31:
+            freq = DataFrequency.month
+            self._check_month_freq(deltas_days)
+        elif 89 <= first_delta <= 92:
+            freq = DataFrequency.quart
+            self._check_quarter_freq(deltas_days)
+        elif 365 <= first_delta <= 366:
+            self._check_year_freq(deltas_days)
+            freq = DataFrequency.year
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail="Ряд имеет неподдерживаемую частотность. Разрешенные: [Y, Q, M, D]"
+            )
+
+        # Валидация формата дат для определенной частотности
+        self._validate_dates(sorted_ts, freq)
+
+        return freq

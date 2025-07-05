@@ -16,6 +16,11 @@ def ts_splitter():
     return TimeseriesTrainTestSplit()
 
 @pytest.fixture
+def freq_determiner():
+    from src.infrastructure.adapters.timeseries import FrequencyDeterminer
+    return FrequencyDeterminer()
+
+@pytest.fixture
 def ts_alignment():
     from src.infrastructure.adapters.timeseries import TimeseriesAlignment
     return TimeseriesAlignment()
