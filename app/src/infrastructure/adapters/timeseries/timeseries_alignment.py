@@ -13,7 +13,7 @@ class TimeseriesAlignment:
         self._freq_determiner = FrequencyDeterminer()
         self._pandas_adapter = PandasTimeseriesAdapter()
 
-    def _is_ts_freq_equal_to_expected(self, ts) -> DataFrequency:
+    def is_ts_freq_equal_to_expected(self, ts: Timeseries) -> DataFrequency:
         freq_type = self._freq_determiner.determine(ts.dates)
         if freq_type != ts.data_frequency:
             raise HTTPException(
@@ -24,10 +24,10 @@ class TimeseriesAlignment:
         return freq_type
 
     def compare(self, timeseries_list: List[Timeseries], target: Timeseries) -> pd.DataFrame:
-        target_data_frequency = self._is_ts_freq_equal_to_expected(target)
+        target_data_frequency = self.is_ts_freq_equal_to_expected(target)
         series_list = [self._pandas_adapter.to_series(target)]
         for ts_obj in timeseries_list:
-            freq_type = self._is_ts_freq_equal_to_expected(ts_obj)
+            freq_type = self.is_ts_freq_equal_to_expected(ts_obj)
             if freq_type != target.data_frequency:
                 raise HTTPException(
                     detail=f"Частотность экзогенной переменной {ts_obj.name} не соответствует частотности целевой переменной. "
