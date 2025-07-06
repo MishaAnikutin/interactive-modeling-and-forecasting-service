@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar
+from typing import TypeVar, Optional
 
 import pandas as pd
 
@@ -42,8 +42,8 @@ class MlAdapterInterface(ABC):
     @staticmethod
     def _generate_forecasts(
         train_predict: pd.Series,
-        test_predict: pd.Series,
-        forecast: pd.Series
+        test_predict: Optional[pd.Series],
+        forecast: Optional[pd.Series]
     ) -> Forecasts:
         return Forecasts(
             train_predict=Timeseries(
@@ -53,11 +53,11 @@ class MlAdapterInterface(ABC):
             test_predict=Timeseries(
                 dates=test_predict.index.tolist(),
                 values=test_predict.values.tolist(),
-            ),
+            )  if train_predict is not None else None,
             forecast=Timeseries(
                 dates=forecast.index.tolist(),
                 values=forecast.values.tolist(),
-            ),
+            ) if forecast is not None else None,
         )
 
     @abstractmethod

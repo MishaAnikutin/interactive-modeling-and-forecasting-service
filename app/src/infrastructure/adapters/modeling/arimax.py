@@ -47,6 +47,8 @@ class ArimaxAdapter(MlAdapterInterface):
         )
         # 2. Подготовка данных --------------------------------------------------------
         # 3. Создаём и обучаем модель -------------------------------------------------
+        print(f'{train_target = }')
+
         model = sm.tsa.ARIMA(
             endog=train_target,
             exog=exog_train,
@@ -94,8 +96,8 @@ class ArimaxAdapter(MlAdapterInterface):
             coefficients=coefficients,
             model_metrics=metrics,
             forecasts=forecasts,
-            weight_path=fit_params.weight_path,
-            model_id=fit_params.model_id,
+            weight_path='',
+            model_id='',
         )
 
     def _parse_coefficients(self, results) -> List[Coefficient]:
