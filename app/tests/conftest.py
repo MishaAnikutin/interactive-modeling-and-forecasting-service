@@ -131,6 +131,39 @@ def balance():
     assert len(target.values) == len(target.dates)
     return target
 
+@pytest.fixture
+def labour():
+    df = pd.read_csv(
+        "/Users/oleg/projects/interactive-modeling-and-forecasting-service/app/tests/data/quarter/labour.csv",
+        sep=";"
+    )
+    df['date'] = pd.to_datetime(df['date'])
+    target = Timeseries(
+        values=df['value1'].to_list(),
+        dates=df['date'].to_list(),
+        name="labour",
+        data_frequency=DataFrequency.month,
+    )
+    assert len(target.values) == len(target.dates)
+    return target
+
+@pytest.fixture
+def ca():
+    df = pd.read_csv(
+        "/Users/oleg/projects/interactive-modeling-and-forecasting-service/app/tests/data/quarter/ca.csv",
+        sep=";"
+    )
+    df['date'] = pd.to_datetime(df['date'])
+    target = Timeseries(
+        values=df['value1'].to_list(),
+        dates=df['date'].to_list(),
+        name="ca",
+        data_frequency=DataFrequency.month,
+    )
+    assert len(target.values) == len(target.dates)
+    return target
+
+# Параметры для тестов
 
 @pytest.fixture
 def nhits_params_base():
