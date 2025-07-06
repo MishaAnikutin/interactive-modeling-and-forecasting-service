@@ -65,9 +65,9 @@ class NhitsAdapter(MlAdapterInterface):
         if periods <= 0:
             return pd.DatetimeIndex([])
         freq_map: Dict[DataFrequency, str] = {
-            DataFrequency.year: "Y",
+            DataFrequency.year: "YE",
             DataFrequency.month: "ME",
-            DataFrequency.quart: "Q",
+            DataFrequency.quart: "QE",
             DataFrequency.day: "D",
         }
         try:
