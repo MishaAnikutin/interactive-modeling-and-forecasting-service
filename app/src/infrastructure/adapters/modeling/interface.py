@@ -3,7 +3,7 @@ from typing import TypeVar, Optional
 
 import pandas as pd
 
-from src.core.domain import ModelMetrics, Forecasts, Timeseries, FitParams
+from src.core.domain import ModelMetrics, Forecasts, Timeseries, FitParams, DataFrequency
 from src.infrastructure.adapters.metrics import MetricsFactory
 from src.infrastructure.adapters.timeseries import TimeseriesTrainTestSplit
 
@@ -67,5 +67,6 @@ class MlAdapterInterface(ABC):
         exog: pd.DataFrame | None,
         params: ModelParams,
         fit_params: FitParams,
+        data_frequency: DataFrequency,
     ) -> ModelFitResult:
         pass
