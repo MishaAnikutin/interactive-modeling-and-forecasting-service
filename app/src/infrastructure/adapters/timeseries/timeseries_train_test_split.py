@@ -72,6 +72,9 @@ class TimeseriesTrainTestSplit:
             exog_train, exog_val, exog_test = self.split_ts(
                 exog, train_boundary, val_boundary
             )
+            assert exog_train.shape[0] == train_target.shape[0]
+            assert exog_val.shape[0] == val_target.shape[0]
+            assert exog_test.shape[0] == test_target.shape[0]
             return (
                 exog_train,
                 train_target,
