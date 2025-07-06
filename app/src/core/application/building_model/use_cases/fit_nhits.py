@@ -20,21 +20,25 @@ class FitNhitsUC:
         self._storage = storage
 
     def execute(self, request: NhitsFitRequest) -> NhitsFitResult:
+        self._ts_aligner.is_ts_freq_equal_to_expected(request.dependent_variables)
         target = pd.Series(
             index=request.dependent_variables.dates,
             data=request.dependent_variables.values,
             name=request.dependent_variables.name
         )
-        exog_df = (
-            None if request.explanatory_variables is None
-            else self._ts_aligner.compare(timeseries_list=request.explanatory_variables)
-        )
+        exog_df = None
+        if request.explanatory_variables is not None:
+            exog_df = self._ts_aligner.compare(
+                timeseries_list=request.explanatory_variables,
+                target=request.dependent_variables,
+            )
 
         model_result: NhitsFitResult = self._model_adapter.fit(
             target=target,
-            exog=None,
+            exog=exog_df,
             nhits_params=request.hyperparameters,
             fit_params=request.fit_params,
+            data_frequency=request.dependent_variables.data_frequency
         )
 
         model_id, model_path = self._storage.save(model_result)

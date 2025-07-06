@@ -40,7 +40,7 @@ def nhits_adapter(metrics_factory, ts_splitter):
 @pytest.fixture
 def ipp_eu():
     df = pd.read_csv(
-        "/Users/oleg/projects/interactive-modeling-and-forecasting-service/app/tests/data/ipc_eu.csv",
+        "/Users/oleg/projects/interactive-modeling-and-forecasting-service/app/tests/data/month/ipc_eu.csv",
         sep=";"
     )
     df['date'] = pd.to_datetime(df['date'])
@@ -104,11 +104,29 @@ def u_men():
         "/Users/oleg/projects/interactive-modeling-and-forecasting-service/app/tests/data/year/u_men.csv",
         sep=";"
     )
+    df['date'] = pd.to_datetime(df['date'])
     target = Timeseries(
         values=df['value1'].to_list(),
         dates=df['date'].to_list(),
         name="u_men",
         data_frequency=DataFrequency.year,
+    )
+    assert len(target.values) == len(target.dates)
+    return target
+
+
+@pytest.fixture
+def balance():
+    df = pd.read_csv(
+        "/Users/oleg/projects/interactive-modeling-and-forecasting-service/app/tests/data/month/balance.csv",
+        sep=";"
+    )
+    df['date'] = pd.to_datetime(df['date'])
+    target = Timeseries(
+        values=df['value1'].to_list(),
+        dates=df['date'].to_list(),
+        name="balance",
+        data_frequency=DataFrequency.month,
     )
     assert len(target.values) == len(target.dates)
     return target

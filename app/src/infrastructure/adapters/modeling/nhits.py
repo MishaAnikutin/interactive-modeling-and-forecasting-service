@@ -42,7 +42,18 @@ class NhitsAdapter(MlAdapterInterface):
             }
         )
         if exog is not None and not exog.empty:
-            raise NotImplementedError("Необходимо реализовать логику построения данных с экз переменными")
+            # Проверка конфликта имен
+            conflict_columns = set(exog.columns) & {'unique_id', 'ds', 'y'}
+            if conflict_columns:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Конфликт имен в экзогенных переменных: {conflict_columns}"
+                )
+
+            # Объединяем с экзогенными переменными
+            df = df.set_index('ds')
+            df = df.join(exog, how='left')
+            df = df.reset_index()
         return df
 
     @staticmethod
@@ -58,8 +69,6 @@ class NhitsAdapter(MlAdapterInterface):
             DataFrequency.month: "ME",
             DataFrequency.quart: "Q",
             DataFrequency.day: "D",
-            DataFrequency.hour: "H",
-            DataFrequency.minute: "T",
         }
         try:
             freq_alias = freq_map[data_frequency]
@@ -81,6 +90,7 @@ class NhitsAdapter(MlAdapterInterface):
             test_target: pd.Series,
             freq: DataFrequency,
     ):
+        assert len(test_target.index.tolist()) > 0, "Похоже ты пытаешься посчитать последнюю дату от пустого массива"
         last_known_dt = test_target.index.max()
         futr_index = self._future_index(
             last_dt=last_known_dt,
@@ -107,6 +117,7 @@ class NhitsAdapter(MlAdapterInterface):
             exog: pd.DataFrame | None,
             nhits_params: NhitsParams,
             fit_params: FitParams,
+            data_frequency: DataFrequency,
     ) -> NhitsFitResult:
         # 1. Train / val / test split -------------------------------------------------
         (
@@ -143,13 +154,18 @@ class NhitsAdapter(MlAdapterInterface):
             )
 
         # 2. Подготовка данных --------------------------------------------------------
-        train_df = self._to_panel(
-            target=pd.concat([train_target, val_target]) if val_size != 0 else train_target,
-            exog=None
-        )
+        if exog is not None:
+            train_df = self._to_panel(
+                target=pd.concat([train_target, val_target]) if val_size != 0 else train_target,
+                exog=pd.concat([exog_train, exog_val]) if exog_val.shape[0] != 0 else exog_train,
+            )
+        else:
+            train_df = self._to_panel(
+                target=pd.concat([train_target, val_target]) if val_size != 0 else train_target
+            )
         future_df = self._future_df(
             future_size=fit_params.forecast_horizon,
-            freq=fit_params.data_frequency,
+            freq=data_frequency,
             test_target=test_target
         )
 
@@ -164,7 +180,7 @@ class NhitsAdapter(MlAdapterInterface):
             input_size=h * 3,
             **nhits_params.model_dump()
         )
-        nf = NeuralForecast(models=[model], freq=fit_params.data_frequency)
+        nf = NeuralForecast(models=[model], freq=data_frequency)
         nf.fit(df=train_df, val_size=val_size)
 
         # 4. Прогнозы -----------------------------------------------------------------
