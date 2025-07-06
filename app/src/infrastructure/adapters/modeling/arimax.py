@@ -3,7 +3,7 @@ from typing import List
 import statsmodels.api as sm
 from logs import logger
 
-from src.core.domain import FitParams, Coefficient
+from src.core.domain import FitParams, Coefficient, DataFrequency
 from src.core.application.building_model.schemas.arimax import ArimaxParams, ArimaxFitResult
 from src.infrastructure.adapters.modeling.interface import MlAdapterInterface
 
@@ -28,6 +28,7 @@ class ArimaxAdapter(MlAdapterInterface):
         exog: pd.DataFrame | None,
         arimax_params: ArimaxParams,
         fit_params: FitParams,
+        data_frequency: DataFrequency,
     ) -> ArimaxFitResult:
         self._log.debug("Старт обучения ARIMAX")
 

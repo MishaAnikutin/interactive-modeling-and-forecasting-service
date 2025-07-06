@@ -21,17 +21,18 @@ class FitNhitsUC:
 
     def execute(self, request: NhitsFitRequest) -> NhitsFitResult:
         self._ts_aligner.is_ts_freq_equal_to_expected(request.dependent_variables)
-        target = pd.Series(
-            index=request.dependent_variables.dates,
-            data=request.dependent_variables.values,
-            name=request.dependent_variables.name
-        )
-        exog_df = None
-        if request.explanatory_variables is not None:
-            exog_df = self._ts_aligner.compare(
+        if request.explanatory_variables:
+            df = self._ts_aligner.compare(
                 timeseries_list=request.explanatory_variables,
-                target=request.dependent_variables,
+                target=request.dependent_variables
             )
+
+            target = df[request.dependent_variables.name]
+            exog_df = df.drop(columns=[request.dependent_variables.name])
+
+        else:
+            target = self._ts_adapter.to_series(request.dependent_variables)
+            exog_df = None
 
         model_result: NhitsFitResult = self._model_adapter.fit(
             target=target,

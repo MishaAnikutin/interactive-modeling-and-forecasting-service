@@ -22,24 +22,26 @@ class FitArimaxUC:
         self._storage = storage
 
     def execute(self, request: ArimaxFitRequest) -> ArimaxFitResult:
+        self._ts_aligner.is_ts_freq_equal_to_expected(request.dependent_variables)
         if request.explanatory_variables:
             df = self._ts_aligner.compare(
                 timeseries_list=request.explanatory_variables,
                 target=request.dependent_variables
             )
 
-            target_df = df[request.dependent_variables.name]
+            target = df[request.dependent_variables.name]
             exog_df = df.drop(columns=[request.dependent_variables.name])
 
         else:
-            target_df = self._ts_adapter.to_dataframe(request.dependent_variables)
+            target = self._ts_adapter.to_series(request.dependent_variables)
             exog_df = None
 
         model_result: ArimaxFitResult = self._model_adapter.fit(
-            target=target_df,
+            target=target,
             exog=exog_df,
             arimax_params=request.hyperparameters,
             fit_params=request.fit_params,
+            data_frequency=request.dependent_variables.data_frequency,
         )
 
         model_id, model_path = self._storage.save(model_result)
