@@ -201,6 +201,7 @@ class NhitsAdapter(MlAdapterInterface):
 
         # 4.2-4.3 test
         all_forecasts = nf.predict(futr_df=future_df)['NHITS']
+        all_forecasts.index = future_df['ds']
         fcst_test = all_forecasts.iloc[:test_size].copy()
         fcst_future = all_forecasts.iloc[test_size:].copy()
 
