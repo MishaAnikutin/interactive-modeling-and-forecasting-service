@@ -49,14 +49,17 @@ class MlAdapterInterface(ABC):
             train_predict=Timeseries(
                 dates=train_predict.index.tolist(),
                 values=train_predict.values.tolist(),
+                name="Прогноз на тренировочной выборке",
             ),
             test_predict=Timeseries(
                 dates=test_predict.index.tolist(),
                 values=test_predict.values.tolist(),
+                name="Прогноз на тестовой выборке"
             )  if train_predict is not None else None,
             forecast=Timeseries(
                 dates=forecast.index.tolist(),
                 values=forecast.values.tolist(),
+                name="Прогноз сверх известных данных"
             ) if forecast is not None else None,
         )
 
