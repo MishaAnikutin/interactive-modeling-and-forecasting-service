@@ -316,6 +316,22 @@ def test_nhits_fit_with_exog_quarter_frequency(
                 forecast_horizon=3,
             ),
             "Валидационная выборка должна быть не пустой"
+        ),
+        (
+            NhitsParams(
+                max_steps=30,
+                early_stop_patience_steps=3,
+                val_check_steps=50,
+                learning_rate=1e-3,
+                scaler_type="robust",
+            ),
+            FitParams(
+                train_boundary=datetime(2014, 6,30),
+                val_boundary=datetime(2019, 6,30),
+                forecast_horizon=3,
+            ),
+            "Вы выбрали слишком большую тестовую выборку и горизонт прогноза "
+            "либо слишком маленькую тренировочную."
         )
     ]
 )
