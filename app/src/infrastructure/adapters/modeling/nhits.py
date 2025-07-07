@@ -153,6 +153,12 @@ class NhitsAdapter(MlAdapterInterface):
                 status_code=400,
             )
 
+        if 4 * h > train_target.shape[-1]:
+            raise HTTPException(
+                status_code=400,
+                detail="Вы выбрали слишком большую тестовую выборку. Попробуйте уменьшить ее и увеличить тренировочную."
+            )
+
         # 2. Подготовка данных --------------------------------------------------------
         if exog is not None:
             train_df = self._to_panel(

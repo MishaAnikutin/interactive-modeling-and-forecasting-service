@@ -142,7 +142,7 @@ def labour():
         values=df['value1'].to_list(),
         dates=df['date'].to_list(),
         name="labour",
-        data_frequency=DataFrequency.month,
+        data_frequency=DataFrequency.quart,
     )
     assert len(target.values) == len(target.dates)
     return target
@@ -158,7 +158,7 @@ def ca():
         values=df['value1'].to_list(),
         dates=df['date'].to_list(),
         name="ca",
-        data_frequency=DataFrequency.month,
+        data_frequency=DataFrequency.quart,
     )
     assert len(target.values) == len(target.dates)
     return target
