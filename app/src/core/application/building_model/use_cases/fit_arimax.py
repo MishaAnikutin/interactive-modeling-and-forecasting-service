@@ -1,3 +1,5 @@
+import pandas as pd
+
 from src.core.application.building_model.schemas.arimax import ArimaxFitRequest, ArimaxFitResult
 from src.infrastructure.adapters.timeseries import (
     PandasTimeseriesAdapter,
@@ -30,8 +32,11 @@ class FitArimaxUC:
             )
 
             target = df[request.dependent_variables.name]
+            if type(target) == pd.DataFrame:
+                target = target.iloc[:, 0]
             exog_df = df.drop(columns=[request.dependent_variables.name])
-
+            if exog_df.empty:
+                exog_df = None
         else:
             target = self._ts_adapter.to_series(request.dependent_variables)
             exog_df = None
