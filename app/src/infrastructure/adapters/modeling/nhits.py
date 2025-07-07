@@ -5,6 +5,9 @@ import pandas as pd
 from fastapi import HTTPException
 from neuralforecast import NeuralForecast
 from neuralforecast.models import NHITS
+from neuralforecast.losses.pytorch import (
+    MAE, MSE, RMSE, MAPE, DistributionLoss, IQLoss, MQLoss,
+)
 
 from logs import logger
 from src.core.application.building_model.schemas.nhits import (
@@ -111,6 +114,29 @@ class NhitsAdapter(MlAdapterInterface):
             }
         )
 
+    def _process_params(self, nhits_params: NhitsParams) -> dict:
+        loss_map = {
+            "MAE": MAE,
+            "MSE": MSE,
+            "RMSE": RMSE,
+            "MAPE": MAPE,
+        }
+        return {
+            "stack_types": nhits_params.n_stacks * ['identity'],
+            "n_blocks": nhits_params.n_blocks,
+            "n_pool_kernel_size": nhits_params.n_pool_kernel_size,
+            "pooling_mode": nhits_params.pooling_mode,
+            "interpolation_mode": nhits_params.interpolation_mode,
+            "activation": nhits_params.activation,
+            "max_steps": nhits_params.max_steps,
+            "early_stop_patience_steps": nhits_params.early_stop_patience_steps,
+            "val_check_steps": nhits_params.val_check_steps,
+            "learning_rate": nhits_params.learning_rate,
+            "scaler_type": nhits_params.scaler_type,
+            "loss": loss_map[nhits_params.loss](),
+            "valid_loss": loss_map[nhits_params.valid_loss](),
+        }
+
     def fit(
             self,
             target: pd.Series,
@@ -185,7 +211,7 @@ class NhitsAdapter(MlAdapterInterface):
             accelerator='cpu',
             h=h,
             input_size=h * 3,
-            **nhits_params.model_dump()
+            **self._process_params(nhits_params)
         )
         nf = NeuralForecast(models=[model], freq=data_frequency)
         nf.fit(df=train_df, val_size=val_size)

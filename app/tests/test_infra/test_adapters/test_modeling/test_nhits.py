@@ -35,8 +35,8 @@ from tests.conftest import nhits_adapter, ipp_eu, ipp_eu_ts, u_men, u_women, u_t
                 scaler_type="robust",
             ),
             FitParams(
-                train_boundary=datetime(2013, 12, 31),
-                val_boundary=datetime(2017, 12, 31),
+                train_boundary=datetime(2015, 12, 31),
+                val_boundary=datetime(2018, 12, 31),
                 forecast_horizon=24,
             ),
         ),
