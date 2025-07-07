@@ -2,6 +2,7 @@ from datetime import datetime
 
 import pandas as pd
 import pytest
+from fastapi import HTTPException
 
 from src.core.application.building_model.schemas.nhits import NhitsParams
 from src.core.domain import FitParams, DataFrequency
@@ -248,8 +249,6 @@ def test_nhits_fit_with_exog_quarter_frequency(
         target=labour,
     )
 
-    aligned_df.to_csv("exog.csv", index_label='date')
-
     target = aligned_df[labour.name]
 
     assert type(target) == pd.Series
@@ -283,3 +282,72 @@ def test_nhits_fit_with_exog_quarter_frequency(
     future_predict_len = len(result.forecasts.forecast.dates)
     assert train_predict_len + test_predict_len == target.shape[0]
     assert future_predict_len == fit_params.forecast_horizon
+
+
+@pytest.mark.parametrize(
+    "nhits_params, fit_params, exception",
+    [
+        (
+            NhitsParams(
+                max_steps=30,
+                early_stop_patience_steps=3,
+                val_check_steps=50,
+                learning_rate=1e-3,
+                scaler_type="robust",
+            ),
+            FitParams(
+                train_boundary=datetime(2019, 6,30),
+                val_boundary=datetime(2021, 6, 30),
+                forecast_horizon=30,
+            ),
+            "Размер валидационной выборки должен быть"
+        ),
+        (
+            NhitsParams(
+                max_steps=30,
+                early_stop_patience_steps=3,
+                val_check_steps=50,
+                learning_rate=1e-3,
+                scaler_type="robust",
+            ),
+            FitParams(
+                train_boundary=datetime(2019, 6,30),
+                val_boundary=datetime(2019, 6,30),
+                forecast_horizon=3,
+            ),
+            "Валидационная выборка должна быть не пустой"
+        )
+    ]
+)
+def test_nhits_val_size_error_with_exog(
+    nhits_params,
+    fit_params,
+    exception,
+    nhits_adapter,
+    ts_alignment,
+    ca,
+    labour
+):
+    aligned_df = ts_alignment.compare(
+        timeseries_list=[ca],
+        target=labour,
+    )
+
+    target = aligned_df[labour.name]
+
+    assert type(target) == pd.Series
+    assert aligned_df.columns.to_list() == [labour.name, ca.name]
+
+    exog = aligned_df.drop(columns=[labour.name])
+
+    with pytest.raises(HTTPException) as exc:
+        nhits_adapter.fit(
+            target=target,
+            exog=exog,
+            nhits_params=nhits_params,
+            fit_params=fit_params,
+            data_frequency=labour.data_frequency,
+        )
+    assert exc.value.status_code == 400
+    assert exception in exc.value.detail
+
