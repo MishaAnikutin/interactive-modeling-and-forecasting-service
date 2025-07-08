@@ -54,7 +54,7 @@ class NhitsParams(BaseModel):
     valid_loss: LossEnum = Field(default=LossEnum.MAE,)
     activation: ActivationType = Field(default=ActivationType.ReLU)
     max_steps: int = Field(default=100, gt=0, description="Максимум итераций обучения")
-    early_stop_patience_steps: int = Field(default=10, ge=0, description="Patience для early-stopping")
+    early_stop_patience_steps: int = Field(default=-1, ge=-1, description="Patience для early-stopping")
     val_check_steps: int = Field(default=50, ge=0, description="Проверка валидации каждые n шагов")
     learning_rate: float = Field(default=1e-3, gt=0, description="Шаг обучения")
     scaler_type: ScalerType = Field(default=ScalerType.Identity, description="Тип скейлера")
