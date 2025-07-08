@@ -33,17 +33,20 @@ class MlAdapterInterface(ABC):
         train_metrics = self._metric_factory.apply(
             metrics=self.metrics, y_pred=y_train_pred, y_true=y_train_true
         )
-        test_metrics = self._metric_factory.apply(
-            metrics=self.metrics, y_pred=y_test_pred, y_true=y_test_true
-        )
+
+        test_metrics = None
+        if not y_test_pred.empty and not y_test_true.empty:
+            test_metrics = self._metric_factory.apply(
+                metrics=self.metrics, y_pred=y_test_pred, y_true=y_test_true
+            )
 
         return ModelMetrics(train_metrics=train_metrics, test_metrics=test_metrics)
 
     @staticmethod
     def _generate_forecasts(
         train_predict: pd.Series,
-        test_predict: Optional[pd.Series],
-        forecast: Optional[pd.Series]
+        test_predict: pd.Series,
+        forecast: pd.Series
     ) -> Forecasts:
         return Forecasts(
             train_predict=Timeseries(
@@ -55,12 +58,12 @@ class MlAdapterInterface(ABC):
                 dates=test_predict.index.tolist(),
                 values=test_predict.values.tolist(),
                 name="Прогноз на тестовой выборке"
-            )  if train_predict is not None else None,
+            )  if not test_predict.empty else None,
             forecast=Timeseries(
                 dates=forecast.index.tolist(),
                 values=forecast.values.tolist(),
                 name="Прогноз сверх известных данных"
-            ) if forecast is not None else None,
+            ) if not forecast.empty else None,
         )
 
     @abstractmethod
