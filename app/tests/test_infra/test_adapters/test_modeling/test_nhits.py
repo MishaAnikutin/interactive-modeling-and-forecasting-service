@@ -7,6 +7,7 @@ from fastapi import HTTPException
 from src.core.application.building_model.schemas.nhits import NhitsParams
 from src.core.domain import FitParams, DataFrequency
 from src.infrastructure.adapters.modeling.neural_forecast import future_index
+from tests.common.nhits import base_nhits
 from tests.conftest import nhits_adapter, ipp_eu, ipp_eu_ts, u_men, u_women, u_total, ts_alignment, balance, ca, labour
 
 
@@ -15,13 +16,7 @@ from tests.conftest import nhits_adapter, ipp_eu, ipp_eu_ts, u_men, u_women, u_t
     "nhits_params, fit_params",
     [
         (
-            NhitsParams(
-                max_steps=30,
-                early_stop_patience_steps=3,
-                val_check_steps=50,
-                learning_rate=1e-3,
-                scaler_type="robust",
-            ),
+            base_nhits,
             FitParams(
                 train_boundary=datetime(2014, 6, 30),
                 val_boundary=datetime(2018, 5, 31),
@@ -97,13 +92,7 @@ def test_nhits_fit_without_exog_month_frequency(
     "nhits_params, fit_params",
     [
         (
-            NhitsParams(
-                max_steps=30,
-                early_stop_patience_steps=3,
-                val_check_steps=50,
-                learning_rate=1e-3,
-                scaler_type="robust",
-            ),
+            base_nhits,
             FitParams(
                 train_boundary=datetime(2012, 12, 31),
                 val_boundary=datetime(2021, 12, 31),
@@ -171,13 +160,7 @@ def test_nhits_fit_with_two_exog_year_frequency(
     "nhits_params, fit_params",
     [
         (
-            NhitsParams(
-                max_steps=30,
-                early_stop_patience_steps=3,
-                val_check_steps=50,
-                learning_rate=1e-3,
-                scaler_type="robust",
-            ),
+            base_nhits,
             FitParams(
                 train_boundary=datetime(2018, 5,31),
                 val_boundary=datetime(2019, 7, 31),
@@ -249,13 +232,7 @@ def test_nhits_fit_with_one_exog_month_frequency(
     "nhits_params, fit_params",
     [
         (
-            NhitsParams(
-                max_steps=30,
-                early_stop_patience_steps=3,
-                val_check_steps=50,
-                learning_rate=1e-3,
-                scaler_type="robust",
-            ),
+            base_nhits,
             FitParams(
                 train_boundary=datetime(2019, 6,30),
                 val_boundary=datetime(2021, 6, 30),
@@ -325,13 +302,7 @@ def test_nhits_fit_with_exog_quarter_frequency(
     "nhits_params, fit_params, exception",
     [
         (
-            NhitsParams(
-                max_steps=30,
-                early_stop_patience_steps=3,
-                val_check_steps=50,
-                learning_rate=1e-3,
-                scaler_type="robust",
-            ),
+            base_nhits,
             FitParams(
                 train_boundary=datetime(2019, 6,30),
                 val_boundary=datetime(2021, 6, 30),
@@ -340,13 +311,7 @@ def test_nhits_fit_with_exog_quarter_frequency(
             "Размер валидационной выборки должен быть"
         ),
         (
-            NhitsParams(
-                max_steps=30,
-                early_stop_patience_steps=3,
-                val_check_steps=50,
-                learning_rate=1e-3,
-                scaler_type="robust",
-            ),
+            base_nhits,
             FitParams(
                 train_boundary=datetime(2019, 6,30),
                 val_boundary=datetime(2019, 6,30),
@@ -355,13 +320,7 @@ def test_nhits_fit_with_exog_quarter_frequency(
             "Валидационная выборка должна быть не пустой"
         ),
         (
-            NhitsParams(
-                max_steps=30,
-                early_stop_patience_steps=3,
-                val_check_steps=50,
-                learning_rate=1e-3,
-                scaler_type="robust",
-            ),
+            base_nhits,
             FitParams(
                 train_boundary=datetime(2014, 6,30),
                 val_boundary=datetime(2019, 6,30),
@@ -514,13 +473,7 @@ def test_nhits_without_validation(
     "nhits_params, fit_params",
     [
         (
-            NhitsParams(
-                max_steps=30,
-                early_stop_patience_steps=3,
-                val_check_steps=50,
-                learning_rate=1e-3,
-                scaler_type="robust",
-            ),
+            base_nhits,
             FitParams(
                 train_boundary=datetime(2019, 6,30),
                 val_boundary=datetime(2021, 12, 31),
