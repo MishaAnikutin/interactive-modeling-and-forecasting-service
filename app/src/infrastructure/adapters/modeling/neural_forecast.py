@@ -7,6 +7,33 @@ from src.core.domain import DataFrequency
 from src.infrastructure.adapters.modeling.interface import MlAdapterInterface
 
 
+def future_index(
+        last_dt: pd.Timestamp,
+        data_frequency: DataFrequency,
+        periods: int,
+):
+    if periods <= 0:
+        return pd.DatetimeIndex([])
+    freq_map: dict[DataFrequency, str] = {
+        DataFrequency.year: "YE",
+        DataFrequency.month: "ME",
+        DataFrequency.quart: "QE",
+        DataFrequency.day: "D",
+    }
+    try:
+        freq_alias = freq_map[data_frequency]
+    except KeyError:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Неподдерживаемая частотность: {data_frequency}",
+        )
+    dr = pd.date_range(
+        start=last_dt,
+        periods=periods + 1,
+        freq=freq_alias,
+    )
+    return dr[1:]
+
 class NeuralForecastInterface(MlAdapterInterface, ABC):
     @staticmethod
     def _to_panel(
@@ -35,57 +62,26 @@ class NeuralForecastInterface(MlAdapterInterface, ABC):
             df = df.reset_index()
         return df
 
-    @staticmethod
-    def _future_index(
-            last_dt: pd.Timestamp,
-            data_frequency: DataFrequency,
-            periods: int,
-    ):
-        if periods <= 0:
-            return pd.DatetimeIndex([])
-        freq_map: dict[DataFrequency, str] = {
-            DataFrequency.year: "YE",
-            DataFrequency.month: "ME",
-            DataFrequency.quart: "QE",
-            DataFrequency.day: "D",
-        }
-        try:
-            freq_alias = freq_map[data_frequency]
-        except KeyError:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Неподдерживаемая частотность: {data_frequency}",
-            )
-        dr = pd.date_range(
-            start=last_dt,
-            periods=periods + 1,
-            freq=freq_alias,
-        )
-        return dr[1:]
-
     def _future_df(
             self,
             future_size: int,
             test_target: pd.Series,
+            last_known_dt: pd.Timestamp,
             freq: DataFrequency,
     ):
-        assert len(test_target.index.tolist()) > 0, "Похоже ты пытаешься посчитать последнюю дату от пустого массива"
-        last_known_dt = test_target.index.max()
-        futr_index = self._future_index(
+        futr_index = future_index(
             last_dt=last_known_dt,
             data_frequency=freq,
             periods=future_size,
         )
-        future_index = pd.concat(
-            [
-                test_target,
-                pd.Series(index=futr_index)
-            ]
-        ).index
+        futr_index_expanded = (
+            pd.concat([test_target, pd.Series(index=futr_index)]).index
+            if test_target.shape[0] != 0 else futr_index
+        )
 
         return pd.DataFrame(
             {
                 "unique_id": 'ts',
-                "ds": future_index,
+                "ds": futr_index_expanded,
             }
         )
