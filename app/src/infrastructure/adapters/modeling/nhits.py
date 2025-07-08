@@ -115,10 +115,13 @@ class NhitsAdapter(NeuralForecastInterface):
             train_df = self._to_panel(
                 target=pd.concat([train_target, val_target]) if val_size != 0 else train_target
             )
+
+        last_known_dt = target.index.max()
         future_df = self._future_df(
             future_size=fit_params.forecast_horizon,
             freq=data_frequency,
-            test_target=test_target
+            test_target=test_target,
+            last_known_dt=last_known_dt,
         )
 
         assert future_df.shape[0] == h
@@ -147,8 +150,12 @@ class NhitsAdapter(NeuralForecastInterface):
         # 4.2-4.3 test
         all_forecasts = nf.predict(futr_df=future_df)['NHITS']
         all_forecasts.index = future_df['ds']
-        fcst_test = all_forecasts.iloc[:test_size].copy()
-        fcst_future = all_forecasts.iloc[test_size:].copy()
+        if test_size > 0:
+            fcst_test = all_forecasts.iloc[:test_size].copy()
+            fcst_future = all_forecasts.iloc[test_size:].copy()
+        else:
+            fcst_test = pd.Series()
+            fcst_future = all_forecasts.copy()
 
         # ------------------------------------------------------------------
         # 5. Сборка результата

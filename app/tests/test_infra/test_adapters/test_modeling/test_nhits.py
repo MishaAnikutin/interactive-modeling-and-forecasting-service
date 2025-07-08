@@ -6,7 +6,9 @@ from fastapi import HTTPException
 
 from src.core.application.building_model.schemas.nhits import NhitsParams
 from src.core.domain import FitParams, DataFrequency
+from src.infrastructure.adapters.modeling.neural_forecast import future_index
 from tests.conftest import nhits_adapter, ipp_eu, ipp_eu_ts, u_men, u_women, u_total, ts_alignment, balance, ca, labour
+
 
 @pytest.mark.filterwarnings("ignore::UserWarning")
 @pytest.mark.parametrize(
@@ -48,8 +50,9 @@ def test_nhits_fit_without_exog_month_frequency(
     nhits_adapter,
     ipp_eu
 ) -> None:
+    target = ipp_eu
     result = nhits_adapter.fit(
-        target=ipp_eu,
+        target=target,
         exog=None,
         nhits_params=nhits_params,
         fit_params=fit_params,
@@ -77,8 +80,16 @@ def test_nhits_fit_without_exog_month_frequency(
     train_predict_len = len(result.forecasts.train_predict.dates)
     test_predict_len = len(result.forecasts.test_predict.dates)
     future_predict_len = len(result.forecasts.forecast.dates)
-    assert train_predict_len + test_predict_len == ipp_eu.shape[0]
+    assert train_predict_len + test_predict_len == target.shape[0]
     assert future_predict_len == fit_params.forecast_horizon
+
+    # проверка дат в прогнозах
+    assert target.index.tolist() == result.forecasts.train_predict.dates + result.forecasts.test_predict.dates
+    assert future_index(
+        last_dt=target.index.tolist()[-1],
+        data_frequency=DataFrequency.month,
+        periods=fit_params.forecast_horizon,
+    ).tolist() == result.forecasts.forecast.dates
 
 
 @pytest.mark.filterwarnings("ignore::UserWarning")
@@ -145,6 +156,14 @@ def test_nhits_fit_with_two_exog_year_frequency(
     future_predict_len = len(result.forecasts.forecast.dates)
     assert train_predict_len + test_predict_len == target.shape[0]
     assert future_predict_len == fit_params.forecast_horizon
+
+    # проверка дат в прогнозах
+    assert target.index.tolist() == result.forecasts.train_predict.dates + result.forecasts.test_predict.dates
+    assert future_index(
+        last_dt=target.index.tolist()[-1],
+        data_frequency=DataFrequency.year,
+        periods=fit_params.forecast_horizon,
+    ).tolist() == result.forecasts.forecast.dates
 
 
 @pytest.mark.filterwarnings("ignore::UserWarning")
@@ -215,6 +234,15 @@ def test_nhits_fit_with_one_exog_month_frequency(
     assert train_predict_len + test_predict_len == target.shape[0]
     assert future_predict_len == fit_params.forecast_horizon
 
+    # проверка дат в прогнозах
+    assert target.index.tolist() == result.forecasts.train_predict.dates + result.forecasts.test_predict.dates
+    assert future_index(
+        last_dt=target.index.tolist()[-1],
+        data_frequency=DataFrequency.month,
+        periods=fit_params.forecast_horizon,
+    ).tolist() == result.forecasts.forecast.dates
+
+
 
 @pytest.mark.filterwarnings("ignore::UserWarning")
 @pytest.mark.parametrize(
@@ -283,7 +311,16 @@ def test_nhits_fit_with_exog_quarter_frequency(
     assert train_predict_len + test_predict_len == target.shape[0]
     assert future_predict_len == fit_params.forecast_horizon
 
+    # проверка дат в прогнозах
+    assert target.index.tolist() == result.forecasts.train_predict.dates + result.forecasts.test_predict.dates
+    assert future_index(
+        last_dt=target.index.tolist()[-1],
+        data_frequency=DataFrequency.quart,
+        periods=fit_params.forecast_horizon,
+    ).tolist() == result.forecasts.forecast.dates
 
+
+@pytest.mark.filterwarnings("ignore::UserWarning")
 @pytest.mark.parametrize(
     "nhits_params, fit_params, exception",
     [
@@ -335,7 +372,7 @@ def test_nhits_fit_with_exog_quarter_frequency(
         )
     ]
 )
-def test_nhits_val_size_error_with_exog(
+def test_nhits_errors(
     nhits_params,
     fit_params,
     exception,
@@ -367,3 +404,242 @@ def test_nhits_val_size_error_with_exog(
     assert exc.value.status_code == 400
     assert exception in exc.value.detail
 
+
+@pytest.mark.filterwarnings("ignore::UserWarning")
+@pytest.mark.parametrize(
+    "nhits_params, fit_params, exception",
+    [
+        (
+            NhitsParams(
+                max_steps=30,
+                early_stop_patience_steps=-1,
+                val_check_steps=30,
+                learning_rate=1e-3,
+                scaler_type="robust",
+            ),
+            FitParams(
+                train_boundary=datetime(2021, 6,30),
+                val_boundary=datetime(2021, 6,30),
+                forecast_horizon=3,
+            ),
+            None
+        ),
+        (
+            NhitsParams(
+                max_steps=30,
+                early_stop_patience_steps=10,
+                val_check_steps=50,
+                learning_rate=1e-3,
+                scaler_type="robust",
+            ),
+            FitParams(
+                train_boundary=datetime(2021, 6,30),
+                val_boundary=datetime(2021, 6,30),
+                forecast_horizon=3,
+            ),
+            "Валидационная выборка должна быть не пустой"
+        ),
+    ]
+)
+def test_nhits_without_validation(
+    nhits_params,
+    fit_params,
+    exception,
+    nhits_adapter,
+    ts_alignment,
+    ca,
+    labour
+):
+    aligned_df = ts_alignment.compare(
+        timeseries_list=[ca],
+        target=labour,
+    )
+
+    target = aligned_df[labour.name]
+
+    assert type(target) == pd.Series
+    assert aligned_df.columns.to_list() == [labour.name, ca.name]
+
+    exog = aligned_df.drop(columns=[labour.name])
+
+    if exception is not None:
+        with pytest.raises(HTTPException) as exc:
+            nhits_adapter.fit(
+                target=target,
+                exog=exog,
+                nhits_params=nhits_params,
+                fit_params=fit_params,
+                data_frequency=labour.data_frequency,
+            )
+        assert exc.value.status_code == 400
+        assert exception in exc.value.detail
+    else:
+        result = nhits_adapter.fit(
+            target=target,
+            exog=exog,
+            nhits_params=nhits_params,
+            fit_params=fit_params,
+            data_frequency=labour.data_frequency,
+        )
+        assert result.forecasts.train_predict.dates, "Пустой train-прогноз"
+        assert result.forecasts.test_predict.dates, "Пустой test-прогноз"
+
+        assert result.model_metrics.train_metrics, "Train-метрики не рассчитаны"
+        assert result.model_metrics.test_metrics, "Test-метрики не рассчитаны"
+
+        assert result.weight_path, "Путь к весам пуст"
+
+        metrics = result.model_metrics.test_metrics
+        types = tuple(m.type for m in metrics)
+        assert types == nhits_adapter.metrics
+
+        # Проверка прогнозов
+        train_predict_len = len(result.forecasts.train_predict.dates)
+        test_predict_len = len(result.forecasts.test_predict.dates)
+        future_predict_len = len(result.forecasts.forecast.dates)
+        assert train_predict_len + test_predict_len == target.shape[0]
+        assert future_predict_len == fit_params.forecast_horizon
+
+        # проверка дат в прогнозах
+        assert target.index.tolist() == result.forecasts.train_predict.dates + result.forecasts.test_predict.dates
+        assert future_index(
+            last_dt=target.index.tolist()[-1],
+            data_frequency=DataFrequency.quart,
+            periods=fit_params.forecast_horizon,
+        ).tolist() == result.forecasts.forecast.dates
+
+
+@pytest.mark.filterwarnings("ignore::UserWarning")
+@pytest.mark.parametrize(
+    "nhits_params, fit_params",
+    [
+        (
+            NhitsParams(
+                max_steps=30,
+                early_stop_patience_steps=3,
+                val_check_steps=50,
+                learning_rate=1e-3,
+                scaler_type="robust",
+            ),
+            FitParams(
+                train_boundary=datetime(2019, 6,30),
+                val_boundary=datetime(2021, 12, 31),
+                forecast_horizon=3,
+            ),
+        ),
+    ]
+)
+def test_nhits_without_test_observations(
+    nhits_params,
+    fit_params,
+    nhits_adapter,
+    ts_alignment,
+    ca,
+    labour
+):
+    aligned_df = ts_alignment.compare(
+        timeseries_list=[ca],
+        target=labour,
+    )
+
+    target = aligned_df[labour.name]
+
+    assert type(target) == pd.Series
+    assert aligned_df.columns.to_list() == [labour.name, ca.name]
+
+    exog = aligned_df.drop(columns=[labour.name])
+
+    result = nhits_adapter.fit(
+        target=target,
+        exog=exog,
+        nhits_params=nhits_params,
+        fit_params=fit_params,
+        data_frequency=labour.data_frequency,
+    )
+    assert result.forecasts.train_predict.dates, "Пустой train-прогноз"
+    assert not result.forecasts.test_predict, "test-прогноз содержит наблюдения"
+
+    assert result.model_metrics.train_metrics, "Train-метрики не рассчитаны"
+    assert not result.model_metrics.test_metrics, "Test-метрики рассчитаны, их тут быть не должно"
+
+    assert result.weight_path, "Путь к весам пуст"
+
+    # Проверка прогнозов
+    train_predict_len = len(result.forecasts.train_predict.dates)
+    future_predict_len = len(result.forecasts.forecast.dates)
+    assert train_predict_len == target.shape[0]
+    assert result.forecasts.test_predict is None
+    assert future_predict_len == fit_params.forecast_horizon
+
+    # проверка дат в прогнозах
+    assert target.index.tolist() == result.forecasts.train_predict.dates
+    assert future_index(
+        last_dt=target.index.tolist()[-1],
+        data_frequency=DataFrequency.quart,
+        periods=fit_params.forecast_horizon,
+    ).tolist() == result.forecasts.forecast.dates
+
+
+@pytest.mark.filterwarnings("ignore::UserWarning")
+@pytest.mark.parametrize(
+    "nhits_params, fit_params",
+    [
+        (
+                NhitsParams(),
+                FitParams(
+                    train_boundary=datetime(2021, 12, 31),
+                    val_boundary=datetime(2021, 12, 31),
+                    forecast_horizon=3,
+                ),
+        ),
+    ]
+)
+def test_nhits_without_val_and_test_observations(
+    nhits_params,
+    fit_params,
+    nhits_adapter,
+    ts_alignment,
+    ca,
+    labour
+):
+    aligned_df = ts_alignment.compare(
+        timeseries_list=[ca],
+        target=labour,
+    )
+
+    target = aligned_df[labour.name]
+
+    assert type(target) == pd.Series
+    assert aligned_df.columns.to_list() == [labour.name, ca.name]
+
+    exog = aligned_df.drop(columns=[labour.name])
+
+    result = nhits_adapter.fit(
+        target=target,
+        exog=exog,
+        nhits_params=nhits_params,
+        fit_params=fit_params,
+        data_frequency=labour.data_frequency,
+    )
+    assert result.forecasts.train_predict.dates, "Пустой train-прогноз"
+    assert not result.forecasts.test_predict, "test-прогноз не пустой"
+
+    assert result.model_metrics.train_metrics, "Train-метрики не рассчитаны"
+    assert not result.model_metrics.test_metrics, "Test-метрики рассчитаны, их тут быть не должно"
+
+    assert result.weight_path, "Путь к весам пуст"
+
+    # Проверка прогнозов
+    train_predict_len = len(result.forecasts.train_predict.dates)
+    future_predict_len = len(result.forecasts.forecast.dates)
+    assert train_predict_len == target.shape[0]
+    assert result.forecasts.test_predict is None
+    assert future_predict_len == fit_params.forecast_horizon
+
+    # проверка дат в прогнозах
+    assert target.index.tolist() == result.forecasts.train_predict.dates
+    assert future_index(
+        last_dt=target.index.tolist()[-1],
+        data_frequency=DataFrequency.quart,
+        periods=fit_params.forecast_horizon,
+    ).tolist() == result.forecasts.forecast.dates
