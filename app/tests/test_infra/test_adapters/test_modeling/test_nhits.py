@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 from fastapi import HTTPException
 
+from neuralforecast.auto import AutoNHITS
 from src.core.application.building_model.schemas.nhits import NhitsParams
 from src.core.domain import FitParams, DataFrequency
 from src.infrastructure.adapters.modeling.neural_forecast import future_index

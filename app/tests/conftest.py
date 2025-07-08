@@ -1,8 +1,5 @@
-from datetime import datetime
-
 import pytest
 import pandas as pd
-
 from src.core.domain import Timeseries, DataFrequency
 
 
@@ -35,6 +32,21 @@ def nhits_adapter(metrics_factory, ts_splitter):
         ts_train_test_split=ts_splitter,
     )
     return adapter
+
+@pytest.fixture
+def app():
+    from dishka.integrations.fastapi import setup_dishka
+    from main import create_fastapi_app
+    from src.api import container
+    app = create_fastapi_app()
+    setup_dishka(container, app)
+    return app
+
+
+@pytest.fixture
+def client(app):
+    from fastapi.testclient import TestClient
+    return TestClient(app)
 
 # ---------- Данные ----------
 @pytest.fixture
@@ -164,29 +176,6 @@ def ca():
     return target
 
 # Параметры для тестов
-
-@pytest.fixture
-def nhits_params_base():
-    from src.infrastructure.adapters.modeling.nhits import NhitsParams
-
-    return NhitsParams(
-        max_steps=30,
-        early_stop_patience_steps=3,
-        val_check_steps=50,
-        learning_rate=1e-3,
-        scaler_type="robust",
-    )
-
-
-@pytest.fixture
-def fit_params_base():
-    from src.core.domain import FitParams
-    return FitParams(
-        train_boundary=datetime(2016, 6, 30),
-        val_boundary=datetime(2018, 5, 31),
-        forecast_horizon=20
-    )
-
 
 @pytest.fixture
 def sample_data():
