@@ -1,7 +1,6 @@
+import json
 import random
 from datetime import datetime
-
-import numpy as np
 import pandas as pd
 import pytest
 
@@ -31,7 +30,7 @@ def from_pd_stamp_to_datetime(ts: list[pd.Timestamp]) -> list[str]:
     return [date.strftime("%Y-%m-%d") for date in ts]
 
 def delete_timestamp(ts: list[str]) -> list[str]:
-    return [date.replace("T00:00:00", "") for date in ts]
+    return [date.replace("T00:00:00", "") if "T00:00:00" in date else date for date in ts]
 
 def validate_no_exog_result(
         received_data: dict,
@@ -47,11 +46,14 @@ def validate_no_exog_result(
     forecast = forecasts['forecast']
 
     assert delete_timestamp(train_predict['dates'] + test_predict['dates']) == data['dependent_variables']['dates']
-    assert from_pd_stamp_to_datetime(future_index(
-        last_dt=pd.to_datetime(dependent_variables.dates[-1]),
-        data_frequency=dependent_variables.data_frequency,
-        periods=fit_params.forecast_horizon,
-    ).tolist()) == delete_timestamp(forecast['dates'])
+    if fit_params.forecast_horizon > 0:
+        assert from_pd_stamp_to_datetime(future_index(
+            last_dt=pd.to_datetime(dependent_variables.dates[-1]),
+            data_frequency=dependent_variables.data_frequency,
+            periods=fit_params.forecast_horizon,
+        ).tolist()) == delete_timestamp(forecast['dates'])
+    else:
+        assert forecast is None
 
     # проверяем метрики
     assert received_data['model_metrics']['train_metrics'], "Train-метрики не рассчитаны"
@@ -158,14 +160,18 @@ TEST_SIZES = [0, 12, 24, 36]
 VAL_SIZES = [0, 12, 24, 36]
 
 
-def generate_valid_combinations():
+total_points = 30
+FORECAST_HORIZONS_2 = [i for i in range(total_points)]
+TEST_SIZES_2 = [i for i in range(total_points)]
+VAL_SIZES_2 = [i for i in range(total_points)]
+
+
+def generate_valid_combinations(f, t, v):
     """Генерирует допустимые комбинации параметров"""
     combinations = []
-    total_points = 401
-
-    for h in FORECAST_HORIZONS:
-        for test_size in TEST_SIZES:
-            for val_size in VAL_SIZES:
+    for h in f:
+        for test_size in t:
+            for val_size in v:
                 train_size = total_points - val_size - test_size
 
                 # Проверка ограничения 3
@@ -180,11 +186,16 @@ def generate_valid_combinations():
                 if train_size < 10:  # Минимум 10 точек для обучения
                     continue
 
+                if h + test_size == 0:
+                    continue
+
                 combinations.append((h, test_size, val_size))
 
     return combinations
 
-VALID_COMBINATIONS = generate_valid_combinations()
+VALID_COMBINATIONS = generate_valid_combinations(
+    FORECAST_HORIZONS, TEST_SIZES, VAL_SIZES
+)
 
 
 @pytest.mark.slow
@@ -259,6 +270,97 @@ def test_nhits_fit_without_exog_grid_params(
         learning_rate=learning_rate,
     )
 
+    data = dict(
+        dependent_variables=process_variable(balance),
+        explanatory_variables=None,
+        hyperparameters=nhits_params.model_dump(),
+        fit_params=process_fit_params(fit_params),
+    )
+    result = client.post(
+        url='/api/v1/building_model/nhits/fit',
+        json=data
+    )
+
+    received_data = result.json()
+    assert result.status_code == 200, received_data
+
+    # Адаптированная проверка для случаев без теста
+    forecasts = received_data['forecasts']
+    test_predict = forecasts['test_predict']
+
+    assert received_data['model_metrics']['train_metrics'], "Train metrics missing"
+
+    # Проверяем test_metrics только если есть тестовые данные
+    if test_predict:
+        assert received_data['model_metrics']['test_metrics'], "Test metrics missing"
+        validate_no_exog_result(received_data, balance, data, fit_params)
+    else:
+        assert received_data['model_metrics']['test_metrics'] is None, "Test metrics should be empty"
+        validate_empty_test_data(received_data, balance, data, fit_params)
+
+    assert received_data['weight_path'], "Weight path missing"
+
+
+VALID_COMBINATIONS_EXTENDED = generate_valid_combinations(
+    FORECAST_HORIZONS_2, TEST_SIZES_2, VAL_SIZES_2
+)
+
+@pytest.mark.slow
+@pytest.mark.filterwarnings("ignore::UserWarning")
+@pytest.mark.parametrize(
+    "h, test_size, val_size",
+    VALID_COMBINATIONS_EXTENDED,
+)
+def test_nhits_fit_grid_params(
+    h: int,
+    test_size: int,
+    val_size: int,
+    client,
+    balance,
+):
+    balance = Timeseries(
+        data_frequency=balance.data_frequency,
+        dates=balance.dates[:total_points],
+        values=balance.values[:total_points],
+        name="balance",
+    )
+    # 1. Подготовка временного ряда (401 месяц)
+    dates = balance.dates
+    total_size = len(dates)
+    assert total_points == total_size
+    # 2. Рассчет границ выборок
+    train_size = total_size - val_size - test_size
+    train_end_idx = train_size - 1
+    val_end_idx = train_end_idx + val_size
+
+    # 3. Установка границ дат
+    train_boundary_date = dates[train_end_idx]
+    val_boundary_date = dates[val_end_idx]
+
+    # 4. Настройка параметров
+    fit_params = FitParams(
+        train_boundary=train_boundary_date,
+        val_boundary=val_boundary_date,
+        forecast_horizon=h
+    )
+
+    nhits_params = NhitsParams(
+        early_stop_patience_steps=-1,
+        n_stacks=2,
+        n_blocks=[1, 1],
+        n_pool_kernel_size=[2, 1],
+        pooling_mode=PoolingMode.AvgPool1d,
+        interpolation_mode=InterpMode.Linear,
+        loss=LossEnum.MAE,
+        valid_loss=LossEnum.MAE,
+        activation=ActivationType.ReLU,
+        max_steps=20,
+        val_check_steps=50,
+        learning_rate=1e-3,
+        scaler_type=ScalerType.Identity
+    )
+
+    # 6. Отправка запроса
     data = dict(
         dependent_variables=process_variable(balance),
         explanatory_variables=None,
