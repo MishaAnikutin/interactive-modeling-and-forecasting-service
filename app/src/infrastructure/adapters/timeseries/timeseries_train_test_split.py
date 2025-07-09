@@ -32,7 +32,6 @@ class TimeseriesTrainTestSplit:
     ) -> Tuple[pd.Series, pd.Series, pd.Series]:
         """Разбивает Series без перекрытия границ."""
         # преобразуем в datetime
-        assert type(ts) == pd.Series
         idx = pd.to_datetime(ts.index)
 
         # Удалим временную зону
