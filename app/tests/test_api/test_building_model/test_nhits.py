@@ -1,11 +1,13 @@
 from datetime import datetime
-
+import pandas as pd
 import pytest
 
-from src.core.application.building_model.schemas.nhits import NhitsParams
+from src.core.application.building_model.schemas.nhits import NhitsParams, PoolingMode, InterpMode, LossEnum, \
+    ActivationType, ScalerType
 from src.core.domain import FitParams, Timeseries
-from tests.common.nhits import base_nhits
-from tests.conftest import client
+from src.infrastructure.adapters.modeling.neural_forecast import future_index
+from tests.conftest import client, balance_ts, ca_ts, u_total_ts, balance
+
 
 def process_fit_params(fit_params: FitParams) -> dict:
     return {
@@ -14,7 +16,7 @@ def process_fit_params(fit_params: FitParams) -> dict:
         "train_boundary": fit_params.train_boundary.strftime("%Y-%m-%d"),
     }
 
-def process_valiable(ts: Timeseries) -> dict:
+def process_variable(ts: Timeseries) -> dict:
     return {
         "name": ts.name,
         "values": ts.values,
@@ -22,36 +24,87 @@ def process_valiable(ts: Timeseries) -> dict:
         "data_frequency": ts.data_frequency,
     }
 
+def from_pd_stamp_to_datetime(ts: list[pd.Timestamp]) -> list[str]:
+    return [date.strftime("%Y-%m-%d") for date in ts]
+
+def delete_timestamp(ts: list[str]) -> list[str]:
+    return [date.replace("T00:00:00", "") for date in ts]
+
+def validate_no_exog_result(
+        received_data: dict,
+        dependent_variables,
+        data,
+        fit_params,
+):
+    # проверяем прогнозы
+    forecasts = received_data['forecasts']
+
+    train_predict = forecasts['train_predict']
+    test_predict = forecasts['test_predict']
+    forecast = forecasts['forecast']
+
+    assert delete_timestamp(train_predict['dates'] + test_predict['dates']) == data['dependent_variables']['dates']
+    assert from_pd_stamp_to_datetime(future_index(
+        last_dt=pd.to_datetime(dependent_variables.dates[-1]),
+        data_frequency=dependent_variables.data_frequency,
+        periods=fit_params.forecast_horizon,
+    ).tolist()) == delete_timestamp(forecast['dates'])
+
+    # проверяем метрики
+    assert received_data['model_metrics']['train_metrics'], "Train-метрики не рассчитаны"
+    assert received_data['model_metrics']['test_metrics'], "Test-метрики не рассчитаны"
+
+    assert received_data['weight_path'], "Путь к весам пуст"
+
+    metrics = received_data['model_metrics']['test_metrics']
+    types = tuple(m['type'] for m in metrics)
+    assert types == ("RMSE", "MAPE", "R2")
+
 
 @pytest.mark.parametrize(
     "nhits_params, fit_params, dependent_variables",
     [
-        (
-            base_nhits,
+        ( # самый базовый кейс с дефолтными значениями параметров
+            NhitsParams(),
             FitParams(),
             Timeseries()
         ),
-        (
-            NhitsParams(
-                max_steps=500,
-                early_stop_patience_steps=50,
-                val_check_steps=200,
-                learning_rate=5e-4,
-                scaler_type="robust",
+        ( # месячные данные
+            NhitsParams(),
+            FitParams(
+                train_boundary=datetime(2020, 12, 31),
+                val_boundary=datetime(2024, 1,31)
             ),
-            FitParams(),
-            Timeseries()
+            balance_ts()
         ),
+        ( # квартальные данные
+            NhitsParams(),
+            FitParams(
+                train_boundary=datetime(2019, 6, 30),
+                val_boundary=datetime(2021, 6, 30),
+                forecast_horizon=3,
+            ),
+            ca_ts()
+        ),
+        ( # годовые данные
+            NhitsParams(),
+            FitParams(
+                train_boundary=datetime(2012, 12, 31),
+                val_boundary=datetime(2021, 12, 31),
+                forecast_horizon=3,
+            ),
+            u_total_ts()
+        )
     ]
 )
-def test_nhits_fit_without_exog_month_frequency(
+def test_nhits_fit_without_exog(
     nhits_params,
     fit_params,
     dependent_variables,
     client
 ):
     data = dict(
-        dependent_variables=process_valiable(dependent_variables),
+        dependent_variables=process_variable(dependent_variables),
         explanatory_variables=None,
         hyperparameters=nhits_params.model_dump(),
         fit_params=process_fit_params(fit_params),
@@ -60,4 +113,89 @@ def test_nhits_fit_without_exog_month_frequency(
         url='/api/v1/building_model/nhits/fit',
         json=data
     )
-    assert result.status_code == 200
+
+    received_data = result.json()
+    assert result.status_code == 200, received_data
+
+    validate_no_exog_result(received_data, dependent_variables, data, fit_params)
+
+
+@pytest.mark.slow
+@pytest.mark.filterwarnings("ignore::UserWarning")
+@pytest.mark.parametrize('n_stacks', [1, 2, 3])
+@pytest.mark.parametrize('activation', [ActivationType.ReLU, ActivationType.Tanh, ActivationType.Sigmoid])
+@pytest.mark.parametrize('scaler_type', [ScalerType.Standard, ScalerType.Robust, ScalerType.Identity])
+@pytest.mark.parametrize('early_stop_patience_steps', [30])
+@pytest.mark.parametrize('pooling_mode', [PoolingMode.AvgPool1d])
+@pytest.mark.parametrize('interpolation_mode', [InterpMode.Linear,])
+@pytest.mark.parametrize('loss', [LossEnum.MAE])
+@pytest.mark.parametrize('valid_loss', [LossEnum.MSE])
+@pytest.mark.parametrize("learning_rate", [1e-4,])
+def test_nhits_fit_without_exog_grid_params(
+        n_stacks: int,
+        activation: ActivationType,
+        scaler_type: ScalerType,
+        early_stop_patience_steps,
+        pooling_mode,
+        interpolation_mode,
+        loss,
+        valid_loss,
+        learning_rate,
+        client,
+        balance,
+):
+    # Фиксируем параметры, влияющие на размер выборок
+    fit_params = FitParams(
+        train_boundary=datetime(2019, 12, 31),
+        val_boundary=datetime(2023, 12, 31),
+        forecast_horizon=6,
+    )
+
+    # Автоподбор параметров под размеры выборок
+    n_blocks = [1] * n_stacks
+    n_pool_kernel_size = [2] * n_stacks
+
+    nhits_params = NhitsParams(
+        n_stacks=n_stacks,
+        n_blocks=n_blocks,
+        n_pool_kernel_size=n_pool_kernel_size,
+        activation=activation,
+        scaler_type=scaler_type,
+        early_stop_patience_steps=early_stop_patience_steps,
+        pooling_mode=pooling_mode,
+        interpolation_mode=interpolation_mode,
+        loss=loss,
+        valid_loss=valid_loss,
+        # Фиксируем остальные параметры
+        max_steps=100,
+        val_check_steps=50,
+        learning_rate=learning_rate,
+    )
+
+    data = dict(
+        dependent_variables=process_variable(balance),
+        explanatory_variables=None,
+        hyperparameters=nhits_params.model_dump(),
+        fit_params=process_fit_params(fit_params),
+    )
+    result = client.post(
+        url='/api/v1/building_model/nhits/fit',
+        json=data
+    )
+
+    received_data = result.json()
+    assert result.status_code == 200, received_data
+
+    # Адаптированная проверка для случаев без теста
+    forecasts = received_data['forecasts']
+    test_predict = forecasts['test_predict']
+
+    assert received_data['model_metrics']['train_metrics'], "Train metrics missing"
+
+    # Проверяем test_metrics только если есть тестовые данные
+    if test_predict['dates']:
+        assert received_data['model_metrics']['test_metrics'], "Test metrics missing"
+    else:
+        assert received_data['model_metrics']['test_metrics'] == [], "Test metrics should be empty"
+
+    assert received_data['weight_path'], "Weight path missing"

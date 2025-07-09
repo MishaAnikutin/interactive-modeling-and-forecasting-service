@@ -78,6 +78,9 @@ def ipp_eu_ts():
 
 @pytest.fixture
 def u_total():
+    return u_total_ts()
+
+def u_total_ts():
     df = pd.read_csv(
         "/Users/oleg/projects/interactive-modeling-and-forecasting-service/app/tests/data/year/u_total.csv",
         sep=";"
@@ -127,8 +130,7 @@ def u_men():
     return target
 
 
-@pytest.fixture
-def balance():
+def balance_ts():
     df = pd.read_csv(
         "/Users/oleg/projects/interactive-modeling-and-forecasting-service/app/tests/data/month/balance.csv",
         sep=";"
@@ -142,6 +144,10 @@ def balance():
     )
     assert len(target.values) == len(target.dates)
     return target
+
+@pytest.fixture
+def balance():
+    return balance_ts()
 
 @pytest.fixture
 def labour():
@@ -159,8 +165,7 @@ def labour():
     assert len(target.values) == len(target.dates)
     return target
 
-@pytest.fixture
-def ca():
+def ca_ts():
     df = pd.read_csv(
         "/Users/oleg/projects/interactive-modeling-and-forecasting-service/app/tests/data/quarter/ca.csv",
         sep=";"
@@ -174,6 +179,10 @@ def ca():
     )
     assert len(target.values) == len(target.dates)
     return target
+
+@pytest.fixture
+def ca():
+    return ca_ts()
 
 # Параметры для тестов
 
