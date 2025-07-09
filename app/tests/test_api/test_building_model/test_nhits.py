@@ -1,3 +1,4 @@
+import random
 from datetime import datetime
 import pandas as pd
 import pytest
@@ -125,7 +126,7 @@ def test_nhits_fit_without_exog(
 @pytest.mark.parametrize('n_stacks', [1, 2, 3])
 @pytest.mark.parametrize('activation', [ActivationType.ReLU, ActivationType.Tanh, ActivationType.Sigmoid])
 @pytest.mark.parametrize('scaler_type', [ScalerType.Standard, ScalerType.Robust, ScalerType.Identity])
-@pytest.mark.parametrize('early_stop_patience_steps', [30])
+@pytest.mark.parametrize('early_stop_patience_steps', [random.randint(-1, 5000)])
 @pytest.mark.parametrize('pooling_mode', [PoolingMode.AvgPool1d])
 @pytest.mark.parametrize('interpolation_mode', [InterpMode.Linear,])
 @pytest.mark.parametrize('loss', [LossEnum.MAE])
@@ -168,7 +169,7 @@ def test_nhits_fit_without_exog_grid_params(
         valid_loss=valid_loss,
         # Фиксируем остальные параметры
         max_steps=100,
-        val_check_steps=50,
+        val_check_steps=random.randint(0, 1000),
         learning_rate=learning_rate,
     )
 
