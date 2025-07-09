@@ -44,7 +44,16 @@ class MASE(MetricServiceI):
 
 @MetricsFactory.register()
 class R2(MetricServiceI):
-    strategy = r2_score
+    def apply(self, y_pred, y_true,):
+        if len(y_pred) < 2:
+            return Metric(
+                value=None,
+                type="R2"
+            )
+        return Metric(
+            value=r2_score(y_pred=y_pred, y_true=y_true),
+            type="R2"
+        )
 
 
 @MetricsFactory.register()
