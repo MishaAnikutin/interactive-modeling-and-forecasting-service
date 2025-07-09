@@ -83,6 +83,12 @@ class NhitsAdapter(NeuralForecastInterface):
 
         h = fit_params.forecast_horizon + test_size
 
+        if h == 0:
+            raise HTTPException(
+                detail="Горизонт прогноза + размер тестовой выборки должен быть больше 0",
+                status_code=400,
+            )
+
         if val_size != 0 and val_size < h:
             raise HTTPException(
                 detail="Размер валидационной выборки должен быть 0 "
