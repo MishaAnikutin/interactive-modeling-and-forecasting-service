@@ -41,7 +41,6 @@ def process_variable(ts: Timeseries) -> dict:
     }
 
 @pytest.mark.slow
-@pytest.mark.slow
 @pytest.mark.filterwarnings("ignore::UserWarning")
 @pytest.mark.parametrize('autolag', [AutoLagEnum.AIC, AutoLagEnum.BIC, AutoLagEnum.t_stat, None])
 @pytest.mark.parametrize(
@@ -59,10 +58,70 @@ def test_adf_base(
         url='/api/v1/stationary_testing/dickey_fuller',
         json={
             "ts": ts,
-            "max_lags": 0,
-            "autolag": "AIC",
-            "regression": "c"
+            "max_lags": max_lags,
+            "autolag": autolag,
+            "regression": regression
         }
     )
     data = result.json()
     assert result.status_code == 200, data
+
+
+reduced_target = Timeseries(
+    name="reduced_target",
+    values=target.values[:10],
+    dates=target.dates[:10],
+    data_frequency=target.data_frequency,
+)
+
+
+@pytest.mark.slow
+@pytest.mark.filterwarnings("ignore::UserWarning")
+@pytest.mark.parametrize('autolag', [AutoLagEnum.AIC, AutoLagEnum.BIC, AutoLagEnum.t_stat, None])
+@pytest.mark.parametrize(
+    "max_lags, regression",
+    get_valid_combinations(len(reduced_target.dates)),
+)
+def test_adf_short(
+        autolag,
+        max_lags,
+        regression,
+        client,
+):
+    ts = process_variable(reduced_target)
+    result = client.post(
+        url='/api/v1/stationary_testing/dickey_fuller',
+        json={
+            "ts": ts,
+            "max_lags": max_lags,
+            "autolag": autolag,
+            "regression": regression
+        }
+    )
+    data = result.json()
+    assert result.status_code == 200, data
+
+
+empty_target = Timeseries(
+    name='empty',
+    values=[],
+    dates=[],
+    data_frequency='ME'
+)
+
+@pytest.mark.slow
+@pytest.mark.filterwarnings("ignore::UserWarning")
+def test_adf_empty_ts(client):
+    ts = process_variable(empty_target)
+    result = client.post(
+        url='/api/v1/stationary_testing/dickey_fuller',
+        json={
+            "ts": ts,
+            "max_lags": None,
+            "autolag": None,
+            "regression": 'c'
+        }
+    )
+    data = result.json()
+    assert result.status_code == 422, data
+    
