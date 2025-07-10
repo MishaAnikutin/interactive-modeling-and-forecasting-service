@@ -3,7 +3,9 @@ from dishka import FromDishka
 from dishka.integrations.fastapi import inject_sync
 
 from src.core.application.preliminary_diagnosis.schemas.dickey_fuller import DickeyFullerParams, DickeyFullerResult
+from src.core.application.preliminary_diagnosis.schemas.kpss import KpssResult, KpssParams
 from src.core.application.preliminary_diagnosis.use_cases.dicker_fuller import DickeuFullerUC
+from src.core.application.preliminary_diagnosis.use_cases.kpss import KpssUC
 
 stationary_testing_router = APIRouter(prefix="/stationary_testing", tags=["Анализ ряда на стационарность"])
 
@@ -15,4 +17,12 @@ def dickey_fuller(
 ) -> DickeyFullerResult:
     return dickey_fuller_uc.execute(request=request)
 
+
+@stationary_testing_router.post("/kpss")
+@inject_sync
+def kpss(
+    request: KpssParams,
+    kpss_uc: FromDishka[KpssUC]
+) -> KpssResult:
+    return kpss_uc.execute(request=request)
 

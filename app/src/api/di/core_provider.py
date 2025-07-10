@@ -4,6 +4,7 @@ from src.core.application.building_model.use_cases.fit_arimax import FitArimaxUC
 from src.core.application.building_model.use_cases.fit_nhits import FitNhitsUC
 from src.core.application.building_model.use_cases.params import ArimaxParamsUC, NhitsParamsUC
 from src.core.application.preliminary_diagnosis.use_cases.dicker_fuller import DickeuFullerUC
+from src.core.application.preliminary_diagnosis.use_cases.kpss import KpssUC
 
 
 class CoreProvider(Provider):
@@ -19,4 +20,5 @@ class CoreProvider(Provider):
 
     # тесты на стационарность
     dickey_fuller_command = provide(DickeuFullerUC, provides=DickeuFullerUC)
+    kpss_command = provide(KpssUC, provides=KpssUC)
 

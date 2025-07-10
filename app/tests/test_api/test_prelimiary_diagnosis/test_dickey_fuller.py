@@ -15,7 +15,7 @@ regression_possible = [
 ]
 
 def get_valid_combinations(total_size: int):
-    max_lags_possible = [None, 1] + list(range(2, total_size))
+    max_lags_possible = [None, 1] + list(range(2, total_size + 10))
     result = []
     for regression in regression_possible:
         ntrend = len(regression) if regression != "n" else 0
@@ -124,4 +124,3 @@ def test_adf_empty_ts(client):
     )
     data = result.json()
     assert result.status_code == 422, data
-    
