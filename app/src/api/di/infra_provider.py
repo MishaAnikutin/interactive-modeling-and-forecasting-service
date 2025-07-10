@@ -4,7 +4,6 @@ from src.infrastructure.adapters.metrics import MetricsFactory
 from src.infrastructure.adapters.model_storage import IModelStorage, MockModelStorage
 from src.infrastructure.adapters.modeling import ArimaxAdapter
 from src.infrastructure.adapters.modeling.nhits import NhitsAdapter
-from src.infrastructure.adapters.stationarity_testing.factory import StationarityTestsFactory
 from src.infrastructure.adapters.timeseries import (
     PandasTimeseriesAdapter,
     TimeseriesAlignment,
@@ -29,5 +28,3 @@ class InfraProvider(Provider):
     model_storage = provide(MockModelStorage, provides=IModelStorage)
 
     metrics_factory = provide(MetricsFactory, provides=MetricsFactory)
-
-    stationarity_tests_factory = provide(StationarityTestsFactory, provides=StationarityTestsFactory)
