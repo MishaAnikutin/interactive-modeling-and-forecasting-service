@@ -1,5 +1,6 @@
 from statsmodels.tsa.stattools import adfuller
 
+from src.core.application.preliminary_diagnosis.schemas.common import CriticalValues
 from src.core.application.preliminary_diagnosis.schemas.dickey_fuller import DickeyFullerParams, DickeyFullerResult
 from src.infrastructure.adapters.timeseries import PandasTimeseriesAdapter
 
@@ -32,6 +33,10 @@ class DickeuFullerUC:
             p_value=pvalue,
             usedlag=usedlag,
             nobs=nobs,
-            critical_values=critvalues,
+            critical_values=CriticalValues(
+                percent_1=critvalues['1%'],
+                percent_5=critvalues['5%'],
+                percent_10=critvalues['10%'],
+            ),
             information_criterion_max_value=icbest
         )

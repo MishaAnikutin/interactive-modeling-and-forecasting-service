@@ -32,7 +32,7 @@ class DickeyFullerParams(StatTestParams):
 
     @model_validator(mode='after')
     def validate_ts(self):
-        if self.ts.max() == self.ts.min():
+        if max(self.ts.dates) == min(self.ts.dates):
             raise ValueError("Invalid input, ts is constant")
         return self
 

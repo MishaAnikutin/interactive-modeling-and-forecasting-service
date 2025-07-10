@@ -7,7 +7,7 @@ from src.core.application.preliminary_diagnosis.use_cases.dicker_fuller import D
 
 stationary_testing_router = APIRouter(prefix="/stationary_testing", tags=["Анализ ряда на стационарность"])
 
-@stationary_testing_router.get("/dickey_fuller")
+@stationary_testing_router.post("/dickey_fuller")
 @inject_sync
 def dickey_fuller(
     request: DickeyFullerParams,
