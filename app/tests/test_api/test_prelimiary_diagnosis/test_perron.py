@@ -1,6 +1,5 @@
 import pytest
 
-from src.core.application.preliminary_diagnosis.schemas.kpss import RegressionEnum
 from src.core.application.preliminary_diagnosis.schemas.phillips_perron import TestType, TrendEnum
 from src.core.domain import Timeseries
 from tests.conftest import client, balance_ts
@@ -27,7 +26,7 @@ def process_variable(ts: Timeseries) -> dict:
 @pytest.mark.parametrize('trend', [TrendEnum.ConstantAndTrend, TrendEnum.ConstantOnly, TrendEnum.NoConstantNoTrend])
 @pytest.mark.parametrize('test_type', [TestType.tau, TestType.rho])
 @pytest.mark.parametrize("lags", [None, 1] + [i for i in range(2, len(reduced_target.values) + 10)])
-def test_kpss_short(
+def test_perron_short(
         trend,
         test_type,
         lags,
@@ -55,7 +54,7 @@ def test_kpss_short(
 @pytest.mark.parametrize('trend', [TrendEnum.ConstantAndTrend, TrendEnum.ConstantOnly, TrendEnum.NoConstantNoTrend])
 @pytest.mark.parametrize('test_type', [TestType.tau, TestType.rho])
 @pytest.mark.parametrize("lags", [None, 1] + [i for i in range(2, len(target.values) + 10)])
-def test_kpss_long(
+def test_perron_long(
         trend,
         test_type,
         lags,

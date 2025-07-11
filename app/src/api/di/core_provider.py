@@ -3,6 +3,7 @@ from dishka import Provider, Scope, provide
 from src.core.application.building_model.use_cases.fit_arimax import FitArimaxUC
 from src.core.application.building_model.use_cases.fit_nhits import FitNhitsUC
 from src.core.application.building_model.use_cases.params import ArimaxParamsUC, NhitsParamsUC
+from src.core.application.preliminary_diagnosis.use_cases.df_gls import DfGlsUC
 from src.core.application.preliminary_diagnosis.use_cases.dicker_fuller import DickeuFullerUC
 from src.core.application.preliminary_diagnosis.use_cases.kpss import KpssUC
 from src.core.application.preliminary_diagnosis.use_cases.phillips_perron import PhillipsPerronUC
@@ -23,4 +24,5 @@ class CoreProvider(Provider):
     dickey_fuller_command = provide(DickeuFullerUC, provides=DickeuFullerUC)
     kpss_command = provide(KpssUC, provides=KpssUC)
     phillips_perron_command = provide(PhillipsPerronUC, provides=PhillipsPerronUC)
+    df_gls_command = provide(DfGlsUC, provides=DfGlsUC)
 
