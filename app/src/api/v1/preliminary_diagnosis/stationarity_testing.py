@@ -7,11 +7,13 @@ from src.core.application.preliminary_diagnosis.schemas.dickey_fuller import Dic
 from src.core.application.preliminary_diagnosis.schemas.kpss import KpssResult, KpssParams
 from src.core.application.preliminary_diagnosis.schemas.phillips_perron import PhillipsPerronParams, \
     PhillipsPerronResult
+from src.core.application.preliminary_diagnosis.schemas.range_scheme import RangeUnitRootResult, RangeUnitRootParams
 from src.core.application.preliminary_diagnosis.schemas.zivot_andrews import ZivotAndrewsParams, ZivotAndrewsResult
 from src.core.application.preliminary_diagnosis.use_cases.df_gls import DfGlsUC
 from src.core.application.preliminary_diagnosis.use_cases.dicker_fuller import DickeuFullerUC
 from src.core.application.preliminary_diagnosis.use_cases.kpss import KpssUC
 from src.core.application.preliminary_diagnosis.use_cases.phillips_perron import PhillipsPerronUC
+from src.core.application.preliminary_diagnosis.use_cases.range_uc import RangeUnitRootUC
 from src.core.application.preliminary_diagnosis.use_cases.zivot_andrews import ZivotAndrewsUC
 from src.infrastructure.adapters.timeseries import PandasTimeseriesAdapter
 
@@ -60,4 +62,10 @@ def zivot_andrews(
 ) -> ZivotAndrewsResult:
     return zivot_andrews_uc.execute(request=request)
 
-
+@stationary_testing_router.post("/range_unit_root")
+@inject_sync
+def range_unit_root(
+    request: RangeUnitRootParams,
+    range_unit_root_uc: FromDishka[RangeUnitRootUC]
+) -> RangeUnitRootResult:
+    return range_unit_root_uc.execute(request=request)

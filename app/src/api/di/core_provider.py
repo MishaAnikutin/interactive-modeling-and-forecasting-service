@@ -7,6 +7,7 @@ from src.core.application.preliminary_diagnosis.use_cases.df_gls import DfGlsUC
 from src.core.application.preliminary_diagnosis.use_cases.dicker_fuller import DickeuFullerUC
 from src.core.application.preliminary_diagnosis.use_cases.kpss import KpssUC
 from src.core.application.preliminary_diagnosis.use_cases.phillips_perron import PhillipsPerronUC
+from src.core.application.preliminary_diagnosis.use_cases.range_uc import RangeUnitRootUC
 from src.core.application.preliminary_diagnosis.use_cases.zivot_andrews import ZivotAndrewsUC
 
 
@@ -27,4 +28,5 @@ class CoreProvider(Provider):
     phillips_perron_command = provide(PhillipsPerronUC, provides=PhillipsPerronUC)
     df_gls_command = provide(DfGlsUC, provides=DfGlsUC)
     zivot_andrews_command = provide(ZivotAndrewsUC, provides=ZivotAndrewsUC)
+    range_unit_root_command = provide(RangeUnitRootUC, provides=RangeUnitRootUC)
 
