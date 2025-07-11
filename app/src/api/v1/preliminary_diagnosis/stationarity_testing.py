@@ -7,10 +7,12 @@ from src.core.application.preliminary_diagnosis.schemas.dickey_fuller import Dic
 from src.core.application.preliminary_diagnosis.schemas.kpss import KpssResult, KpssParams
 from src.core.application.preliminary_diagnosis.schemas.phillips_perron import PhillipsPerronParams, \
     PhillipsPerronResult
+from src.core.application.preliminary_diagnosis.schemas.zivot_andrews import ZivotAndrewsParams, ZivotAndrewsResult
 from src.core.application.preliminary_diagnosis.use_cases.df_gls import DfGlsUC
 from src.core.application.preliminary_diagnosis.use_cases.dicker_fuller import DickeuFullerUC
 from src.core.application.preliminary_diagnosis.use_cases.kpss import KpssUC
 from src.core.application.preliminary_diagnosis.use_cases.phillips_perron import PhillipsPerronUC
+from src.core.application.preliminary_diagnosis.use_cases.zivot_andrews import ZivotAndrewsUC
 from src.infrastructure.adapters.timeseries import PandasTimeseriesAdapter
 
 stationary_testing_router = APIRouter(prefix="/stationary_testing", tags=["Анализ ряда на стационарность"])
@@ -48,4 +50,14 @@ def df_gls(
     df_gls_uc: FromDishka[DfGlsUC]
 ) -> DfGlsResult:
     return df_gls_uc.execute(request=request)
+
+
+@stationary_testing_router.post("/zivot_andrews")
+@inject_sync
+def zivot_andrews(
+    request: ZivotAndrewsParams,
+    zivot_andrews_uc: FromDishka[ZivotAndrewsUC]
+) -> ZivotAndrewsResult:
+    return zivot_andrews_uc.execute(request=request)
+
 
