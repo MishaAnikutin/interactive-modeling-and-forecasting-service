@@ -25,6 +25,6 @@ class PandasTimeseriesAdapter:
     def from_series(series: pd.Series) -> Timeseries:
         return Timeseries(
             name=series.name,
-            dates=series.index.to_list(),
-            values=series.values.to_list()
+            dates=series.index.tolist(),
+            values=series.values.tolist()
         )
