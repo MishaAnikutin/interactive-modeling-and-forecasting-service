@@ -33,6 +33,17 @@ def nhits_adapter(metrics_factory, ts_splitter):
     )
     return adapter
 
+
+@pytest.fixture
+def ts_adapter():
+    from src.infrastructure.adapters.timeseries import PandasTimeseriesAdapter
+    return PandasTimeseriesAdapter
+
+@pytest.fixture
+def preprocess_factory():
+    from src.infrastructure.adapters.preprocessing.preprocess_factory import PreprocessFactory
+    return PreprocessFactory
+
 @pytest.fixture
 def app():
     from dishka.integrations.fastapi import setup_dishka
