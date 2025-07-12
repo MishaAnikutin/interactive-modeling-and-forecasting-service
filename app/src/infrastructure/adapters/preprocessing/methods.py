@@ -64,11 +64,6 @@ class ExpSmooth(PreprocessingServiceI):
 class BoxCox(PreprocessingServiceI):
     def apply(self, ts: pd.Series, transformation: BoxCoxTransformation) -> pd.Series:
         safe_ts = ts.copy()
-        if (safe_ts <= 0).any():
-            raise HTTPException(
-                status_code=400,
-                detail="Все элементы ряда должны быть положительные для выполнения преобразования Бокса-Кокса"
-            )
         transformed = boxcox(safe_ts, lmbda=transformation.param)
         return pd.Series(transformed, index=ts.index, name=ts.name)
 

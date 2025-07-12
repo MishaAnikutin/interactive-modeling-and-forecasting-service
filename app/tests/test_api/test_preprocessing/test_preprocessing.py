@@ -3,6 +3,8 @@ from typing import List, Dict, Any
 import numpy as np
 import pandas as pd
 import pytest
+from scipy.stats import boxcox
+
 from src.core.application.preprocessing.preprocess_scheme import (
     DiffTransformation,
     LagTransformation,
@@ -86,6 +88,13 @@ def test_preprocessing_empty(client):
     assert data['data_frequency'] == ts.data_frequency
     assert delete_timestamp(data['dates']) == [str(date) for date in ts.dates]
 
+def normalize(ts: pd.Series) -> pd.Series:
+    return (ts - ts.mean()) / ts.std(ddof=0)
+
+def my_boxcox(ts: pd.Series, lmbda: float) -> pd.Series:
+    safe_ts = ts.copy()
+    transformed = boxcox(safe_ts, lmbda=lmbda)
+    return pd.Series(transformed, index=ts.index, name=ts.name)
 
 @pytest.mark.parametrize(
     "transformations_list, expected",
@@ -103,6 +112,38 @@ def test_preprocessing_empty(client):
             ],
             target.diff(1).shift(2)
         ),
+        (
+            [
+                DiffTransformation(diff_order=3),
+                LagTransformation(lag_order=2),
+                DiffTransformation(diff_order=1),
+            ],
+            target.diff(3).shift(2).diff(1)
+        ),
+        (
+            [
+                DiffTransformation(diff_order=3),
+                LagTransformation(lag_order=2),
+                LogTransformation(),
+                PowTransformation(pow_order=2),
+                NormalizeTransformation(method="standard"),
+                ExpSmoothTransformation(span=3),
+                MovingAverageTransformation(window=4),
+                FillMissingTransformation(method="last"),
+                BoxCoxTransformation(param=0.5),
+            ],
+            my_boxcox(
+                normalize(
+                    (np.log(target.diff(3).shift(2)) ** 2)
+                ).ewm(
+                    span=3
+                ).mean().rolling(
+                    window=4,
+                    min_periods=1
+                ).mean().ffill(),
+                0.5
+            )
+        )
     ]
 )
 def test_preprocessing_base(
