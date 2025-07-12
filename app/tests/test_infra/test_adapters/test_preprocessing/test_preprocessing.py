@@ -50,10 +50,10 @@ def test_log(sample_series):
 
 
 def test_pow(sample_series):
-    res = PreprocessFactory.apply(sample_series, PowTransformation(pow_oder=2))
+    res = PreprocessFactory.apply(sample_series, PowTransformation(pow_order=2))
     pd.testing.assert_series_equal(res, sample_series ** 2)
 
-    res = PreprocessFactory.apply(sample_series, PowTransformation(pow_oder=2.5))
+    res = PreprocessFactory.apply(sample_series, PowTransformation(pow_order=2.5))
     pd.testing.assert_series_equal(res, sample_series ** 2.5)
 
 

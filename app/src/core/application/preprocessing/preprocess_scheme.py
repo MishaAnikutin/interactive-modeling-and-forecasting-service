@@ -23,7 +23,7 @@ class LogTransformation(Transformation):
 # 4. Потенцирование
 class PowTransformation(Transformation):
     type: Literal["pow"] = "pow"
-    pow_oder: float = Field(..., gt=0)
+    pow_order: float = Field(..., gt=0)
 
 # 5. Нормализация
 class NormalizeTransformation(Transformation):

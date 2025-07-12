@@ -40,7 +40,7 @@ class Log(PreprocessingServiceI):
 @PreprocessFactory.register(transform_type="pow")
 class Pow(PreprocessingServiceI):
     def apply(self, ts: pd.Series, transformation: PowTransformation) -> pd.Series:
-        exp = transformation.pow_oder
+        exp = transformation.pow_order
         if float(exp).is_integer():
             exp = int(exp)
         return ts ** exp
