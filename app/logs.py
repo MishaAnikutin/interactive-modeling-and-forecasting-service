@@ -4,7 +4,7 @@ import os
 import sys
 from logging.config import dictConfig
 
-LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+LOG_LEVEL = os.getenv("LOG_LEVEL", "ERROR").upper()
 LOG_FILE = os.getenv("LOG_FILE", "app.log")
 SERVICE_NAME = os.getenv("SERVICE_NAME", "ml-service")
 
@@ -25,39 +25,39 @@ class JsonFormatter(logging.Formatter):
             log_record["exc"] = self.formatException(record.exc_info)
         return json.dumps(log_record, ensure_ascii=False)
 
-dictConfig(
-    {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "formatters": {
-            "json": {
-                "()": JsonFormatter,
-            },
-            "plain": {
-                "format": "[%(asctime)s] %(levelname)s: %(message)s",
-            },
-        },
-        "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-                "formatter": "json",
-                "stream": sys.stdout,
-            },
-            "file": {
-                "class": "logging.handlers.TimedRotatingFileHandler",
-                "formatter": "json",
-                "filename": LOG_FILE,
-                "when": "midnight",
-                "backupCount": 14,
-                "encoding": "utf-8",
-            },
-        },
-        "root": {
-            "level": LOG_LEVEL,
-            "handlers": ["console", "file"],
-        },
-    }
-)
+# dictConfig(
+#     {
+#         "version": 1,
+#         "disable_existing_loggers": False,
+#         "formatters": {
+#             "json": {
+#                 "()": JsonFormatter,
+#             },
+#             "plain": {
+#                 "format": "[%(asctime)s] %(levelname)s: %(message)s",
+#             },
+#         },
+#         "handlers": {
+#             "console": {
+#                 "class": "logging.StreamHandler",
+#                 "formatter": "json",
+#                 "stream": sys.stdout,
+#             },
+#             "file": {
+#                 "class": "logging.handlers.TimedRotatingFileHandler",
+#                 "formatter": "json",
+#                 "filename": LOG_FILE,
+#                 "when": "midnight",
+#                 "backupCount": 14,
+#                 "encoding": "utf-8",
+#             },
+#         },
+#         "root": {
+#             "level": LOG_LEVEL,
+#             "handlers": ["console", "file"],
+#         },
+#     }
+# )
 
 logger = logging.getLogger(SERVICE_NAME)
 logger.info("Логирование инициализировано", extra={"correlation_id": "startup"})

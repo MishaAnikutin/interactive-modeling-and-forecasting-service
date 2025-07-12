@@ -16,10 +16,10 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         request.state.request_id = request_id
         request.state.correlation_id = corr_id
 
-        logger.info(
-            "HTTP %s %s", request.method, request.url.path,
-            extra={"request_id": request_id, "correlation_id": corr_id},
-        )
+        # logger.info(
+        #     "HTTP %s %s", request.method, request.url.path,
+        #     extra={"request_id": request_id, "correlation_id": corr_id},
+        # )
 
         response = await call_next(request)
         response.headers[REQUEST_ID_HEADER] = request_id
