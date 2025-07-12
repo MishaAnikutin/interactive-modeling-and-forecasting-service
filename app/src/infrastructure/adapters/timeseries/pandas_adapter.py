@@ -25,7 +25,7 @@ class PandasTimeseriesAdapter:
     def from_series(series: pd.Series, freq: DataFrequency) -> Timeseries:
         return Timeseries(
             name=series.name,
-            dates=series.index.tolist(),
-            values=series.values.tolist(),
+            dates=[d.to_pydatetime() for d in series.index],
+            values=[None if pd.isna(v) else float(v) for v in series.values],
             data_frequency=freq
         )
