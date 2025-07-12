@@ -19,6 +19,6 @@ class PreprocessUC:
         for transformation in request.transformations:
             x = self._preprocess_factory.apply(x, transformation)
 
-        ts = self._ts_adapter.from_series(x)
+        ts = self._ts_adapter.from_series(x, request.ts.data_frequency)
 
         return ts

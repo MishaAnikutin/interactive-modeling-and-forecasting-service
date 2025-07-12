@@ -1,6 +1,6 @@
 import pandas as pd
 
-from src.core.domain import Timeseries
+from src.core.domain import Timeseries, DataFrequency
 
 
 class PandasTimeseriesAdapter:
@@ -22,9 +22,10 @@ class PandasTimeseriesAdapter:
         )
 
     @staticmethod
-    def from_series(series: pd.Series) -> Timeseries:
+    def from_series(series: pd.Series, freq: DataFrequency) -> Timeseries:
         return Timeseries(
             name=series.name,
             dates=series.index.tolist(),
-            values=series.values.tolist()
+            values=series.values.tolist(),
+            data_frequency=freq
         )
