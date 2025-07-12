@@ -9,6 +9,7 @@ from src.core.application.preliminary_diagnosis.use_cases.kpss import KpssUC
 from src.core.application.preliminary_diagnosis.use_cases.phillips_perron import PhillipsPerronUC
 from src.core.application.preliminary_diagnosis.use_cases.range_uc import RangeUnitRootUC
 from src.core.application.preliminary_diagnosis.use_cases.zivot_andrews import ZivotAndrewsUC
+from src.core.application.preprocessing.preprocessing_uc import PreprocessUC
 
 
 class CoreProvider(Provider):
@@ -29,4 +30,7 @@ class CoreProvider(Provider):
     df_gls_command = provide(DfGlsUC, provides=DfGlsUC)
     zivot_andrews_command = provide(ZivotAndrewsUC, provides=ZivotAndrewsUC)
     range_unit_root_command = provide(RangeUnitRootUC, provides=RangeUnitRootUC)
+
+    # предобработка ряда
+    preprocess_command = provide(PreprocessUC, provides=PreprocessUC)
 
