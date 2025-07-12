@@ -19,7 +19,6 @@ class LagTransformation(Transformation):
 # 3. Логарифмирование
 class LogTransformation(Transformation):
     type: Literal["log"] = "log"
-    log_order: float = Field(..., gt=0)
 
 # 4. Потенцирование
 class PowTransformation(Transformation):
@@ -34,11 +33,12 @@ class NormalizeTransformation(Transformation):
 # 6. Экспоненциальное сглаживание (без параметров)
 class ExpSmoothTransformation(Transformation):
     type: Literal["exp_smooth"] = "exp_smooth"
+    span: int = Field(..., gt=0)
 
 # 7. Преобразование Бокса-Кокса
 class BoxCoxTransformation(Transformation):
     type: Literal["boxcox"] = "boxcox"
-    lambda_: float = Field(..., alias="lambda")
+    param: float = Field(...)
 
 # 8. Заполнение пропусков
 class FillMissingTransformation(Transformation):

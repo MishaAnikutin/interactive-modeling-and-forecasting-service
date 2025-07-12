@@ -17,5 +17,4 @@ class PreprocessFactory:
 
     @classmethod
     def apply(cls, ts: pd.Series, transformation: TransformationUnion) -> pd.Series:
-        print(cls.registry)
         return cls.registry[transformation.type]().apply(ts=ts, transformation=transformation)
