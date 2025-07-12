@@ -14,17 +14,17 @@ class DiffTransformation(Transformation):
 # 2. Взятие лага
 class LagTransformation(Transformation):
     type: Literal["lag"] = "lag"
-    order: int = Field(..., gt=0)
+    lag_order: int = Field(..., gt=0)
 
 # 3. Логарифмирование
 class LogTransformation(Transformation):
     type: Literal["log"] = "log"
-    a: float = Field(..., gt=0)
+    log_order: float = Field(..., gt=0)
 
 # 4. Потенцирование
 class PowTransformation(Transformation):
     type: Literal["pow"] = "pow"
-    a: float = Field(..., gt=0)
+    pow_oder: float = Field(..., gt=0)
 
 # 5. Нормализация
 class NormalizeTransformation(Transformation):
