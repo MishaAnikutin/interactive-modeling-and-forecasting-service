@@ -1,7 +1,18 @@
+import json
+
 import pandas as pd
 
 from src.core.domain import Timeseries, DataFrequency
 
+def process_float(val):
+    if pd.isna(val):
+        return None
+    val = float(val)
+    if val == float('nan'):
+        return None
+    elif val == float('-inf') or val == float('inf'):
+        return None
+    return val
 
 class PandasTimeseriesAdapter:
     @staticmethod
@@ -23,9 +34,10 @@ class PandasTimeseriesAdapter:
 
     @staticmethod
     def from_series(series: pd.Series, freq: DataFrequency) -> Timeseries:
-        return Timeseries(
+        res = Timeseries(
             name=series.name,
             dates=[d.to_pydatetime() for d in series.index],
-            values=[None if pd.isna(v) else float(v) for v in series.values],
+            values=[process_float(v) for v in series.values],
             data_frequency=freq
         )
+        return res

@@ -1,3 +1,4 @@
+from itertools import permutations
 from typing import List, Dict, Any
 
 import numpy as np
@@ -178,3 +179,30 @@ def test_unknown_transformation(client):
     })
 
     assert response.status_code == 422
+
+
+permutated = list(permutations(
+    [
+        DiffTransformation(diff_order=3),
+        LogTransformation(),
+        PowTransformation(pow_order=2),
+        NormalizeTransformation(method="standard"),
+        ExpSmoothTransformation(span=3),
+        MovingAverageTransformation(window=4),
+        FillMissingTransformation(method="last"),
+        BoxCoxTransformation(param=0.5),
+    ]
+))
+
+@pytest.mark.parametrize(
+    "transformations_list",
+    [list(comb) for comb in permutated]
+)
+def test_permutations_of_transformations(client, transformations_list):
+    # просто проверяем, что для любых перестановок преобразований ничего не сломается
+    ts = from_series(target, "ME")
+    payload = make_request(ts, transformations_list)
+    response = client.post(ENDPOINT, json=payload)
+
+    data = response.json()
+    assert response.status_code == 200, data
