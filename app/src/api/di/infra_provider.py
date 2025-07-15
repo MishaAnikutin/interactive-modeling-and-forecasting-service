@@ -3,6 +3,7 @@ from dishka import Provider, Scope, provide
 from src.infrastructure.adapters.metrics import MetricsFactory
 from src.infrastructure.adapters.model_storage import IModelStorage, MockModelStorage
 from src.infrastructure.adapters.modeling import ArimaxAdapter
+from src.infrastructure.adapters.modeling.lstm import LstmAdapter
 from src.infrastructure.adapters.modeling.nhits import NhitsAdapter
 from src.infrastructure.adapters.preprocessing.preprocess_factory import PreprocessFactory
 from src.infrastructure.adapters.timeseries import (
@@ -25,6 +26,7 @@ class InfraProvider(Provider):
 
     arimax = provide(ArimaxAdapter, provides=ArimaxAdapter)
     nhits = provide(NhitsAdapter, provides=NhitsAdapter)
+    lstm = provide(LstmAdapter, provides=LstmAdapter)
 
     model_storage = provide(MockModelStorage, provides=IModelStorage)
 

@@ -1,6 +1,7 @@
 from dishka import Provider, Scope, provide
 
 from src.core.application.building_model.use_cases.fit_arimax import FitArimaxUC
+from src.core.application.building_model.use_cases.fit_lstm import FitLstmUC
 from src.core.application.building_model.use_cases.fit_nhits import FitNhitsUC
 from src.core.application.building_model.use_cases.params import ArimaxParamsUC, NhitsParamsUC
 from src.core.application.preliminary_diagnosis.use_cases.df_gls import DfGlsUC
@@ -18,6 +19,7 @@ class CoreProvider(Provider):
     # команды для построения моделей
     arimax_fit_command = provide(FitArimaxUC, provides=FitArimaxUC)
     nhits_fit_command = provide(FitNhitsUC, provides=FitNhitsUC)
+    lstm_fit_command = provide(FitLstmUC, provides=FitLstmUC)
 
     # параметры моделей
     arimax_params_command = provide(ArimaxParamsUC, provides=ArimaxParamsUC)

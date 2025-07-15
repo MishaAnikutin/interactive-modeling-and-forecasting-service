@@ -26,6 +26,8 @@ class ScalerType(str, Enum):
     Standard = "standard"
     MinMax = "minmax"
     Identity = "identity"
+    Revin = "revin"
+    Invariant = "invariant"
 
 
 class LossEnum(str, Enum):

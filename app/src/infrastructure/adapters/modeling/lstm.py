@@ -1,0 +1,150 @@
+import pandas as pd
+from neuralforecast import NeuralForecast
+from neuralforecast.losses.pytorch import MAE, MSE, RMSE, MAPE
+from neuralforecast.models import LSTM
+
+from logs import logger
+from src.core.application.building_model.schemas.lstm import LstmParams, LstmFitResult
+from src.core.domain import FitParams, DataFrequency
+from src.infrastructure.adapters.metrics import MetricsFactory
+from src.infrastructure.adapters.modeling.neural_forecast import NeuralForecastInterface
+from src.infrastructure.adapters.timeseries import TimeseriesTrainTestSplit
+
+
+class LstmAdapter(NeuralForecastInterface):
+    metrics = ("RMSE", "MAPE", "R2")
+
+    def __init__(
+            self,
+            metric_factory: MetricsFactory,
+            ts_train_test_split: TimeseriesTrainTestSplit,
+    ):
+        super().__init__(metric_factory, ts_train_test_split)
+        self._log = logger.getChild(self.__class__.__name__)
+
+    @staticmethod
+    def _process_params(lstm_params: LstmParams) -> dict:
+        loss_map = {
+            "MAE": MAE,
+            "MSE": MSE,
+            "RMSE": RMSE,
+            "MAPE": MAPE,
+        }
+        return {
+            "inference_input_size": lstm_params.inference_input_size,
+            "h_train": lstm_params.h_train,
+            "encoder_n_layers": lstm_params.encoder_n_layers,
+            "encoder_hidden_size": lstm_params.encoder_hidden_size,
+            "encoder_dropout": lstm_params.encoder_dropout,
+            "decoder_hidden_size": lstm_params.decoder_hidden_size,
+            "decoder_layers": lstm_params.decoder_layers,
+            "recurrent": lstm_params.recurrent,
+            "loss": loss_map[lstm_params.loss](),
+            "valid_loss": loss_map[lstm_params.valid_loss](),
+            "max_steps": lstm_params.max_steps,
+            "learning_rate": lstm_params.learning_rate,
+            "early_stop_patience_steps": lstm_params.early_stop_patience_steps,
+            "val_check_steps": lstm_params.val_check_steps,
+            "scaler_type": lstm_params.scaler_type,
+        }
+
+    def fit(
+        self,
+        target: pd.Series,
+        exog: pd.DataFrame | None,
+        lstm_params: LstmParams,
+        fit_params: FitParams,
+        data_frequency: DataFrequency
+    ) -> LstmFitResult:
+        # 1. Train / val / test split -------------------------------------------------
+        (
+            exog_train,
+            train_target,
+            exog_val,
+            val_target,
+            exog_test,
+            test_target,
+        ) = self._ts_spliter.split(
+            train_boundary=fit_params.train_boundary,
+            val_boundary=fit_params.val_boundary,
+            target=target,
+            exog=exog,
+        )
+        test_size = test_target.shape[0]
+        val_size = val_target.shape[0]
+
+        h = fit_params.forecast_horizon + test_size
+
+        # валидация параметров
+
+        # 2. Подготовка данных --------------------------------------------------------
+        if exog is not None:
+            train_df = self._to_panel(
+                target=pd.concat([train_target, val_target]) if val_size != 0 else train_target,
+                exog=pd.concat([exog_train, exog_val]) if exog_val.shape[0] != 0 else exog_train,
+            )
+        else:
+            train_df = self._to_panel(
+                target=pd.concat([train_target, val_target]) if val_size != 0 else train_target
+            )
+
+        last_known_dt = target.index.max()
+        future_df = self._future_df(
+            future_size=fit_params.forecast_horizon,
+            freq=data_frequency,
+            test_target=test_target,
+            last_known_dt=last_known_dt,
+        )
+
+        assert future_df.shape[0] == h
+        assert train_df.shape[0] == (train_target.shape[0] + val_target.shape[0])
+        assert test_size + train_df.shape[0] == target.shape[0]
+
+        # 3. Создаём и обучаем модель -------------------------------------------------
+        model = LSTM(
+            accelerator='cpu',
+            h=h,
+            input_size=-1,
+            **self._process_params(lstm_params)
+        )
+        nf = NeuralForecast(models=[model], freq=data_frequency)
+        nf.fit(df=train_df, val_size=val_size)
+
+        # 4. Прогнозы -----------------------------------------------------------------
+        # 4.1 train
+        fcst_insample_df = nf.predict_insample()
+        fcst_train = (
+            fcst_insample_df.loc[fcst_insample_df['ds'].isin(train_df['ds'])]
+            .drop_duplicates('ds', keep='last')
+            .set_index('ds')['LSTM']
+        )
+
+        # 4.2-4.3 test
+        all_forecasts = nf.predict(futr_df=future_df)['LSTM']
+        all_forecasts.index = future_df['ds']
+        if test_size > 0:
+            fcst_test = all_forecasts.iloc[:test_size].copy()
+            fcst_future = all_forecasts.iloc[test_size:].copy()
+        else:
+            fcst_test = pd.Series()
+            fcst_future = all_forecasts.copy()
+
+        # ------------------------------------------------------------------
+        # 5. Сборка результата
+        forecasts = self._generate_forecasts(
+            train_predict=fcst_train,
+            test_predict=fcst_test,
+            forecast=fcst_future,
+        )
+        metrics = self._calculate_metrics(
+            y_train_true=train_df['y'],
+            y_train_pred=fcst_train,
+            y_test_true=test_target,
+            y_test_pred=fcst_test,
+        )
+        return LstmFitResult(
+            forecasts=forecasts,
+            model_metrics=metrics,
+            weight_path='заглушка',
+            model_id='заглушка',
+        )

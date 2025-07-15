@@ -3,6 +3,7 @@ from dishka import FromDishka
 from dishka.integrations.fastapi import inject_sync
 
 from src.core.application.building_model.schemas.arimax import ArimaxParams
+from src.core.application.building_model.schemas.lstm import LstmParams
 from src.core.application.building_model.schemas.nhits import NhitsParams
 from src.core.application.building_model.use_cases.params import ArimaxParamsUC, NhitsParamsUC
 
@@ -23,3 +24,8 @@ def params_nhits(
     nhits_params_uc: FromDishka[NhitsParamsUC]
 ) -> NhitsParams:
     return nhits_params_uc.execute()
+
+@params_router.get("/lstm")
+@inject_sync
+def params_lstm() -> LstmParams:
+    return LstmParams()
