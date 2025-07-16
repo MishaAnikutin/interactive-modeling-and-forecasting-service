@@ -69,6 +69,12 @@ class LstmParams(BaseModel):
             raise ValueError("proj_size has to be smaller than hidden_size")
         return self
 
+    @model_validator(mode='after')
+    def validate_valid_loss(self):
+        if self.valid_loss is None:
+            self.valid_loss = self.loss
+        return self
+
 
 class LstmFitRequest(BaseModel):
     dependent_variables: Timeseries

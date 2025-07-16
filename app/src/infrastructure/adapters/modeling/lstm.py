@@ -1,4 +1,5 @@
 import pandas as pd
+from fastapi import HTTPException
 from neuralforecast import NeuralForecast
 from neuralforecast.losses.pytorch import MAE, MSE, RMSE, MAPE
 from neuralforecast.models import LSTM
@@ -31,6 +32,7 @@ class LstmAdapter(NeuralForecastInterface):
             "MAPE": MAPE,
         }
         return {
+            "input_size": lstm_params.input_size,
             "inference_input_size": lstm_params.inference_input_size,
             "h_train": lstm_params.h_train,
             "encoder_n_layers": lstm_params.encoder_n_layers,
@@ -76,6 +78,18 @@ class LstmAdapter(NeuralForecastInterface):
         h = fit_params.forecast_horizon + test_size
 
         # валидация параметров
+        if h == 0:
+            raise HTTPException(
+                detail="Горизонт прогноза + размер тестовой выборки должен быть больше 0",
+                status_code=400,
+            )
+
+        if val_size == 0 and lstm_params.early_stop_patience_steps > 0:
+            raise HTTPException(
+                detail="Валидационная выборка должна быть не пустой, "
+                       "если ранняя остановка включена (early_stop_patience_steps > 0)",
+                status_code=400,
+            )
 
         # 2. Подготовка данных --------------------------------------------------------
         if exog is not None:
@@ -104,7 +118,6 @@ class LstmAdapter(NeuralForecastInterface):
         model = LSTM(
             accelerator='cpu',
             h=h,
-            input_size=-1,
             **self._process_params(lstm_params)
         )
         nf = NeuralForecast(models=[model], freq=data_frequency)
