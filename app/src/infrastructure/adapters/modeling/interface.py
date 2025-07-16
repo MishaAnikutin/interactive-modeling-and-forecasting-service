@@ -48,7 +48,11 @@ class MlAdapterInterface(ABC):
                 metrics=self.metrics, y_pred=y_test_pred, y_true=y_test_true
             )
 
-        return ModelMetrics(train_metrics=train_metrics, test_metrics=test_metrics)
+        return ModelMetrics(
+            train_metrics=train_metrics,
+            test_metrics=test_metrics,
+            val_metrics=val_metrics
+        )
 
     @staticmethod
     def _generate_forecasts(
