@@ -6,95 +6,11 @@ import pytest
 from src.core.application.building_model.schemas.nhits import NhitsParams, PoolingMode, InterpMode, LossEnum, \
     ActivationType, ScalerType
 from src.core.domain import FitParams, Timeseries
-from src.infrastructure.adapters.modeling.neural_forecast import future_index
+from tests.common.params_permutations import VALID_COMBINATIONS, total_points, VALID_COMBINATIONS_EXTENDED, \
+    total_for_extended, VALID_COMBINATIONS_EXTENDED_exog, aligned_size
 from tests.conftest import client, balance_ts, ca_ts, u_total_ts, balance, ipp_eu_ts
-
-
-def process_fit_params(fit_params: FitParams) -> dict:
-    return {
-        "forecast_horizon": fit_params.forecast_horizon,
-        "val_boundary": fit_params.val_boundary.strftime("%Y-%m-%d"),
-        "train_boundary": fit_params.train_boundary.strftime("%Y-%m-%d"),
-    }
-
-def process_variable(ts: Timeseries) -> dict:
-    return {
-        "name": ts.name,
-        "values": ts.values,
-        "dates": [date.strftime("%Y-%m-%d") for date in ts.dates],
-        "data_frequency": ts.data_frequency,
-    }
-
-def from_pd_stamp_to_datetime(ts: list[pd.Timestamp]) -> list[str]:
-    return [date.strftime("%Y-%m-%d") for date in ts]
-
-def delete_timestamp(ts: list[str]) -> list[str]:
-    return [date.replace("T00:00:00", "") if "T00:00:00" in date else date for date in ts]
-
-def validate_no_exog_result(
-        received_data: dict,
-        dependent_variables,
-        data,
-        fit_params,
-):
-    # проверяем прогнозы
-    forecasts = received_data['forecasts']
-
-    train_predict = forecasts['train_predict']
-    test_predict = forecasts['test_predict']
-    forecast = forecasts['forecast']
-
-    assert delete_timestamp(
-        train_predict['dates'] + test_predict['dates']
-    ) == data['dependent_variables']['dates'], \
-        "Не сходятся даты в предикте и в исходных данных"
-    if fit_params.forecast_horizon > 0:
-        assert from_pd_stamp_to_datetime(future_index(
-            last_dt=pd.to_datetime(dependent_variables.dates[-1]),
-            data_frequency=dependent_variables.data_frequency,
-            periods=fit_params.forecast_horizon,
-        ).tolist()) == delete_timestamp(forecast['dates'])
-    else:
-        assert forecast is None
-
-    # проверяем метрики
-    assert received_data['model_metrics']['train_metrics'], "Train-метрики не рассчитаны"
-    assert received_data['model_metrics']['test_metrics'], "Test-метрики не рассчитаны"
-
-    assert received_data['weight_path'], "Путь к весам пуст"
-
-    metrics = received_data['model_metrics']['test_metrics']
-    types = tuple(m['type'] for m in metrics)
-    assert types == ("RMSE", "MAPE", "R2")
-
-def validate_empty_test_data(
-        received_data: dict,
-        dependent_variables,
-        data,
-        fit_params,
-):
-    # проверяем прогнозы
-    forecasts = received_data['forecasts']
-
-    train_predict = forecasts['train_predict']
-    forecast = forecasts['forecast']
-
-    assert delete_timestamp(train_predict['dates']) == data['dependent_variables']['dates']
-    assert from_pd_stamp_to_datetime(future_index(
-        last_dt=pd.to_datetime(dependent_variables.dates[-1]),
-        data_frequency=dependent_variables.data_frequency,
-        periods=fit_params.forecast_horizon,
-    ).tolist()) == delete_timestamp(forecast['dates'])
-
-    # проверяем метрики
-    assert received_data['model_metrics']['train_metrics'], "Train-метрики не рассчитаны"
-    assert received_data['model_metrics']['test_metrics'] is None, "Test-метрики рассчитаны"
-
-    assert received_data['weight_path'], "Путь к весам пуст"
-
-    metrics = received_data['model_metrics']['train_metrics']
-    types = tuple(m['type'] for m in metrics)
-    assert types == ("RMSE", "MAPE", "R2")
+from tests.test_api.test_building_model.validators import process_variable, process_fit_params, validate_no_exog_result, \
+    validate_empty_test_data
 
 
 @pytest.mark.parametrize(
@@ -154,51 +70,6 @@ def test_nhits_fit_without_exog(
     assert result.status_code == 200, received_data
 
     validate_no_exog_result(received_data, dependent_variables, data, fit_params)
-
-
-# Параметры для перебора
-total_points = 401
-FORECAST_HORIZONS = [1, 6, 12, 24, 36]
-TEST_SIZES = [0, 12, 24, 36]
-VAL_SIZES = [0, 12, 24, 36]
-
-
-total_for_extended = 30
-FORECAST_HORIZONS_2 = [i for i in range(total_for_extended)]
-TEST_SIZES_2 = [i for i in range(total_for_extended)]
-VAL_SIZES_2 = [i for i in range(total_for_extended)]
-
-
-def generate_valid_combinations(f, t, v, total):
-    """Генерирует допустимые комбинации параметров"""
-    combinations = []
-    for h in f:
-        for test_size in t:
-            for val_size in v:
-                train_size = total - val_size - test_size
-
-                # Проверка ограничения 3
-                if 4 * (h + test_size) > train_size:
-                    continue
-
-                # Проверка ограничения 1
-                if 0 < val_size < h + test_size:
-                    continue
-
-                # Проверка минимального размера train
-                if train_size < 10:  # Минимум 10 точек для обучения
-                    continue
-
-                if h + test_size == 0:
-                    continue
-
-                combinations.append((h, test_size, val_size))
-
-    return combinations
-
-VALID_COMBINATIONS = generate_valid_combinations(
-    FORECAST_HORIZONS, TEST_SIZES, VAL_SIZES, total_points
-)
 
 
 @pytest.mark.slow
@@ -303,10 +174,6 @@ def test_nhits_fit_without_exog_grid_params(
     assert received_data['weight_path'], "Weight path missing"
 
 
-VALID_COMBINATIONS_EXTENDED = generate_valid_combinations(
-    FORECAST_HORIZONS_2, TEST_SIZES_2, VAL_SIZES_2, total_for_extended
-)
-
 @pytest.mark.slow
 @pytest.mark.filterwarnings("ignore::UserWarning")
 @pytest.mark.parametrize(
@@ -390,15 +257,6 @@ def test_nhits_fit_without_exog_grid_params_extended(
         validate_empty_test_data(received_data, balance, data, fit_params)
 
     assert received_data['weight_path'], "Weight path missing"
-
-aligned_size = 29
-FORECAST_HORIZONS_exog = [i for i in range(aligned_size)]
-TEST_SIZES_exog = [i for i in range(aligned_size)]
-VAL_SIZES_exog = [i for i in range(aligned_size)]
-
-VALID_COMBINATIONS_EXTENDED_exog = generate_valid_combinations(
-    FORECAST_HORIZONS_exog, TEST_SIZES_exog, VAL_SIZES_exog, aligned_size
-)
 
 @pytest.mark.slow
 @pytest.mark.filterwarnings("ignore::UserWarning")
