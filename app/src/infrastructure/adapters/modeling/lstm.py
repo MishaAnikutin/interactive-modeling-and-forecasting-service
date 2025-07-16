@@ -84,6 +84,14 @@ class LstmAdapter(NeuralForecastInterface):
                 status_code=400,
             )
 
+        if val_size != 0 and val_size < h:
+            raise HTTPException(
+                detail="Размер валидационной выборки должен быть 0 "
+                       "или больше или равен величины горизонт прогнозирования + размер тестовой выборки "
+                       f"({val_size} < {h})",
+                status_code=400,
+            )
+
         if val_size == 0 and lstm_params.early_stop_patience_steps > 0:
             raise HTTPException(
                 detail="Валидационная выборка должна быть не пустой, "
@@ -145,14 +153,26 @@ class LstmAdapter(NeuralForecastInterface):
 
         # ------------------------------------------------------------------
         # 5. Сборка результата
+
+        # делим прогноз на валидационную и обучающую часть
+        if val_size > 0:
+            train_predict = fcst_train.iloc[:-val_size]
+            validation_predict = fcst_train.iloc[-val_size:]
+        else:
+            train_predict = fcst_train.copy()
+            validation_predict = pd.Series()
+
         forecasts = self._generate_forecasts(
-            train_predict=fcst_train,
+            train_predict=train_predict,
+            validation_predict=validation_predict,
             test_predict=fcst_test,
             forecast=fcst_future,
         )
         metrics = self._calculate_metrics(
-            y_train_true=train_df['y'],
-            y_train_pred=fcst_train,
+            y_train_true=train_target,
+            y_train_pred=train_predict,
+            y_val_true=val_target,
+            y_val_pred=validation_predict,
             y_test_true=test_target,
             y_test_pred=fcst_test,
         )
