@@ -4,7 +4,7 @@ from dishka.integrations.fastapi import inject_sync
 
 
 seasonal_decomposition_router = APIRouter(
-    prefix="/seasonaly_decomposition",
+    prefix="/seasonal_decomposition",
     tags=["Сезонная декомпозиция"]
 )
 
