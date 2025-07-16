@@ -116,6 +116,7 @@ class LstmAdapter(NeuralForecastInterface):
 
         # 3. Создаём и обучаем модель -------------------------------------------------
         model = LSTM(
+            hist_exog_list=[exog_col for exog_col in exog.columns] if exog is not None else None,
             accelerator='cpu',
             h=h,
             **self._process_params(lstm_params)

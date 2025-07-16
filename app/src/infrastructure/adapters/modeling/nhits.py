@@ -136,6 +136,7 @@ class NhitsAdapter(NeuralForecastInterface):
 
         # 3. Создаём и обучаем модель -------------------------------------------------
         model = NHITS(
+            hist_exog_list=[exog_col for exog_col in exog.columns] if exog is not None else None,
             accelerator='cpu',
             h=h,
             input_size=h * 3,
