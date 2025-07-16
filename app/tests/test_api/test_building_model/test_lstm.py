@@ -156,8 +156,8 @@ def test_lstm_fit_with_exog(
 @pytest.mark.slow
 @pytest.mark.filterwarnings("ignore::UserWarning")
 @pytest.mark.parametrize("input_size", [1, 10, 5000])
-@pytest.mark.parametrize("inference_input_size", [1, 10,])
-@pytest.mark.parametrize("h_train", [1, 10])
+@pytest.mark.parametrize("inference_input_size", [1, 10, 5000])
+@pytest.mark.parametrize("h_train", [1, 10, 5000])
 @pytest.mark.parametrize("encoder_n_layers", [2, 4])
 @pytest.mark.parametrize("encoder_hidden_size", [2])
 @pytest.mark.parametrize("decoder_hidden_size", [10, 128])
@@ -245,6 +245,10 @@ def test_lstm_fit_exog_grid_params(
     if lstm_params.input_size + fit_params.forecast_horizon + test_size > total_size - test_size - val_size:
         assert result.status_code == 400, received_data
         return
+    elif recurrent:
+        if lstm_params.input_size + h_train + test_size > total_size - test_size - val_size:
+            assert result.status_code == 400, received_data
+            return
     assert result.status_code == 200, received_data
 
     assert received_data['model_metrics']['train_metrics'], "Train metrics missing"

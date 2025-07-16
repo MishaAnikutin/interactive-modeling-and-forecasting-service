@@ -106,6 +106,13 @@ class LstmAdapter(NeuralForecastInterface):
                        "либо слишком маленькую тренировочную."
             )
 
+        if lstm_params.recurrent and lstm_params.input_size + lstm_params.h_train + test_size > train_target.shape[-1]:
+            raise HTTPException(
+                status_code=400,
+                detail="При рекуррентном прогнозировании вы выбрали слишком большой h_train "
+                       "либо слишком маленькую обучающую выборку по сравнению с тестовой"
+            )
+
         # 2. Подготовка данных --------------------------------------------------------
         if exog is not None:
             train_df = self._to_panel(

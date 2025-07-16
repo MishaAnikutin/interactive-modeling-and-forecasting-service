@@ -163,13 +163,22 @@ def test_nhits_fit_without_exog_grid_params(
 
     assert received_data['model_metrics']['train_metrics'], "Train metrics missing"
 
-    # Проверяем test_metrics только если есть тестовые данные
-    if test_predict:
+    if test_size and val_size:
         assert received_data['model_metrics']['test_metrics'], "Test metrics missing"
+        assert received_data['model_metrics']['val_metrics'], "Validation metrics missing"
         validate_no_exog_result(received_data, balance, data, fit_params)
-    else:
+    elif (not test_size) and val_size:
         assert received_data['model_metrics']['test_metrics'] is None, "Test metrics should be empty"
+        assert received_data['model_metrics']['val_metrics'], "Validation metrics missing"
         validate_empty_test_data(received_data, balance, data, fit_params)
+    elif test_size and (not val_size):
+        assert received_data['model_metrics']['test_metrics'], "Test metrics missing"
+        assert received_data['model_metrics']['val_metrics'] is None, "Validation metrics should be empty"
+        validate_empty_val_data(received_data, balance, data, fit_params)
+    elif (not val_size) and (not test_size):
+        assert received_data['model_metrics']['test_metrics'] is None, "Test metrics should be empty"
+        assert received_data['model_metrics']['val_metrics'] is None, "Validation metrics should be empty"
+        validate_only_train_data(received_data, balance, data, fit_params)
 
     assert received_data['weight_path'], "Weight path missing"
 
@@ -249,12 +258,22 @@ def test_nhits_fit_without_exog_grid_params_extended(
 
     assert received_data['model_metrics']['train_metrics'], "Train metrics missing"
 
-    if test_predict:
+    if test_size and val_size:
         assert received_data['model_metrics']['test_metrics'], "Test metrics missing"
+        assert received_data['model_metrics']['val_metrics'], "Validation metrics missing"
         validate_no_exog_result(received_data, balance, data, fit_params)
-    else:
+    elif (not test_size) and val_size:
         assert received_data['model_metrics']['test_metrics'] is None, "Test metrics should be empty"
+        assert received_data['model_metrics']['val_metrics'], "Validation metrics missing"
         validate_empty_test_data(received_data, balance, data, fit_params)
+    elif test_size and (not val_size):
+        assert received_data['model_metrics']['test_metrics'], "Test metrics missing"
+        assert received_data['model_metrics']['val_metrics'] is None, "Validation metrics should be empty"
+        validate_empty_val_data(received_data, balance, data, fit_params)
+    elif (not val_size) and (not test_size):
+        assert received_data['model_metrics']['test_metrics'] is None, "Test metrics should be empty"
+        assert received_data['model_metrics']['val_metrics'] is None, "Validation metrics should be empty"
+        validate_only_train_data(received_data, balance, data, fit_params)
 
     assert received_data['weight_path'], "Weight path missing"
 
