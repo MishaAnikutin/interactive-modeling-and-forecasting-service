@@ -10,7 +10,7 @@ from tests.common.params_permutations import VALID_COMBINATIONS, total_points, V
     total_for_extended, VALID_COMBINATIONS_EXTENDED_exog, aligned_size
 from tests.conftest import client, balance_ts, ca_ts, u_total_ts, balance, ipp_eu_ts
 from tests.test_api.test_building_model.validators import process_variable, process_fit_params, validate_no_exog_result, \
-    validate_empty_test_data
+    validate_empty_test_data, validate_only_train_data, validate_empty_val_data
 
 
 @pytest.mark.parametrize(
@@ -340,11 +340,21 @@ def test_nhits_fit_exog_grid_params_extended(
 
     assert received_data['model_metrics']['train_metrics'], "Train metrics missing"
 
-    if test_size:
+    if test_size and val_size:
         assert received_data['model_metrics']['test_metrics'], "Test metrics missing"
+        assert received_data['model_metrics']['val_metrics'], "Validation metrics missing"
         validate_no_exog_result(received_data, aligned_balance, data, fit_params)
-    else:
+    elif (not test_size) and val_size:
         assert received_data['model_metrics']['test_metrics'] is None, "Test metrics should be empty"
+        assert received_data['model_metrics']['val_metrics'], "Validation metrics missing"
         validate_empty_test_data(received_data, aligned_balance, data, fit_params)
+    elif test_size and (not val_size):
+        assert received_data['model_metrics']['test_metrics'], "Test metrics missing"
+        assert received_data['model_metrics']['val_metrics'] is None, "Validation metrics should be empty"
+        validate_empty_val_data(received_data, aligned_balance, data, fit_params)
+    elif (not val_size) and (not test_size):
+        assert received_data['model_metrics']['test_metrics'] is None, "Test metrics should be empty"
+        assert received_data['model_metrics']['val_metrics'] is None, "Validation metrics should be empty"
+        validate_only_train_data(received_data, aligned_balance, data, fit_params)
 
     assert received_data['weight_path'], "Weight path missing"
