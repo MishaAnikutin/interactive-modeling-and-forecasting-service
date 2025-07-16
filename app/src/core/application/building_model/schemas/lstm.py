@@ -29,7 +29,7 @@ class LstmParams(BaseModel):
     )
     encoder_hidden_size: int = Field(
         default=200,
-        gt=0,
+        gt=1,
         le=5000,
         description="units for the LSTM's hidden state size."
     )

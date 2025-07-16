@@ -99,6 +99,13 @@ class LstmAdapter(NeuralForecastInterface):
                 status_code=400,
             )
 
+        if lstm_params.input_size + h > train_target.shape[-1]:
+            raise HTTPException(
+                status_code=400,
+                detail="Вы выбрали слишком большую тестовую выборку и горизонт прогноза "
+                       "либо слишком маленькую тренировочную."
+            )
+
         # 2. Подготовка данных --------------------------------------------------------
         if exog is not None:
             train_df = self._to_panel(
