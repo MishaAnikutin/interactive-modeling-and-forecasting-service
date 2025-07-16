@@ -71,7 +71,7 @@ class MlAdapterInterface(ABC):
                 dates=validation_predict.index.tolist(),
                 values=validation_predict.values.tolist(),
                 name="Прогноз на валидационной выборке"
-            )  if not test_predict.empty else None,
+            )  if not validation_predict.empty else None,
             test_predict=Timeseries(
                 dates=test_predict.index.tolist(),
                 values=test_predict.values.tolist(),
