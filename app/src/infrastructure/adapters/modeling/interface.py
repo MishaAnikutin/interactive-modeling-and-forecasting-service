@@ -26,6 +26,8 @@ class MlAdapterInterface(ABC):
         self,
         y_train_true: pd.Series,
         y_train_pred: pd.Series,
+        y_val_true: pd.Series,
+        y_val_pred: pd.Series,
         y_test_true: pd.Series,
         y_test_pred: pd.Series,
     ) -> ModelMetrics:
@@ -33,6 +35,12 @@ class MlAdapterInterface(ABC):
         train_metrics = self._metric_factory.apply(
             metrics=self.metrics, y_pred=y_train_pred, y_true=y_train_true
         )
+
+        val_metrics = None
+        if not y_val_pred.empty and not y_val_true.empty:
+            val_metrics = self._metric_factory.apply(
+                metrics=self.metrics, y_pred=y_val_pred, y_true=y_val_true
+            )
 
         test_metrics = None
         if not y_test_pred.empty and not y_test_true.empty:
@@ -45,6 +53,7 @@ class MlAdapterInterface(ABC):
     @staticmethod
     def _generate_forecasts(
         train_predict: pd.Series,
+        validation_predict: pd.Series,
         test_predict: pd.Series,
         forecast: pd.Series
     ) -> Forecasts:
@@ -52,8 +61,13 @@ class MlAdapterInterface(ABC):
             train_predict=Timeseries(
                 dates=train_predict.index.tolist(),
                 values=train_predict.values.tolist(),
-                name="Прогноз на тренировочной выборке",
+                name="Прогноз на обучающей выборке",
             ),
+            validation_predict=Timeseries(
+                dates=validation_predict.index.tolist(),
+                values=validation_predict.values.tolist(),
+                name="Прогноз на валидационной выборке"
+            )  if not test_predict.empty else None,
             test_predict=Timeseries(
                 dates=test_predict.index.tolist(),
                 values=test_predict.values.tolist(),
@@ -62,7 +76,7 @@ class MlAdapterInterface(ABC):
             forecast=Timeseries(
                 dates=forecast.index.tolist(),
                 values=forecast.values.tolist(),
-                name="Прогноз сверх известных данных"
+                name="Вневыборочный прогноз"
             ) if not forecast.empty else None,
         )
 
