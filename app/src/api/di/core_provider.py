@@ -4,6 +4,7 @@ from src.core.application.building_model.use_cases.fit_arimax import FitArimaxUC
 from src.core.application.building_model.use_cases.fit_lstm import FitLstmUC
 from src.core.application.building_model.use_cases.fit_nhits import FitNhitsUC
 from src.core.application.building_model.use_cases.params import ArimaxParamsUC, NhitsParamsUC
+from src.core.application.generating_series.use_cases.stl_decomposition import STLDecompositionUC
 from src.core.application.preliminary_diagnosis.use_cases.df_gls import DfGlsUC
 from src.core.application.preliminary_diagnosis.use_cases.dicker_fuller import DickeuFullerUC
 from src.core.application.preliminary_diagnosis.use_cases.kpss import KpssUC
@@ -35,4 +36,7 @@ class CoreProvider(Provider):
 
     # предобработка ряда
     preprocess_command = provide(PreprocessUC, provides=PreprocessUC)
+
+    # команды для разложения ряда
+    stl_decomposition_command = provide(STLDecompositionUC, provides=STLDecompositionUC)
 
