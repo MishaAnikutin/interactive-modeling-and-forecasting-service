@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from statsmodels.tsa.seasonal import STL
 
 from src.core.application.generating_series.schemas.stl_decomposition import STLDecompositionRequest, \
@@ -14,20 +15,30 @@ class STLDecompositionUC:
 
     def execute(self, request: STLDecompositionRequest) -> STLDecompositionResult:
         ts = self._ts_adapter.to_series(ts_obj=request.ts)
-        result = STL(
-            ts,
-            period=request.params.period,
-            seasonal=request.params.seasonal,
-            trend=request.params.trend,
-            low_pass=request.params.low_pass,
-            seasonal_deg=request.params.seasonal_deg,
-            trend_deg=request.params.trend_deg,
-            low_pass_deg=request.params.low_pass_deg,
-            robust=request.params.robust,
-            seasonal_jump=request.params.seasonal_jump,
-            trend_jump=request.params.trend_jump,
-            low_pass_jump=request.params.low_pass_jump,
-        ).fit()
+        try:
+            stl = STL(
+                ts,
+                period=request.params.period,
+                seasonal=request.params.seasonal,
+                trend=request.params.trend,
+                low_pass=request.params.low_pass,
+                seasonal_deg=int(request.params.seasonal_deg),
+                trend_deg=int(request.params.trend_deg),
+                low_pass_deg=int(request.params.low_pass_deg),
+                robust=request.params.robust,
+                seasonal_jump=request.params.seasonal_jump,
+                trend_jump=request.params.trend_jump,
+                low_pass_jump=request.params.low_pass_jump,
+            )
+        except ValueError as exc:
+            if "trend > period" in str(exc):
+                raise HTTPException(
+                    status_code=400,
+                    detail=str(exc),
+                )
+            raise exc
+
+        result = stl.fit()
 
         freq = request.ts.data_frequency
 

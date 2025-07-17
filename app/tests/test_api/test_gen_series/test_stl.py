@@ -1,14 +1,14 @@
+from typing import Optional
+
+import pytest
+
 from src.core.application.generating_series.schemas.stl_decomposition import STLParams
-from src.core.domain import Timeseries
 from tests.test_api.utils import process_variable, delete_timestamp
 
 
-def test_stl_base(
-    client,
-    balance
-):
-    ts = process_variable(Timeseries())
-    params = STLParams().model_dump()
+def test_stl_base(client, u_total):
+    ts = process_variable(u_total)
+    params = STLParams(trend=5, period=2).model_dump()
 
     data = {
         "ts": ts,
@@ -33,3 +33,65 @@ def test_stl_base(
         assert delete_timestamp(calculated_ts['dates']) == ts['dates']
         assert calculated_ts['data_frequency'] == ts['data_frequency']
 
+
+@pytest.mark.slow
+@pytest.mark.parametrize("seasonal", [3, 7, 21, 33])
+@pytest.mark.parametrize("trend", [None, 13, 15, 35])
+@pytest.mark.parametrize("low_pass", [None, 13, 35])
+@pytest.mark.parametrize("seasonal_deg", ["0", "1"])
+@pytest.mark.parametrize("trend_deg", ["0", "1"])
+@pytest.mark.parametrize("low_pass_deg", ["0", "1"])
+@pytest.mark.parametrize("robust", [False, True])
+@pytest.mark.parametrize("seasonal_jump", [1, 10, 35])
+@pytest.mark.parametrize("trend_jump", [1, 10, 35])
+@pytest.mark.parametrize("low_pass_jump", [1, 10, 35])
+def test_stl_grid_params(
+    seasonal: int,
+    trend: Optional[int],
+    low_pass: Optional[int],
+    seasonal_deg: str,
+    trend_deg: str,
+    low_pass_deg: str,
+    robust: bool,
+    seasonal_jump: int,
+    trend_jump: int,
+    low_pass_jump: int,
+    client,
+    balance
+):
+    ts = process_variable(balance)
+    params = STLParams(
+        seasonal=seasonal,
+        trend=trend,
+        low_pass=low_pass,
+        seasonal_deg=seasonal_deg,
+        trend_deg=trend_deg,
+        low_pass_deg=low_pass_deg,
+        robust=robust,
+        seasonal_jump=seasonal_jump,
+        trend_jump=trend_jump,
+        low_pass_jump=low_pass_jump,
+    ).model_dump()
+
+    data = {
+        "ts": ts,
+        "params": params,
+    }
+
+    result = client.post(
+        url='/api/v1/generating_series/seasonal_decomposition/stl',
+        json=data
+    )
+
+    data = result.json()
+    assert result.status_code == 200, data
+
+    observed = data["observed"]
+    trend = data["trend"]
+    seasonal = data["seasonal"]
+    resid = data["resid"]
+
+    for calculated_ts in [observed, trend, seasonal, resid]:
+        assert len(calculated_ts['dates']) == len(ts['dates'])
+        assert delete_timestamp(calculated_ts['dates']) == ts['dates']
+        assert calculated_ts['data_frequency'] == ts['data_frequency']
