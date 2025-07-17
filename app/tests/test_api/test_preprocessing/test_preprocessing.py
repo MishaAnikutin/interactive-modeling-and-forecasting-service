@@ -19,6 +19,7 @@ from src.core.application.preprocessing.preprocess_scheme import (
     TransformationUnion
 )
 from src.core.domain import Timeseries, DataFrequency
+from tests.test_api.utils import delete_timestamp
 
 
 def ipp_eu():
@@ -41,9 +42,6 @@ def serialise_ts(ts: Timeseries) -> dict:
         "dates": [date.strftime("%Y-%m-%d") for date in ts.dates],
         "data_frequency": ts.data_frequency,
     }
-
-def delete_timestamp(ts: list[str]) -> list[str]:
-    return [date.replace("T", " ") for date in ts]
 
 def serialise_transformation(transformations: List[TransformationUnion]) -> dict:
     return [

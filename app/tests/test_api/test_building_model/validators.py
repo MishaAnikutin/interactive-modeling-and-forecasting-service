@@ -1,7 +1,8 @@
 import pandas as pd
 
-from src.core.domain import FitParams, Timeseries
+from src.core.domain import FitParams
 from src.infrastructure.adapters.modeling.neural_forecast import future_index
+from tests.test_api.utils import delete_timestamp, from_pd_stamp_to_datetime
 
 
 def process_fit_params(fit_params: FitParams) -> dict:
@@ -11,19 +12,6 @@ def process_fit_params(fit_params: FitParams) -> dict:
         "train_boundary": fit_params.train_boundary.strftime("%Y-%m-%d"),
     }
 
-def process_variable(ts: Timeseries) -> dict:
-    return {
-        "name": ts.name,
-        "values": ts.values,
-        "dates": [date.strftime("%Y-%m-%d") for date in ts.dates],
-        "data_frequency": ts.data_frequency,
-    }
-
-def from_pd_stamp_to_datetime(ts: list[pd.Timestamp]) -> list[str]:
-    return [date.strftime("%Y-%m-%d") for date in ts]
-
-def delete_timestamp(ts: list[str]) -> list[str]:
-    return [date.replace("T00:00:00", "") if "T00:00:00" in date else date for date in ts]
 
 def validate_no_exog_result(
         received_data: dict,
