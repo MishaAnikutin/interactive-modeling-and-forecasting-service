@@ -54,7 +54,7 @@ class STLDecompositionRequest(BaseModel):
             self.ts.data_frequency == DataFrequency.year and
             self.params.period is None
         ):
-            raise ValueError("If data freq is year, period must be provided") # если частотность годовая, то потребуем непустой период
+            raise ValueError("If data freq is year, period must be provided")
         return self
 
     @model_validator(mode="after")
@@ -62,7 +62,9 @@ class STLDecompositionRequest(BaseModel):
         trend = self.params.trend
         if trend is not None and trend % 2 == 0:
             raise ValueError("Trend must be odd")
-        if trend:
+        if trend and self.params.period is not None and trend <= self.params.period:
+            raise ValueError("Trend must be an odd positive integer >= 3 where trend > period")
+        if trend and self.params.period is None:
             if self.ts.data_frequency == DataFrequency.month and trend < 13:
                 raise ValueError(
                     "Trend must be greater than or equal to 13 "
@@ -73,17 +75,38 @@ class STLDecompositionRequest(BaseModel):
                     "Trend must be greater than or equal to 5 "
                     "if timeseries frequency is quarter"
                 )
-            elif self.ts.data_frequency == DataFrequency.year and trend < 1:
-                raise ValueError(
-                    "Trend must be greater than or equal to 1 "
-                    "if timeseries frequency is year"
-                )
+            elif self.ts.data_frequency == DataFrequency.year:
+                raise ValueError("You should a period if the data frequency is year")
             elif self.ts.data_frequency == DataFrequency.day and trend < 365:
                 raise ValueError(
                     "Trend must be greater than or equal to 365 "
                     "if timeseries frequency is day"
                 )
+        return self
 
+    @model_validator(mode="after")
+    def validate_low_pass(self):
+        low_pass = self.params.low_pass
+        if low_pass is not None and low_pass % 2 == 0:
+            raise ValueError("Low_pass must be an odd positive integer >= 3 where low_pass > period")
+        if self.params.period is None and low_pass is not None:
+            if self.ts.data_frequency == DataFrequency.month and low_pass < 13:
+                raise ValueError(
+                    "Low pass must be greater than or equal to 13 "
+                    "if timeseries frequency is month"
+                )
+            elif self.ts.data_frequency == DataFrequency.quart and low_pass < 5:
+                raise ValueError(
+                    "Low pass must be greater than or equal to 5 "
+                    "if timeseries frequency is quarter"
+                )
+            elif self.ts.data_frequency == DataFrequency.year:
+                raise ValueError("You should a period if the data frequency is year")
+            elif self.ts.data_frequency == DataFrequency.day and low_pass < 9:
+                raise ValueError(
+                    "Low pass must be greater than or equal to 365 "
+                    "if timeseries frequency is day"
+                )
         return self
 
 class STLDecompositionResult(BaseModel):
