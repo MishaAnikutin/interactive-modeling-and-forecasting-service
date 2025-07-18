@@ -33,7 +33,6 @@ def nhits_adapter(metrics_factory, ts_splitter):
     )
     return adapter
 
-
 @pytest.fixture
 def ts_adapter():
     from src.infrastructure.adapters.timeseries import PandasTimeseriesAdapter
@@ -58,6 +57,15 @@ def app():
 def client(app):
     from fastapi.testclient import TestClient
     return TestClient(app)
+
+@pytest.fixture
+def arimax_adapter(metrics_factory, ts_splitter):
+    from src.infrastructure.adapters.modeling.arimax import ArimaxAdapter
+    adapter = ArimaxAdapter(
+        metric_factory=metrics_factory(),
+        ts_train_test_split=ts_splitter,
+    )
+    return adapter
 
 # ---------- Данные ----------
 @pytest.fixture
@@ -233,3 +241,27 @@ def all_metrics_config():
         'MAPE', 'MAE', 'RMSE', 'MSE',
         'MASE', 'R2', 'AdjR2'
     ]
+
+@pytest.fixture
+def ipc():
+    ts = pd.read_csv("tests/data/month/ipc_russia.csv", sep=";")
+    ts['date'] = pd.to_datetime(ts['date'])
+
+    return Timeseries(
+        values=ts['value'].to_list(),
+        dates=ts['date'].to_list(),
+        name="ipc",
+        data_frequency=DataFrequency.month,
+    )
+
+@pytest.fixture
+def brent_oil():
+    ts = pd.read_csv("tests/data/month/brent_price.csv", sep=";")
+    ts['date'] = pd.to_datetime(ts['date'])
+
+    return Timeseries(
+        values=ts['value'].to_list(),
+        dates=ts['date'].to_list(),
+        name="brent_oil",
+        data_frequency=DataFrequency.month,
+    )

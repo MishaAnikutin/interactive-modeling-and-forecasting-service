@@ -15,24 +15,25 @@ class ArimaxAdapter(MlAdapterInterface):
     metrics = ("RMSE", "MAPE", "R2")
 
     def __init__(
-        self,
-        metric_factory: MetricsFactory,
-        ts_train_test_split: TimeseriesTrainTestSplit,
+            self,
+            metric_factory: MetricsFactory,
+            ts_train_test_split: TimeseriesTrainTestSplit,
     ):
         super().__init__(metric_factory, ts_train_test_split)
         self._log = logger.getChild(self.__class__.__name__)
+        self._ts_spliter = ts_train_test_split  # Сохраняем для удобства
 
     def fit(
-        self,
-        target: pd.Series,
-        exog: pd.DataFrame | None,
-        arimax_params: ArimaxParams,
-        fit_params: FitParams,
-        data_frequency: DataFrequency,
+            self,
+            target: pd.Series,
+            exog: pd.DataFrame | None,
+            arimax_params: ArimaxParams,
+            fit_params: FitParams,
+            data_frequency: DataFrequency,
     ) -> ArimaxFitResult:
         self._log.debug("Старт обучения ARIMAX")
 
-        # 1. Train / val / test split -------------------------------------------------
+        # 1. Разделение данных -------------------------------------------------------
         (
             exog_train,
             train_target,
@@ -46,53 +47,89 @@ class ArimaxAdapter(MlAdapterInterface):
             target=target,
             exog=exog,
         )
-        # 2. Подготовка данных --------------------------------------------------------
-        # 3. Создаём и обучаем модель -------------------------------------------------
-        print(f'{train_target = }')
 
-        model = sm.tsa.ARIMA(
+        # 2. Создаём и обучаем модель ------------------------------------------------
+        # Используем SARIMAX вместо ARIMA для поддержки метода apply()
+        model = sm.tsa.SARIMAX(
             endog=train_target,
             exog=exog_train,
             order=(arimax_params.p, arimax_params.d, arimax_params.q),
+            seasonal_order=(0, 0, 0, 0),  # Без сезонности
+            trend='c'  # Константа
         )
-        results = model.fit()
-
+        results = model.fit(disp=False)
         self._log.info("Модель обучена", extra={"aic": results.aic, "bic": results.bic})
 
-        # 4. Прогнозы -----------------------------------------------------------------
-        # 4.1 train
+        # 3. Прогнозы ----------------------------------------------------------------
+        # 3.1 In-sample прогноз для тренировочных данных
         train_predict = results.get_prediction().predicted_mean
 
-        # 4.2 test
-        test_predict = results.get_forecast(
-            steps=len(test_target), exog=exog_test
-        ).predicted_mean
+        # 3.2 Прогноз для валидации с использованием фактических лагов
+        val_predict = None
+        if val_target is not None:
+            # Объединяем train + val
+            full_val_target = pd.concat([train_target, val_target])
+            full_val_exog = pd.concat([exog_train, exog_val]) if exog is not None else None
 
-        # 4.3 out-of-sample прогноз (если надо)
-        forecast = (
-            None
-            if exog is not None
-            else results.forecast(steps=fit_params.forecast_horizon)
-        )
+            # Применяем модель к объединенным данным
+            val_model = results.apply(full_val_target, exog=full_val_exog)
+            # Получаем предсказания только для валидационного периода
+            val_predict = val_model.get_prediction(
+                start=val_target.index[0],
+                end=val_target.index[-1]
+            ).predicted_mean
 
-        # ---------- формируем объект Forecasts -----------------------------------
+        # 3.3 Прогноз для теста с использованием фактических лагов
+        test_predict = None
+        if test_target is not None:
+            # Объединяем train + val (если есть) + test
+            full_test_target = train_target
+            full_test_exog = exog_train if exog is not None else None
+
+            if val_target is not None:
+                full_test_target = pd.concat([full_test_target, val_target])
+                full_test_exog = pd.concat([full_test_exog, exog_val]) if exog is not None else None
+
+            full_test_target = pd.concat([full_test_target, test_target])
+            full_test_exog = pd.concat([full_test_exog, exog_test]) if exog is not None else None
+
+            # Применяем модель к объединенным данным
+            test_model = results.apply(full_test_target, exog=full_test_exog)
+            # Получаем предсказания только для тестового периода
+            test_predict = test_model.get_prediction(
+                start=test_target.index[0],
+                end=test_target.index[-1]
+            ).predicted_mean
+
+        # 3.4 Out-of-sample прогноз (рекурсивный)
+        forecast = pd.Series()
+        if exog is None:  # Только если нет экзогенных переменных
+            forecast = results.get_forecast(
+                steps=fit_params.forecast_horizon
+            ).predicted_mean
+
+        # 4. Формируем объект Forecasts ----------------------------------------------
         forecasts = self._generate_forecasts(
             train_predict=train_predict,
+            validation_predict=val_predict,
             test_predict=test_predict,
             forecast=forecast
         )
 
-        # 5. Метрики ------------------------------------------------------------------
+        # 5. Метрики -----------------------------------------------------------------
         metrics = self._calculate_metrics(
             y_train_true=train_target,
             y_train_pred=train_predict,
+            y_val_true=val_target,
+            y_val_pred=val_predict,
             y_test_true=test_target,
             y_test_pred=test_predict,
         )
 
+        # 6. Коэффициенты ------------------------------------------------------------
         coefficients = self._parse_coefficients(results)
 
-        # 6. Результат ----------------------------------------------------------------
+        # 7. Результат ---------------------------------------------------------------
         return ArimaxFitResult(
             coefficients=coefficients,
             model_metrics=metrics,
