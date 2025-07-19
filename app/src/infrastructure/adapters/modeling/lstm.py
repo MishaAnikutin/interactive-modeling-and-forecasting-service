@@ -31,6 +31,16 @@ class LstmAdapter(NeuralForecastInterface):
             "RMSE": RMSE,
             "MAPE": MAPE,
         }
+        if lstm_params.loss not in loss_map:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Loss '{lstm_params.loss}' is not supported. Supported losses are: {list(loss_map.keys())}",
+            )
+        if lstm_params.valid_loss not in loss_map:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Loss '{lstm_params.valid_loss}' is not supported. Supported losses are: {list(loss_map.keys())}",
+            )
         return {
             "input_size": lstm_params.input_size,
             "inference_input_size": lstm_params.inference_input_size,

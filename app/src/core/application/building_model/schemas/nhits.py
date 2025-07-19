@@ -81,6 +81,15 @@ class NhitsParams(BaseModel):
             raise ValueError("All n_pool_kernel_size values must be >= 1")
         return self
 
+    @model_validator(mode='after')
+    def validate_loss(self):
+        losses = ["MAE", "MSE", "RMSE", "MAPE"]
+        if self.loss not in losses:
+            raise ValueError(f"Loss '{self.loss}' is not supported. Supported losses are: {losses}")
+        elif self.valid_loss not in losses:
+            raise ValueError(f"Loss '{self.valid_loss}' is not supported. Supported losses are: {losses}")
+        return self
+
 
 class NhitsFitRequest(BaseModel):
     dependent_variables: Timeseries
