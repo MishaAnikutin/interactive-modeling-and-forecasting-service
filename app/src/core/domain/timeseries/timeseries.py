@@ -2,8 +2,9 @@ from datetime import date  # Изменено: добавлен date
 from typing import Optional
 import numpy as np
 import pandas as pd
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from src.core.domain.timeseries.data_frequency import DataFrequency
+from src.shared.utils import validate_float_param
 
 n = 100
 

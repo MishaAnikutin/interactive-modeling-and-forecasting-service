@@ -1,7 +1,7 @@
 from typing import Optional
 
 
-def validate_float_param(param) -> Optional[float]:
+def validate_float_param(param: Optional[float]) -> Optional[float]:
     if param is not None:
         if (
                 param == float("inf") or
