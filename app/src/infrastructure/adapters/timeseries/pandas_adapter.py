@@ -1,5 +1,3 @@
-import json
-
 import pandas as pd
 
 from src.core.domain import Timeseries, DataFrequency
@@ -36,7 +34,7 @@ class PandasTimeseriesAdapter:
     def from_series(series: pd.Series, freq: DataFrequency) -> Timeseries:
         res = Timeseries(
             name=series.name,
-            dates=[d.to_pydatetime() for d in series.index],
+            dates=[d for d in series.index],
             values=[process_float(v) for v in series.values],
             data_frequency=freq
         )
