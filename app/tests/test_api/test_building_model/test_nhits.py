@@ -9,8 +9,9 @@ from src.core.domain import FitParams, Timeseries
 from tests.common.params_permutations import VALID_COMBINATIONS, total_points, VALID_COMBINATIONS_EXTENDED, \
     total_for_extended, VALID_COMBINATIONS_EXTENDED_exog, aligned_size
 from tests.conftest import client, balance_ts, ca_ts, u_total_ts, balance, ipp_eu_ts
-from tests.test_api.test_building_model.validators import process_variable, process_fit_params, validate_no_exog_result, \
+from tests.test_api.test_building_model.validators import process_fit_params, validate_no_exog_result, \
     validate_empty_test_data, validate_only_train_data, validate_empty_val_data
+from tests.test_api.utils import process_variable
 
 
 @pytest.mark.parametrize(

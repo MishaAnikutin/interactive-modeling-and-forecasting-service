@@ -26,8 +26,9 @@ class PandasTimeseriesAdapter:
 
     @staticmethod
     def to_series(ts_obj: Timeseries) -> pd.Series:
+        dates = pd.to_datetime(ts_obj.dates)
         return pd.Series(
-            data=ts_obj.values, index=ts_obj.dates, name=ts_obj.name
+            data=ts_obj.values, index=dates, name=ts_obj.name
         )
 
     @staticmethod

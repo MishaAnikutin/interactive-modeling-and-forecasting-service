@@ -31,7 +31,7 @@ class STLDecompositionUC:
                 low_pass_jump=request.params.low_pass_jump,
             )
         except ValueError as exc:
-            if "trend > period" in str(exc):
+            if " > period" in str(exc):
                 raise HTTPException(
                     status_code=400,
                     detail=str(exc),
