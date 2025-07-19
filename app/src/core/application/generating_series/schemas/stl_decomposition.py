@@ -6,25 +6,68 @@ from src.core.domain import Timeseries, DataFrequency
 
 
 class STLParams(BaseModel):
-    period: Optional[int] = Field(default=None, ge=2)
-    seasonal: int = Field(default=7, ge=3)
-    trend: Optional[int] = Field(default=None, ge=1)
-    low_pass: Optional[int] = Field(default=None, ge=3)
+    period: Optional[int] = Field(
+        default=None, ge=2,
+        description="Длина сезонного цикла; Обязательно к указанию для годовых данных."
+    )
+    seasonal: int = Field(
+        default=7, ge=3,
+        description="Нечетное число. Длина сезонного сглаживателя"
+    )
+    trend: Optional[int] = Field(
+        default=None, ge=3,
+        description="Длина трендового сглаживателя, нечетное число trend > period. "
+                    "Если не указано, то вычисляется по специальной формуле."
+    )
+    low_pass: Optional[int] = Field(
+        default=None, ge=3,
+        description="Длина низкочастотного сглаживателя, нечетное число low_pass > period. "
+                    "Если не задана, то берется наименьшее число большее period"
+    )
 
-    # Degree of ... LOESS. 0 (constant) or 1 (constant and trend).
-    seasonal_deg: Literal["0", "1"] = Field(default="1")
-    trend_deg: Literal["0", "1"] = Field(default="1")
-    low_pass_deg: Literal["0", "1"] = Field(default="1")
+    seasonal_deg: Literal["0", "1"] = Field(
+        default="1",
+        description="Degree of seasonal LOESS. 0 (constant) or 1 (constant and trend)."
+    )
+    trend_deg: Literal["0", "1"] = Field(
+        default="1",
+        description="Degree of trend LOESS. 0 (constant) or 1 (constant and trend)."
+    )
+    low_pass_deg: Literal["0", "1"] = Field(
+        default="1",
+        description="Degree of low pass LOESS. 0 (constant) or 1 (constant and trend)."
+    )
 
-    robust: bool = Field(default=False)
+    robust: bool = Field(
+        default=False,
+        description="Flag indicating whether to use a "
+                    "weighted version that is robust to some forms of outliers."
+    )
 
-    # Positive integer determining the linear interpolation step.
-    # If larger than 1, the LOESS is used every seasonal_jump points and
-    # linear interpolation is between fitted points.
-    # Higher values reduce estimation time.
-    seasonal_jump: int = Field(default=1, gt=0)
-    trend_jump: int = Field(default=1, gt=0)
-    low_pass_jump: int = Field(default=1, gt=0)
+    seasonal_jump: int = Field(
+        default=1, gt=0,
+        description=(
+            "Positive integer determining the linear interpolation step. "
+            "If larger than 1, the LOESS is used every seasonal_jump points and "
+            "linear interpolation is between fitted points. "
+            "Higher values reduce estimation time.")
+    )
+    trend_jump: int = Field(
+        default=1, gt=0,
+        description=(
+            "Positive integer determining the linear interpolation step. "
+            "If larger than 1, the LOESS is used every seasonal_jump points and "
+            "linear interpolation is between fitted points. "
+            "Higher values reduce estimation time.")
+    )
+    low_pass_jump: int = Field(
+        default=1, gt=0,
+        description=(
+            "Positive integer determining the linear interpolation step. "
+            "If larger than 1, the LOESS is used every seasonal_jump points and "
+            "linear interpolation is between fitted points. "
+            "Higher values reduce estimation time.")
+    )
 
     @model_validator(mode="after")
     def validate_seasonal_trend_pass(self):
