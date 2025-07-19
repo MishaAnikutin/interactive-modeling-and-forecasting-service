@@ -1,8 +1,8 @@
 from fastapi import HTTPException
 from statsmodels.tsa.stattools import kpss
 
-from src.core.application.preliminary_diagnosis.schemas.common import CriticalValues
-from src.core.application.preliminary_diagnosis.schemas.kpss import KpssParams, KpssResult
+from src.core.application.preliminary_diagnosis.schemas.common import CriticalValues, StatTestResult
+from src.core.application.preliminary_diagnosis.schemas.kpss import KpssParams
 from src.infrastructure.adapters.timeseries import PandasTimeseriesAdapter
 
 
@@ -13,11 +13,11 @@ class KpssUC:
     ):
         self._ts_adapter = ts_adapter
 
-    def execute(self, request: KpssParams) -> KpssResult:
+    def execute(self, request: KpssParams) -> StatTestResult:
         ts = self._ts_adapter.to_series(ts_obj=request.ts)
         try:
             kpss_stat, p_value, nlags, crit_dict = kpss(ts, regression=request.regression, nlags=request.nlags)
-            return KpssResult(
+            return StatTestResult(
                 p_value=p_value,
                 stat_value=kpss_stat,
                 critical_values=CriticalValues(

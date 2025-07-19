@@ -1,9 +1,9 @@
 from enum import Enum
 from typing import Optional
 
-from pydantic import Field, model_validator, BaseModel
+from pydantic import Field, model_validator
 
-from src.core.application.preliminary_diagnosis.schemas.common import StatTestParams, CriticalValues
+from src.core.application.preliminary_diagnosis.schemas.common import StatTestParams
 
 
 class TrendEnum(str, Enum):
@@ -32,10 +32,3 @@ class DfGlsParams(StatTestParams):
                 f"trend {self.trend} and the user-specified number of lags."
             )
         return self
-
-class DfGlsResult(BaseModel):
-    p_value: float
-    stat_value: float
-    critical_values: CriticalValues
-    lags: int
-    nobs: int

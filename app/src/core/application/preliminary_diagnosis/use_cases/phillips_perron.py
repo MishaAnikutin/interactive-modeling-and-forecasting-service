@@ -1,8 +1,7 @@
 from arch.unitroot import PhillipsPerron
 
-from src.core.application.preliminary_diagnosis.schemas.common import CriticalValues
-from src.core.application.preliminary_diagnosis.schemas.phillips_perron import PhillipsPerronParams, \
-    PhillipsPerronResult
+from src.core.application.preliminary_diagnosis.schemas.common import CriticalValues, StatTestResult
+from src.core.application.preliminary_diagnosis.schemas.phillips_perron import PhillipsPerronParams
 from src.infrastructure.adapters.timeseries import PandasTimeseriesAdapter
 
 
@@ -13,11 +12,11 @@ class PhillipsPerronUC:
     ):
         self._ts_adapter = ts_adapter
 
-    def execute(self, request: PhillipsPerronParams) -> PhillipsPerronResult:
+    def execute(self, request: PhillipsPerronParams) -> StatTestResult:
         ts = self._ts_adapter.to_series(ts_obj=request.ts)
         result = PhillipsPerron(ts, trend=request.trend, lags=request.lags, test_type=request.test_type)
         critvalues = result.critical_values
-        return PhillipsPerronResult(
+        return StatTestResult(
             p_value=result.pvalue,
             stat_value=result.stat,
             critical_values=CriticalValues(
@@ -26,5 +25,4 @@ class PhillipsPerronUC:
                 percent_10=critvalues['10%'],
             ),
             lags=result.lags,
-            nobs=result.nobs
         )

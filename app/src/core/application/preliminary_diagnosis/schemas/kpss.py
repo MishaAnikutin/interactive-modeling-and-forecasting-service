@@ -1,7 +1,7 @@
-from pydantic import BaseModel, Field, model_validator
+from pydantic import Field, model_validator
 from enum import Enum
 
-from src.core.application.preliminary_diagnosis.schemas.common import CriticalValues, StatTestParams
+from src.core.application.preliminary_diagnosis.schemas.common import StatTestParams
 
 
 class RegressionEnum(str, Enum):
@@ -22,9 +22,3 @@ class KpssParams(StatTestParams):
             if self.nlags < 0:
                 raise ValueError("nlags must be non-negative")
         return self
-
-class KpssResult(BaseModel):
-    p_value: float
-    stat_value: float
-    critical_values: CriticalValues
-    lags: int

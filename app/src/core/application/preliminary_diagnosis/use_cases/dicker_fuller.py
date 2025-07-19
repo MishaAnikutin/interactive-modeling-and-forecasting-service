@@ -31,8 +31,7 @@ class DickeuFullerUC:
         return DickeyFullerResult(
             stat_value=adfstat,
             p_value=pvalue,
-            usedlag=usedlag,
-            nobs=nobs,
+            lags=usedlag,
             critical_values=CriticalValues(
                 percent_1=critvalues['1%'],
                 percent_5=critvalues['5%'],

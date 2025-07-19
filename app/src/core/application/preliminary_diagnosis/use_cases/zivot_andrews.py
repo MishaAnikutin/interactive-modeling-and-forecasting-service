@@ -1,10 +1,9 @@
 from arch.unitroot import ZivotAndrews
 from arch.utility.exceptions import InfeasibleTestException
 from fastapi import HTTPException
-from statsmodels.tsa.stattools import zivot_andrews
 
-from src.core.application.preliminary_diagnosis.schemas.common import CriticalValues
-from src.core.application.preliminary_diagnosis.schemas.zivot_andrews import ZivotAndrewsParams, ZivotAndrewsResult
+from src.core.application.preliminary_diagnosis.schemas.common import CriticalValues, StatTestResult
+from src.core.application.preliminary_diagnosis.schemas.zivot_andrews import ZivotAndrewsParams
 from src.infrastructure.adapters.timeseries import PandasTimeseriesAdapter
 
 
@@ -15,7 +14,7 @@ class ZivotAndrewsUC:
     ):
         self._ts_adapter = ts_adapter
 
-    def execute(self, request: ZivotAndrewsParams) -> ZivotAndrewsResult:
+    def execute(self, request: ZivotAndrewsParams) -> StatTestResult:
         ts = self._ts_adapter.to_series(ts_obj=request.ts)
         try:
             result = ZivotAndrews(
@@ -27,7 +26,7 @@ class ZivotAndrewsUC:
                 method=request.autolag,
             )
             critvalues = result.critical_values
-            return ZivotAndrewsResult(
+            return StatTestResult(
                 p_value=result.pvalue,
                 stat_value=result.stat,
                 critical_values=CriticalValues(
@@ -36,7 +35,6 @@ class ZivotAndrewsUC:
                     percent_10=critvalues['10%'],
                 ),
                 lags=result.lags,
-                nobs=result.nobs
             )
         except InfeasibleTestException as exc:
             if "observations are needed to run an ADF" in str(exc):

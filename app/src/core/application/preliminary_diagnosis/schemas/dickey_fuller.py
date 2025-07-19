@@ -2,9 +2,10 @@ from enum import Enum
 from typing import Optional
 
 import numpy as np
-from pydantic import BaseModel, Field, model_validator
+from pydantic import Field, model_validator
 
-from src.core.application.preliminary_diagnosis.schemas.common import StatTestParams, CriticalValues
+from src.core.application.preliminary_diagnosis.schemas.common import StatTestParams, StatTestResult
+from src.shared.utils import validate_float_param
 
 
 class LagMethodEnum(str, Enum):
@@ -59,10 +60,10 @@ class DickeyFullerParams(StatTestParams):
         return self
 
 
-class DickeyFullerResult(BaseModel):
-    p_value: float
-    stat_value: float
-    usedlag: int
-    nobs: int
-    critical_values: CriticalValues
+class DickeyFullerResult(StatTestResult):
     information_criterion_max_value: Optional[float]
+
+    @model_validator(mode="after")
+    def validate_inf_crit(self):
+        self.information_criterion_max_value = validate_float_param(self.information_criterion_max_value)
+        return self

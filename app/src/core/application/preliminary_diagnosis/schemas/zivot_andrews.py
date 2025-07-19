@@ -1,9 +1,9 @@
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 from enum import Enum
 
-from src.core.application.preliminary_diagnosis.schemas.common import StatTestParams, CriticalValues
+from src.core.application.preliminary_diagnosis.schemas.common import StatTestParams
 
 
 class RegressionEnum(str, Enum):
@@ -24,10 +24,3 @@ class ZivotAndrewsParams(StatTestParams):
     trim: float = Field(default=0.15, ge=0.0, le=0.33)
     regression: RegressionEnum = Field(default=RegressionEnum.ConstantOnly)
     autolag: AutoLagEnum = Field(default=AutoLagEnum.AIC)
-
-class ZivotAndrewsResult(BaseModel):
-    p_value: float
-    stat_value: float
-    critical_values: CriticalValues
-    lags: int
-    nobs: int
