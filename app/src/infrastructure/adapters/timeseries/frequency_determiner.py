@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import date, timedelta
 from typing import List
 
 from fastapi import HTTPException
@@ -12,26 +12,21 @@ class FrequencyDeterminer:
     Алгоритм анализирует минимальный шаг между соседними метками в днях.
     """
 
-    def _first_check_timestamps(self, timestamps: List[datetime]) -> None:
+    def _first_check_timestamps(self, timestamps: List[date]) -> None:
         if not timestamps:
             raise HTTPException(
                 status_code=400,
                 detail="Ряд должен быть не пустой"
             )
-        for ts in timestamps:
-            if ts.time() != datetime.min.time():
-                raise HTTPException(
-                    status_code=400,
-                    detail="Даты должны быть без времени (часы:минуты:секунды = 00:00:00)"
-                )
+
         return None
 
-    def _is_last_day_of_month(self, date: datetime) -> bool:
+    def _is_last_day_of_month(self, day: date) -> bool:
         """Проверяет, является ли дата последним днем месяца."""
-        next_day = date + timedelta(days=1)
+        next_day = day + timedelta(days=1)
         return next_day.month != date.month
 
-    def _validate_dates(self, timestamps: List[datetime], freq: DataFrequency) -> None:
+    def _validate_dates(self, timestamps: List[date], freq: DataFrequency) -> None:
         """Проверяет формат дат в соответствии с частотностью."""
         if freq != DataFrequency.day:
             for ts in timestamps:
@@ -78,7 +73,7 @@ class FrequencyDeterminer:
                 )
         return None
 
-    def determine(self, timestamps: List[datetime]) -> DataFrequency:
+    def determine(self, timestamps: List[date]) -> DataFrequency:
         self._first_check_timestamps(timestamps)
 
         sorted_ts = sorted(timestamps)
