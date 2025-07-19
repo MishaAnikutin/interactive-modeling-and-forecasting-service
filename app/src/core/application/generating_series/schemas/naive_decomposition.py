@@ -72,6 +72,9 @@ class NaiveDecompositionRequest(BaseModel):
                 f"x must have 2 complete cycles requires {2 * period} "
                 f"observations. x only has {x.shape[0]} observation(s)"
             )
+        if x.shape[0] < len(self.params.filt):
+            raise ValueError(f"len of filt {len(self.params.filt)} must be less or equal to "
+                             f"number of observations {x.shape[0]}")
         return self
 
 
