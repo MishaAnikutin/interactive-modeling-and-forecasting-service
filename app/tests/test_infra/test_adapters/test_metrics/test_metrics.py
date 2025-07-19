@@ -18,29 +18,29 @@ def test_factory_apply_basic_metrics(metrics_factory, sample_data):
     # Проверяем корректность расчета для каждой метрики
     for metric in results:
         if metric.type == "MAPE":
-            expected = mean_absolute_percentage_error(
+            expected = round(mean_absolute_percentage_error(
                 sample_data['y_true'], sample_data['y_pred']
-            )
+            ), 4)
             assert metric.value == expected
         elif metric.type == "MAE":
-            expected = mean_absolute_error(
+            expected = round(mean_absolute_error(
                 sample_data['y_true'], sample_data['y_pred']
-            )
+            ), 4)
             assert metric.value == expected
         elif metric.type == "RMSE":
-            expected = root_mean_squared_error(
+            expected = round(root_mean_squared_error(
                 sample_data['y_true'], sample_data['y_pred']
-            )
+            ), 4)
             assert metric.value == expected
         elif metric.type == "MSE":
-            expected = mean_squared_error(
+            expected = round(mean_squared_error(
                 sample_data['y_true'], sample_data['y_pred']
-            )
+            ), 4)
             assert metric.value == expected
         elif metric.type == "R2":
-            expected = r2_score(
+            expected = round(r2_score(
                 sample_data['y_true'], sample_data['y_pred']
-            )
+            ), 4)
             assert metric.value == expected
 
 
@@ -97,24 +97,24 @@ def test_factory_apply_all_metrics(
     # Проверяем что все метрики корректно рассчитаны
     for metric in results:
         if metric.type == "MAPE":
-            expected = mean_absolute_percentage_error(
+            expected = round(mean_absolute_percentage_error(
                 context['y_true'], context['y_pred']
-            )
+            ), 4)
             assert metric.value == expected
         elif metric.type == "MAE":
-            expected = mean_absolute_error(
+            expected = round(mean_absolute_error(
                 context['y_true'], context['y_pred']
-            )
+            ), 4)
             assert metric.value == expected
         elif metric.type == "RMSE":
-            expected = root_mean_squared_error(
+            expected = round(root_mean_squared_error(
                 context['y_true'], context['y_pred']
-            )
+            ), 4)
             assert metric.value == expected
         elif metric.type == "MSE":
-            expected = mean_squared_error(
+            expected = round(mean_squared_error(
                 context['y_true'], context['y_pred']
-            )
+            ), 4)
             assert metric.value == expected
         elif metric.type == "MASE":
             mae_i = mean_absolute_error(
@@ -123,16 +123,16 @@ def test_factory_apply_all_metrics(
             mae_j = mean_absolute_error(
                 context['y_true_j'], context['y_pred_j']
             )
-            expected = mae_i / mae_j
+            expected = round(mae_i / mae_j, 4)
             assert metric.value == expected
         elif metric.type == "R2":
-            expected = r2_score(
+            expected = round(r2_score(
                 context['y_true'], context['y_pred']
-            )
+            ), 4)
             assert metric.value == expected
         elif metric.type == "Adj-R^2":
             r2 = r2_score(context['y_true'], context['y_pred'])
             n = context['row_count']
             p = context['feature_count']
-            expected = 1 - (1 - r2) * (n - 1) / (n - p)
+            expected = round(1 - (1 - r2) * (n - 1) / (n - p), 4)
             assert metric.value == expected
