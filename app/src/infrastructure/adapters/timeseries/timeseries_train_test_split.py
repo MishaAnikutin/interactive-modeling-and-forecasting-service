@@ -1,5 +1,4 @@
-import time
-from datetime import datetime
+from datetime import date
 from typing import Tuple, TypeVar, Optional
 
 import pandas as pd
@@ -27,16 +26,26 @@ class TimeseriesTrainTestSplit:
     """
 
     @staticmethod
-    def split_ts(
-        ts: pd.Series | pd.DataFrame, train_boundary: datetime, val_boundary: datetime
-    ) -> Tuple[pd.Series, pd.Series, pd.Series]:
-        """Разбивает Series без перекрытия границ."""
-        # преобразуем в datetime
-        idx = pd.to_datetime(ts.index)
+    def _ensure_datetime_index(data: pd.Series | pd.DataFrame) -> pd.Series | pd.DataFrame:
+        """Преобразует индекс в datetime64[ns] при необходимости."""
+        if not isinstance(data.index, pd.DatetimeIndex):
+            data = data.copy()
+            data.index = pd.to_datetime(data.index)
+        return data
 
-        # Удалим временную зону
-        train_boundary = train_boundary.replace(tzinfo=None)
-        val_boundary = val_boundary.replace(tzinfo=None)
+    def split_ts(
+            self,
+            ts: pd.Series | pd.DataFrame,
+            train_boundary: date,
+            val_boundary: date
+    ) -> Tuple[pd.Series, pd.Series, pd.Series]:
+        """Разбивает Series/DataFrame без перекрытия границ."""
+        # Преобразуем границы в pd.Timestamp
+        train_boundary= pd.Timestamp(train_boundary)
+        val_boundary = pd.Timestamp(val_boundary)
+
+        ts = self._ensure_datetime_index(ts)
+        idx = ts.index
 
         train_mask = idx <= train_boundary
         val_mask = (idx > train_boundary) & (idx <= val_boundary)
@@ -48,11 +57,11 @@ class TimeseriesTrainTestSplit:
         return train_target, val_target, test_target
 
     def split(
-        self,
-        train_boundary: datetime,
-        val_boundary: datetime,
-        target: pd.Series,
-        exog: Optional[pd.DataFrame] = None,
+            self,
+            train_boundary: date,
+            val_boundary: date,
+            target: pd.Series,
+            exog: Optional[pd.DataFrame] = None,
     ) -> Tuple[
         Optional[pd.DataFrame],
         pd.Series,  # train exog / target
@@ -61,6 +70,8 @@ class TimeseriesTrainTestSplit:
         Optional[pd.DataFrame],
         pd.Series,  # test  exog / target
     ]:
+        # Гарантируем datetime индекс для target
+        target = self._ensure_datetime_index(target)
 
         # --- целевая переменная ---
         train_target, val_target, test_target = self.split_ts(
@@ -69,6 +80,7 @@ class TimeseriesTrainTestSplit:
 
         # --- экзогенные признаки (если есть) ---
         if exog is not None:
+            exog = self._ensure_datetime_index(exog)
             exog_train, exog_val, exog_test = self.split_ts(
                 exog, train_boundary, val_boundary
             )
