@@ -282,10 +282,10 @@ def test_stl_grid_params_quarter(
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize("period", [3, 7, 21, 33])
-@pytest.mark.parametrize("seasonal", [3, 7, 21, 33])
-@pytest.mark.parametrize("trend", [None, 13, 15, 35])
-@pytest.mark.parametrize("low_pass", [None, 13, 35])
+@pytest.mark.parametrize("period", [None, 2, 7, 21, 33, 365, 377])
+@pytest.mark.parametrize("seasonal", [3, 7, 21, 33, 365])
+@pytest.mark.parametrize("trend", [None, 3, 13, 15, 35, 365, 377])
+@pytest.mark.parametrize("low_pass", [None, 3, 13, 35, 365, 377])
 def test_stl_grid_params_year(
     period: Optional[int],
     seasonal: int,
@@ -294,4 +294,41 @@ def test_stl_grid_params_year(
     client,
     u_men
 ):
-    pass
+    ts = process_variable(u_men)
+    if low_pass is not None and period is not None and low_pass <= period:
+        return
+    params = STLParams(
+        period=period,
+        seasonal=seasonal,
+        trend=trend,
+        low_pass=low_pass,
+    ).model_dump()
+
+    data = {
+        "ts": ts,
+        "params": params,
+    }
+
+    result = client.post(
+        url='/api/v1/generating_series/seasonal_decomposition/stl',
+        json=data
+    )
+
+    data = result.json()
+    if period is None:
+        assert result.status_code == 422, data
+        return
+    if trend is not None and period is not None and trend <= period:
+        assert result.status_code == 422, data
+        return
+    assert result.status_code == 200, data
+
+    observed = data["observed"]
+    trend = data["trend"]
+    seasonal = data["seasonal"]
+    resid = data["resid"]
+
+    for calculated_ts in [observed, trend, seasonal, resid]:
+        assert len(calculated_ts['dates']) == len(ts['dates'])
+        assert delete_timestamp(calculated_ts['dates']) == ts['dates']
+        assert calculated_ts['data_frequency'] == ts['data_frequency']
