@@ -38,5 +38,5 @@ class Timeseries(BaseModel):
 
     @model_validator(mode="after")
     def validate_value(self):
-        self.values = validate_float_param(self.values)
+        self.values = [validate_float_param(value) for value in self.values]
         return self
