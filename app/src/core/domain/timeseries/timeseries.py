@@ -35,3 +35,8 @@ class Timeseries(BaseModel):
         default=DataFrequency.month,
         title="Частотность ряда"
     )
+
+    @model_validator(mode="after")
+    def validate_value(self):
+        self.values = validate_float_param(self.values)
+        return self
