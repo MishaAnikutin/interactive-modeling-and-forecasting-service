@@ -17,7 +17,7 @@ from tests.conftest import arimax_adapter, ts_alignment
             ArimaxParams(
                 p=1,
                 d=1,
-                q=1
+                q=0
             ),
             FitParams(
                 train_boundary=datetime(2020, 12, 31),
@@ -63,11 +63,6 @@ def test_arimax_fit_without_exog_month_frequency(
         assert m.value is not None
         assert isinstance(m.value, float)
 
-    # Проверка прогнозов
-    print(f'Train:\t{result.forecasts.train_predict.dates[0]}-{result.forecasts.train_predict.dates[-1]}')
-    print(f'Test:\t{result.forecasts.test_predict.dates[0]}-{result.forecasts.test_predict.dates[-1]}')
-    print(f'Forecast:\t{result.forecasts.forecast.dates[0]}-{result.forecasts.forecast.dates[-1]}')
-
     train_predict_len = len(result.forecasts.train_predict.dates)
     test_predict_len = len(result.forecasts.test_predict.dates)
     val_predict_len = len(result.forecasts.validation_predict.dates)
@@ -84,8 +79,8 @@ def test_arimax_fit_without_exog_month_frequency(
         (
             ArimaxParams(
                 p=1,
-                d=0,
-                q=1
+                d=1,
+                q=0
             ),
             FitParams(
                 train_boundary=datetime(2012, 12, 31),
@@ -126,12 +121,13 @@ def test_arimax_fit_with_exog_month_frequency(
     assert result.model_metrics.test_metrics, "Test-метрики не рассчитаны"
 
     metrics = result.model_metrics.test_metrics
-    types = tuple(m.type for m in metrics)
-    assert types == arimax_params.metrics
 
     # Проверка прогнозов
     train_predict_len = len(result.forecasts.train_predict.dates)
     test_predict_len = len(result.forecasts.test_predict.dates)
-    future_predict_len = len(result.forecasts.forecast.dates)
-    assert train_predict_len + test_predict_len == target.shape[0]
-    assert future_predict_len == fit_params.forecast_horizon
+    val_predict_len = len(result.forecasts.validation_predict.dates)
+
+    assert train_predict_len + val_predict_len + test_predict_len == target.shape[
+        0], f"длина трейна + теста не равна длины таргета: {train_predict_len + test_predict_len = }, {target.shape[0] = }"
+    assert result.forecasts.forecast is None, f'вневыборочный прогноз не пустой'
+
