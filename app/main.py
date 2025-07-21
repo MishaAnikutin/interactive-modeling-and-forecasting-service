@@ -26,11 +26,9 @@ def create_fastapi_app() -> FastAPI:
     return app
 
 
-def create_app():
-    app = create_fastapi_app()
-    setup_dishka(container, app)
-    return app
+app = create_fastapi_app()
+setup_dishka(container, app)
 
 
 if __name__ == "__main__":
-    uvicorn.run(create_app(), host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000)
