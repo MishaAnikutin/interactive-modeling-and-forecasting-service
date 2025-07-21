@@ -4,7 +4,7 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app/
 
-COPY --from=ghcr.io/astral-sh/uv:0.5.11 /uv /bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.5.11 /uv /uvx /bin/
 
 ENV PATH="/app/.venv/bin:/bin:$PATH"
 ENV UV_COMPILE_BYTECODE=1
