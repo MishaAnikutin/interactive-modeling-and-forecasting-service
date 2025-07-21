@@ -13,5 +13,5 @@ class Config:
     ALLOW_METHODS: str = os.getenv("ALLOW_METHODS", "*")
     ALLOW_HEADERS: str = os.getenv("ALLOW_HEADERS", "*")
 
-    APP_CORS_ORIGINS_LIST = os.getenv('APP_CORS_ORIGINS_LIST').split(',')
-    APP_NGINX_PREFIX = os.getenv('APP_NGINX_PREFIX')
+    APP_CORS_ORIGINS_LIST = os.getenv('APP_CORS_ORIGINS_LIST', default='').split(',')
+    APP_NGINX_PREFIX = os.getenv('APP_NGINX_PREFIX', default='/')
