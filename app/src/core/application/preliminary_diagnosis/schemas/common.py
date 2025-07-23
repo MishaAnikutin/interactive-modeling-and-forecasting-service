@@ -7,9 +7,9 @@ from src.shared.utils import validate_float_param
 
 
 class CriticalValues(BaseModel):
-    percent_10: Optional[float]
-    percent_5: Optional[float]
-    percent_1: Optional[float]
+    percent_10: Optional[float] = Field(title="Критическое значение статистики для 10%")
+    percent_5: Optional[float] = Field(title="Критическое значение статистики для 5%")
+    percent_1: Optional[float] = Field(title="Критическое значение статистики для 1%")
 
     @model_validator(mode='after')
     def validate_float(self):
@@ -19,13 +19,16 @@ class CriticalValues(BaseModel):
         return self
 
 class StatTestParams(BaseModel):
-    ts: Timeseries
+    ts: Timeseries = Field(
+        default=Timeseries(name="Временной ряд для анализа"),
+        title="Временной ряд для анализа"
+    )
 
 class StatTestResult(BaseModel):
-    p_value: Optional[float]
-    stat_value: Optional[float]
-    critical_values: CriticalValues
-    lags: int
+    p_value: Optional[float] = Field(default=0.05, title="p-value теста")
+    stat_value: Optional[float] = Field(title="Значение статистики теста")
+    critical_values: CriticalValues = Field(title="Критические значения для разных уровней значимости")
+    lags: int = Field(title="Число лагов, использованных при расчетах")
 
     @model_validator(mode='after')
     def validate_float(self):
