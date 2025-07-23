@@ -33,7 +33,7 @@ class FrequencyDeterminer:
                 if not self._is_last_day_of_month(ts):
                     raise HTTPException(
                         status_code=400,
-                        detail=f"Дата {ts} не является последним днем месяца"
+                        detail=f"Дата не является последним днем месяца"
                     )
         return None
 
