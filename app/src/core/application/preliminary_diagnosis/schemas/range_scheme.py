@@ -17,9 +17,12 @@ class RangeUnitRootParams(StatTestParams):
 
 
 class RangeUnitRootResult(BaseModel):
-    p_value: Optional[float] = Field(default=0.05, title="p-value теста")
-    stat_value: Optional[float] = Field(title="Значение статистики теста")
-    critical_values: CriticalValues = Field(title="Критические значения для разных уровней значимости")
+    p_value: Optional[float] = Field(default=0.05, title="p-value теста", description="p-value теста",)
+    stat_value: Optional[float] = Field(title="Значение статистики теста", description="Значение статистики теста")
+    critical_values: CriticalValues = Field(
+        title="Критические значения для разных уровней значимости",
+        description="Критические значения для разных уровней значимости",
+    )
 
     @model_validator(mode='after')
     def validate_float(self):

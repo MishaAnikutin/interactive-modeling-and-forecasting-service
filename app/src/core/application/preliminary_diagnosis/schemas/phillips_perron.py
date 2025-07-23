@@ -19,11 +19,13 @@ class PhillipsPerronParams(StatTestParams):
     lags: Optional[int] = Field(
         default=None,
         ge=0,
-        title="Число лагов"
+        title="Число лагов",
+        description="Число лагов"
     )
     trend: TrendEnum = Field(
         default=TrendEnum.ConstantOnly,
-        title="Компонента тренда, которую следует включить в тест"
+        title="Компонента тренда, которую следует включить в тест",
+        description="Компонента тренда, которую следует включить в тест"
     )
     test_type: TestType = Field(
         default=TestType.tau,

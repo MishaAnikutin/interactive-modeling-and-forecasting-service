@@ -19,18 +19,29 @@ class AutoLagEnum(str, Enum):
 
 
 class ZivotAndrewsParams(StatTestParams):
-    lags: Optional[int] = Field(default=None, ge=0, title="Число лагов для ADF регрессии")
+    lags: Optional[int] = Field(
+        default=None, ge=0,
+        title="Число лагов для ADF регрессии",
+        description="Число лагов для ADF регрессии"
+    )
     max_lags: Optional[int] = Field(
         default=None,
         ge=0,
-        title="Максимальное число, которое может быть выбрано для лага"
+        title="Максимальное число, которое может быть выбрано для лага",
+        description="Максимальное число, которое может быть выбрано для лага"
     )
     trim: float = Field(
         default=0.15, ge=0.0, le=0.33,
-        title="Процент серий в начале/конце, которые необходимо исключить из промежуточного периода"
+        title="Процент серий в начале/конце, которые необходимо исключить из промежуточного периода",
+        description="Процент серий в начале/конце, которые необходимо исключить из промежуточного периода"
     )
     regression: RegressionEnum = Field(
         default=RegressionEnum.ConstantOnly,
-        title="Компонента тренда, которую следует включить в тест"
+        title="Компонента тренда, которую следует включить в тест",
+        description="Компонента тренда, которую следует включить в тест"
     )
-    autolag: AutoLagEnum = Field(default=AutoLagEnum.AIC, title="Метод выбора длины лага")
+    autolag: AutoLagEnum = Field(
+        default=AutoLagEnum.AIC,
+        title="Метод выбора длины лага",
+        description="Метод выбора длины лага",
+    )

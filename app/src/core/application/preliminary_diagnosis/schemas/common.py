@@ -21,14 +21,28 @@ class CriticalValues(BaseModel):
 class StatTestParams(BaseModel):
     ts: Timeseries = Field(
         default=Timeseries(name="Временной ряд для анализа"),
-        title="Временной ряд для анализа"
+        title="Временной ряд для анализа",
+        description="Временной ряд для анализа",
     )
 
 class StatTestResult(BaseModel):
-    p_value: Optional[float] = Field(default=0.05, title="p-value теста")
-    stat_value: Optional[float] = Field(title="Значение статистики теста")
-    critical_values: CriticalValues = Field(title="Критические значения для разных уровней значимости")
-    lags: int = Field(title="Число лагов, использованных при расчетах")
+    p_value: Optional[float] = Field(
+        default=0.05,
+        title="p-value теста",
+        description="p-value теста"
+    )
+    stat_value: Optional[float] = Field(
+        title="Значение статистики теста",
+        description="Значение статистики теста"
+    )
+    critical_values: CriticalValues = Field(
+        title="Критические значения для разных уровней значимости",
+        description="Критические значения для разных уровней значимости",
+    )
+    lags: int = Field(
+        title="Число лагов, использованных при расчетах",
+        description="Число лагов, использованных при расчетах",
+    )
 
     @model_validator(mode='after')
     def validate_float(self):

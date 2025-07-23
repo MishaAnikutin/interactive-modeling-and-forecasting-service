@@ -15,7 +15,8 @@ class NlagsEnum(str, Enum):
 class KpssParams(StatTestParams):
     regression: RegressionEnum = Field(
         default=RegressionEnum.ConstantOnly,
-        title="Компонента тренда, которую следует включить в тест"
+        title="Компонента тренда, которую следует включить в тест",
+        description="Компонента тренда, которую следует включить в тест",
     )
     nlags: NlagsEnum | int = Field(
         default=NlagsEnum.auto,

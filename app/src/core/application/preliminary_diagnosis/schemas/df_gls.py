@@ -16,17 +16,27 @@ class MethodEnum(str, Enum):
     t_stat = 't-stat'
 
 class DfGlsParams(StatTestParams):
-    lags: Optional[int] = Field(default=None, ge=0, title="Число лагов для ADF регрессии")
+    lags: Optional[int] = Field(
+        default=None, ge=0,
+        title="Число лагов для ADF регрессии",
+        description="Число лагов для ADF регрессии"
+    )
     trend: TrendEnum = Field(
         default=TrendEnum.ConstantOnly,
-        title="Компонента тренда, которую следует включить в тест"
+        title="Компонента тренда, которую следует включить в тест",
+        description="Компонента тренда, которую следует включить в тест",
     )
     max_lags: Optional[int] = Field(
         default=None,
         ge=0,
-        title="Максимальное число, которое может быть выбрано для лага"
+        title="Максимальное число, которое может быть выбрано для лага",
+        description="Максимальное число, которое может быть выбрано для лага"
     )
-    method: MethodEnum = Field(default=MethodEnum.AIC, title="Метод выбора длины лага")
+    method: MethodEnum = Field(
+        default=MethodEnum.AIC,
+        title="Метод выбора длины лага",
+        description="Метод выбора длины лага",
+    )
 
     @model_validator(mode='after')
     def validate_lags(self) -> None:
