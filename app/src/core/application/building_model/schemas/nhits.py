@@ -47,14 +47,42 @@ class ActivationType(str, Enum):
     Sigmoid = "Sigmoid"
 
 class NhitsParams(BaseModel):
-    n_stacks: int = Field(default=3, description="Число стеков", ge=1)
-    n_blocks: list[int] = Field(default=[1, 1, 1],)
-    n_pool_kernel_size: list[int] = Field(default=[2, 2, 1],)
-    pooling_mode: PoolingMode = Field(default=PoolingMode.MaxPool1d,)
-    interpolation_mode: InterpMode = Field(default=InterpMode.Linear,)
-    loss: LossEnum = Field(default=LossEnum.MAE,)
-    valid_loss: LossEnum = Field(default=LossEnum.MAE,)
-    activation: ActivationType = Field(default=ActivationType.ReLU)
+    n_stacks: int = Field(
+        default=3,
+        title="Число стеков",
+        ge=1,
+        description="n_stacks = len(n_blocks) = len(n_pool_kernel_size)"
+    )
+    n_blocks: list[int] = Field(
+        default=[1, 1, 1],
+        title="Число блоков в каждом стеке.",
+        description="len(n_blocks) = n_stacks = len(n_pool_kernel_size)"
+    )
+    n_pool_kernel_size: list[int] = Field(
+        default=[2, 2, 1],
+        title="List with the size of the windows to take a max/avg over",
+        description="len(n_pool_kernel_size) = n_stacks = len(n_blocks)"
+    )
+    pooling_mode: PoolingMode = Field(
+        default=PoolingMode.MaxPool1d,
+        title="Pooling mode"
+    )
+    interpolation_mode: InterpMode = Field(
+        default=InterpMode.Linear,
+        title="Interpolation mode"
+    )
+    loss: LossEnum = Field(
+        default=LossEnum.MAE,
+        title="Название функции ошибки, используемой при обучении"
+    )
+    valid_loss: Optional[LossEnum] = Field(
+        default=None,
+        title="Название функции ошибки, используемой при валидации"
+    )
+    activation: ActivationType = Field(
+        default=ActivationType.ReLU,
+        title="Название функции активации"
+    )
     max_steps: int = Field(default=100, ge=1, description="Максимум итераций обучения", le=5000)
     early_stop_patience_steps: int = Field(default=-1, ge=-1, description="Patience для early-stopping", le=5000)
     val_check_steps: int = Field(default=50, ge=0, description="Проверка валидации каждые n шагов", le=5000)
@@ -92,14 +120,20 @@ class NhitsParams(BaseModel):
 
 
 class NhitsFitRequest(BaseModel):
-    dependent_variables: Timeseries
-    explanatory_variables: Optional[List[Timeseries]]
-    hyperparameters: NhitsParams
-    fit_params: FitParams
+    dependent_variables: Timeseries = Field(
+        default=Timeseries(name="Зависимая переменная"),
+        title="Зависимая переменная"
+    )
+    explanatory_variables: Optional[List[Timeseries]] = Field(
+        default=[Timeseries(name="Объясняющая переменная"), ],
+        title="Список объясняющих переменных"
+    )
+    hyperparameters: NhitsParams = Field(title="Параметры модели NHiTS")
+    fit_params: FitParams = Field(title="Общие параметры обучения")
 
 
 class NhitsFitResult(BaseModel):
-    forecasts: Forecasts          # прогнозы
-    model_metrics: ModelMetrics   # рассчитанные метрики
-    weight_path: str              # путь к сохранённым весам
-    model_id: str                 # идентификатор модели
+    forecasts: Forecasts = Field(title="Прогнозы")
+    model_metrics: ModelMetrics = Field(title="Метрики модели")
+    weight_path: str = Field(default="example.pth", title="Путь до весов модели")
+    model_id: str = Field(default="example", title="Идентификатор модели")
