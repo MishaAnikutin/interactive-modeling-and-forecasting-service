@@ -2,8 +2,9 @@ from fastapi import APIRouter, HTTPException
 from dishka import FromDishka
 from dishka.integrations.fastapi import inject_sync
 
+from src.core.application.building_model.errors.lstm import LstmFitValidationError, LstmPydanticValidationError
+from src.core.application.building_model.errors.nhits import NhitsFitValidationError, NhitsPydanticValidationError
 from src.core.application.building_model.schemas.arimax import ArimaxFitRequest, ArimaxFitResult
-from src.core.application.building_model.schemas.errors import PydanticValidationError, FitValidationError
 from src.core.application.building_model.schemas.lstm import LstmFitRequest, LstmFitResult
 from src.core.application.building_model.schemas.nhits import NhitsFitRequest, NhitsFitResult
 from src.core.application.building_model.use_cases.fit_arimax import FitArimaxUC
@@ -25,7 +26,10 @@ def fit_arimax(
 @fit_model_router.post(
     path="/nhits/fit",
     responses={
-        200: {"model": NhitsFitResult},
+        200: {
+            "model": NhitsFitResult,
+            "description": "Успешный ответ"
+        },
         400: {
             "model": FitValidationError,
             "description": "Ошибка валидации во время обучения",
@@ -44,7 +48,23 @@ def fit_nhits(
     return fit_nhits_uc.execute(request=request)
 
 
-@fit_model_router.post("/lstm/fit")
+@fit_model_router.post(
+    path="/lstm/fit",
+    responses={
+        200: {
+            "model": LstmFitResult,
+            "description": "Успешный ответ"
+        },
+        400: {
+            "model": LstmFitValidationError,
+            "description": "Ошибка валидации во время обучения",
+        },
+        422: {
+            "model": LstmPydanticValidationError,
+            "description": "Ошибка валидации запроса",
+        },
+    }
+)
 @inject_sync
 def fit_lstm(
     request: LstmFitRequest,

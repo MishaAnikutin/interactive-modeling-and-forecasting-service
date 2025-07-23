@@ -28,7 +28,7 @@ PydanticValidationErrorType = Annotated[
 ]
 
 
-class PydanticValidationError(BaseModel):
+class NhitsPydanticValidationError(BaseModel):
     msg: PydanticValidationErrorType = Field(
         title="Описание ошибки",
         default=ListLengthError()
@@ -70,8 +70,7 @@ class TrainSizeError(BaseModel):
     type: Literal["train"] = "train_size"
     detail: str = Field(
         default=(
-            "Вы выбрали слишком большую тестовую выборку и горизонт прогноза "
-            "либо слишком маленькую тренировочную."
+            "4 * (h + размер тестовой выборки) должно быть <= размер обучающей выборки"
         ),
         title="Описание ошибки"
     )
@@ -87,7 +86,7 @@ FitValidationErrorType = Annotated[
     Field(discriminator="type")
 ]
 
-class FitValidationError(BaseModel):
+class NhitsFitValidationError(BaseModel):
     msg: FitValidationErrorType = Field(
         title="Описание ошибки",
         default=HorizonValidationError()

@@ -113,14 +113,18 @@ class LstmAdapter(NeuralForecastInterface):
             raise HTTPException(
                 status_code=400,
                 detail="Вы выбрали слишком большую тестовую выборку и горизонт прогноза "
-                       "либо слишком маленькую тренировочную."
+                       "либо слишком маленькую тренировочную. "
+                       "input_size + h + test_size должно быть <= train_size",
             )
 
         if lstm_params.recurrent and lstm_params.input_size + lstm_params.h_train + test_size > train_target.shape[-1]:
             raise HTTPException(
                 status_code=400,
-                detail="При рекуррентном прогнозировании вы выбрали слишком большой h_train "
-                       "либо слишком маленькую обучающую выборку по сравнению с тестовой"
+                detail=(
+                    "При рекуррентном прогнозировании вы выбрали слишком большой h_train "
+                    "либо слишком маленькую обучающую выборку по сравнению с тестовой."
+                    "Должно быть input_size + h_train + test_size <= train_size"
+                )
             )
 
         # 2. Подготовка данных --------------------------------------------------------
