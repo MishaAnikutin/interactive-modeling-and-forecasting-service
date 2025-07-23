@@ -1,0 +1,94 @@
+from typing import Annotated, Union, Literal
+
+from pydantic import BaseModel, Field
+
+
+class ListLengthError(BaseModel):
+    type: Literal["length"] = "length"
+    detail: str = Field(
+        default="Все списки должны иметь одинаковую длину: n_stacks = len(n_blocks) = len(n_pool_kernel_size)",
+        title="Описание ошибки"
+    )
+
+
+class KernelSizeError(BaseModel):
+    type: Literal["kernel"] = "kernel"
+    detail: str = Field(
+        default="Все значения в списке n_pool_kernel_size должны быть больше или равны 1",
+        title="Описание ошибки"
+    )
+
+
+PydanticValidationErrorType = Annotated[
+    Union[
+        ListLengthError,
+        KernelSizeError,
+    ],
+    Field(discriminator="type")
+]
+
+
+class PydanticValidationError(BaseModel):
+    msg: PydanticValidationErrorType = Field(
+        title="Описание ошибки",
+        default=ListLengthError()
+    )
+
+# валидация в процессе обучения
+
+class HorizonValidationError(BaseModel):
+    type: Literal["horizon"] = "horizon"
+    detail: str = Field(
+        default="Горизонт прогноза + размер тестовой выборки должен быть больше 0",
+        title="Описание ошибки"
+    )
+
+
+class ValSizeError(BaseModel):
+    type: Literal["val_size"] = "val_size"
+    detail: str = Field(
+        default=(
+            "Размер валидационной выборки должен быть 0 или "
+            "больше или равен величины горизонт прогнозирования + размер тестовой выборки"
+        ),
+        title="Описание ошибки"
+    )
+
+
+class PatienceStepsError(BaseModel):
+    type: Literal["patience"] = "patience"
+    detail: str = Field(
+        default=(
+            "Валидационная выборка должна быть не пустой, "
+            "если ранняя остановка включена (early_stop_patience_steps > 0)"
+        ),
+        title="Описание ошибки"
+    )
+
+
+class TrainSizeError(BaseModel):
+    type: Literal["train"] = "train_size"
+    detail: str = Field(
+        default=(
+            "Вы выбрали слишком большую тестовую выборку и горизонт прогноза "
+            "либо слишком маленькую тренировочную."
+        ),
+        title="Описание ошибки"
+    )
+
+
+FitValidationErrorType = Annotated[
+    Union[
+        HorizonValidationError,
+        ValSizeError,
+        PatienceStepsError,
+        TrainSizeError
+    ],
+    Field(discriminator="type")
+]
+
+class FitValidationError(BaseModel):
+    msg: FitValidationErrorType = Field(
+        title="Описание ошибки",
+        default=HorizonValidationError()
+    )
