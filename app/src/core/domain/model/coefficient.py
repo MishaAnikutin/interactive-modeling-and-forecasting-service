@@ -1,9 +1,9 @@
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, model_validator, Field
 from src.shared.utils import validate_float_param
 
 
 class Coefficient(BaseModel):
-    name: str
+    name: str = Field(default="coefficient", title="Название коэффициента")
     value: float
     p_value: float
 
