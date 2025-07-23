@@ -147,7 +147,7 @@ class STLDecompositionRequest(BaseModel):
                 raise ValueError("You should a period if the data frequency is year")
             elif self.ts.data_frequency == DataFrequency.day and low_pass < 9:
                 raise ValueError(
-                    "Low pass must be greater than or equal to 365 "
+                    "Low pass must be greater than or equal to 9 "
                     "if timeseries frequency is day"
                 )
         return self
