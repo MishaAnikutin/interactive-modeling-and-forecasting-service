@@ -8,6 +8,7 @@ from src.core.application.preliminary_diagnosis.errors.dickey_fuller import Dick
 from src.core.application.preliminary_diagnosis.errors.kpss import KpssPydanticValidationError
 from src.core.application.preliminary_diagnosis.errors.phillips_perron import PhillipsPerronPydanticValidationError
 from src.core.application.preliminary_diagnosis.errors.range_unit_root import RangePydanticValidationError
+from src.core.application.preliminary_diagnosis.errors.zivot_andrews import ZivotAndrewsExecuteValidationError
 from src.core.application.preliminary_diagnosis.schemas.common import StatTestResult
 from src.core.application.preliminary_diagnosis.schemas.df_gls import DfGlsParams
 from src.core.application.preliminary_diagnosis.schemas.dickey_fuller import DickeyFullerParams, DickeyFullerResult
@@ -111,7 +112,19 @@ def df_gls(
     return df_gls_uc.execute(request=request)
 
 
-@stationary_testing_router.post("/zivot_andrews")
+@stationary_testing_router.post(
+    path="/zivot_andrews",
+    responses={
+        200: {
+            "model": StatTestResult,
+            "description": "Успешный ответ"
+        },
+        400: {
+            "model": ZivotAndrewsExecuteValidationError,
+            "description": "Ошибка выполнения теста"
+        }
+    }
+)
 @inject_sync
 def zivot_andrews(
     request: ZivotAndrewsParams,
