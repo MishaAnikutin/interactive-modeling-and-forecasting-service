@@ -12,53 +12,59 @@ class LstmParams(BaseModel):
         default=-1,
         ge=-1,
         le=5000,
+        title="Размер входного окна обучения",
         description='Maximum sequence length for truncated train',
     )
-    inference_input_size: Optional[int]= Field(
+    inference_input_size: Optional[int] = Field(
         default=None,
         ge=1,
         le=5000,
+        title="Размер входного окна инференса",
         description='Maximum sequence length for truncated inference. Default None uses input_size history.'
     )
     h_train: int = Field(
         default=1,
         ge=0,
         le=5000,
+        title="Длина обратного распространения ошибки",
         description='Maximum sequence length for truncated train backpropagation. Default 1.'
     )
     encoder_n_layers: int = Field(
         default=2,
         gt=0,
         le=100,
+        title="Количество слоёв LSTM",
         description='Number of layers for the LSTM.'
     )
     encoder_hidden_size: int = Field(
         default=200,
         gt=1,
         le=5000,
+        title="Размер скрытого состояния LSTM",
         description="Units for the LSTM's hidden state size."
     )
     encoder_dropout: float = Field(
         default=0.0,
         ge=0.0,
         le=1.0,
+        title="Dropout",
         description='Dropout regularization applied to LSTM outputs.'
     )
     decoder_hidden_size: int = Field(
         default=128,
         ge=0,
         le=5000,
-        description="Size of hidden layer for the MLP decoder.size of hidden layer for the MLP decoder."
+        title="Размер скрытого слоя декодера",
     )
     decoder_layers: int = Field(
         default=2,
         ge=0,
         le=100,
-        description='number of layers for the MLP decoder.'
+        title="Количество слоёв декодера",
     )
     recurrent: bool = Field(
         default=False,
-        description='whether to exclude the target variable from the input.'
+        title="Исключить целевую переменную из входа",
     )
     loss: LossEnum = Field(
         default=LossEnum.MAE,
@@ -71,28 +77,30 @@ class LstmParams(BaseModel):
     max_steps: int = Field(
         default=100,
         ge=1,
-        description="Максимум итераций обучения",
-        le=5000
+        le=5000,
+        title="Максимальное число шагов обучения",
     )
     learning_rate: float = Field(
         default=1e-3,
         gt=0.0,
+        title="Скорость обучения",
         description="Шаг обучения"
     )
     early_stop_patience_steps: int = Field(
         default=-1,
         ge=-1,
-        description="Patience для early-stopping", le=5000
+        le=5000,
+        title="Patience для early-stopping",
     )
     val_check_steps: int = Field(
         default=50,
         ge=0,
-        description="Проверка валидации каждые n шагов",
-        le=5000
+        le=5000,
+        title="Число шагов между проверками валидации",
     )
     scaler_type: ScalerType = Field(
         default=ScalerType.Robust,
-        description="Тип скейлера"
+        title="Тип скейлера",
     )
 
     @model_validator(mode='after')
