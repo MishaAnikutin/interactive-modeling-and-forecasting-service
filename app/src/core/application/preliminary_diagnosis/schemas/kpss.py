@@ -33,6 +33,6 @@ class KpssParams(StatTestParams):
     @model_validator(mode='after')
     def validate_nlags(self):
         if type(self.nlags) != NlagsEnum:
-            if self.nlags < 0:
-                raise ValueError("nlags must be non-negative")
+            if self.nlags >= len(self.ts.values) or self.nlags < 0:
+                raise ValueError("Число лагов должно быть меньше числа наблюдений и больше или равно 0")
         return self

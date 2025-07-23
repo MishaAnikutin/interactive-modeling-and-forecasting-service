@@ -5,6 +5,7 @@ from dishka.integrations.fastapi import inject_sync
 from src.core.application.preliminary_diagnosis.errors.df_gls import DfGlsPydanticValidationError, \
     DfGlsExecuteValidationError
 from src.core.application.preliminary_diagnosis.errors.dickey_fuller import DickeyFullerPydanticValidationError
+from src.core.application.preliminary_diagnosis.errors.kpss import KpssPydanticValidationError
 from src.core.application.preliminary_diagnosis.schemas.common import StatTestResult
 from src.core.application.preliminary_diagnosis.schemas.df_gls import DfGlsParams
 from src.core.application.preliminary_diagnosis.schemas.dickey_fuller import DickeyFullerParams, DickeyFullerResult
@@ -50,7 +51,7 @@ def dickey_fuller(
             "description": "Успешный ответ",
         },
         422: {
-            "model": DickeyFullerPydanticValidationError,
+            "model": KpssPydanticValidationError,
             "description": "Ошибка валидации параметров"
         }
     }

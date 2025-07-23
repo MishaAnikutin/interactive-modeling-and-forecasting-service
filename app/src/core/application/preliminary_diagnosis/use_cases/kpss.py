@@ -28,10 +28,7 @@ class KpssUC:
                 lags=nlags,
             )
         except ValueError as exc:
-            if "must be < number of observations" in str(exc):
-                raise HTTPException(
-                    status_code=400,
-                    detail=str(exc)
-                )
-            else:
-                raise ValueError(str(exc))
+            raise HTTPException(
+                status_code=400,
+                detail=str(exc)
+            )
