@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from dishka import FromDishka
 from dishka.integrations.fastapi import inject_sync
 
+from src.core.application.building_model.errors.arimax import ArimaxFitValidationError
 from src.core.application.building_model.errors.lstm import LstmFitValidationError, LstmPydanticValidationError
 from src.core.application.building_model.errors.nhits import NhitsFitValidationError, NhitsPydanticValidationError
 from src.core.application.building_model.schemas.arimax import ArimaxFitRequest, ArimaxFitResult
@@ -14,7 +15,19 @@ from src.core.application.building_model.use_cases.fit_nhits import FitNhitsUC
 fit_model_router = APIRouter(prefix="/building_model", tags=["Построение модели"])
 
 
-@fit_model_router.post("/arimax/fit")
+@fit_model_router.post(
+    path="/arimax/fit",
+    responses={
+        200: {
+            "model": ArimaxFitResult,
+            "description": "Успешный ответ"
+        },
+        400: {
+            "model": ArimaxFitValidationError,
+            "description": "Ошибка валидации во время обучения",
+        },
+    }
+)
 @inject_sync
 def fit_arimax(
     request: ArimaxFitRequest,

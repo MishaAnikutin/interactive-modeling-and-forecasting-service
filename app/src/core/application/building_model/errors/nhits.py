@@ -2,6 +2,9 @@ from typing import Annotated, Union, Literal
 
 from pydantic import BaseModel, Field
 
+from src.core.application.building_model.errors.alignment import NotEqualToExpectedError, NotConstantFreqError, \
+    NotEqualToTargetError, NotLastDayOfMonthError, NotSupportedFreqError, EmptyError
+
 
 class ListLengthError(BaseModel):
     type: Literal["length"] = "length"
@@ -81,7 +84,13 @@ FitValidationErrorType = Annotated[
         HorizonValidationError,
         ValSizeError,
         PatienceStepsError,
-        TrainSizeError
+        TrainSizeError,
+        NotEqualToExpectedError,
+        NotEqualToTargetError,
+        NotConstantFreqError,
+        NotSupportedFreqError,
+        NotLastDayOfMonthError,
+        EmptyError
     ],
     Field(discriminator="type")
 ]

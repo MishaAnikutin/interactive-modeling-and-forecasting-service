@@ -2,6 +2,8 @@ from typing import Annotated, Union, Literal
 
 from pydantic import Field, BaseModel
 
+from src.core.application.building_model.errors.alignment import NotEqualToExpectedError, NotEqualToTargetError, \
+    NotConstantFreqError, NotSupportedFreqError, NotLastDayOfMonthError, EmptyError
 from src.core.application.building_model.errors.nhits import HorizonValidationError, ValSizeError, PatienceStepsError
 
 
@@ -53,7 +55,13 @@ FitValidationErrorType = Annotated[
         ValSizeError,
         PatienceStepsError,
         LstmTrainSizeError,
-        LstmTrainSizeError2
+        LstmTrainSizeError2,
+        NotEqualToExpectedError,
+        NotEqualToTargetError,
+        NotConstantFreqError,
+        NotSupportedFreqError,
+        NotLastDayOfMonthError,
+        EmptyError
     ],
     Field(discriminator="type")
 ]
