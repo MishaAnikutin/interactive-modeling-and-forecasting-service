@@ -2,6 +2,8 @@ from fastapi import APIRouter
 from dishka import FromDishka
 from dishka.integrations.fastapi import inject_sync
 
+from src.core.application.preliminary_diagnosis.errors.df_gls import DfGlsPydanticValidationError, \
+    DfGlsExecuteValidationError
 from src.core.application.preliminary_diagnosis.schemas.common import StatTestResult
 from src.core.application.preliminary_diagnosis.schemas.df_gls import DfGlsParams
 from src.core.application.preliminary_diagnosis.schemas.dickey_fuller import DickeyFullerParams, DickeyFullerResult
@@ -44,7 +46,23 @@ def phillips_perron(
 ) -> StatTestResult:
     return phil_perron_uc.execute(request=request)
 
-@stationary_testing_router.post("/df_gls")
+@stationary_testing_router.post(
+    path="/df_gls",
+    responses={
+        200: {
+            "model": StatTestResult,
+            "description": "Успешный ответ",
+        },
+        422: {
+            "model": DfGlsPydanticValidationError,
+            "description": "Ошибка валидации параметров"
+        },
+        400: {
+            "model": DfGlsExecuteValidationError,
+            "description": "Ошибка выполнения теста"
+        }
+    }
+)
 @inject_sync
 def df_gls(
     request: DfGlsParams,

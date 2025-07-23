@@ -54,7 +54,7 @@ def test_df_gls_short(
 ):
     ts = process_variable(reduced_target)
     result = client.post(
-        url='/api/v1/stationary_testing/df_gls',
+        url='/api/v1/preliminary_diagnosis/stationary_testing/df_gls',
         json={
             "ts": ts,
             "lags": lags,

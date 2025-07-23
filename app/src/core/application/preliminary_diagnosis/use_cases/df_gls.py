@@ -36,12 +36,7 @@ class DfGlsUC:
                 lags=result.lags,
             )
         except InfeasibleTestException as exc:
-            if "observations are needed to run an ADF" in str(exc):
-                raise HTTPException(
-                    status_code=400,
-                    detail=str(exc)
-                )
-            elif "The maximum lag you are considering" in str(exc):
+            if "The maximum lag you are considering" in str(exc):
                 raise HTTPException(
                     status_code=400,
                     detail=str(exc)
