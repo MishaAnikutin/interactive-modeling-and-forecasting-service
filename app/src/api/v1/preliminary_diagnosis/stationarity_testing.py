@@ -6,6 +6,7 @@ from src.core.application.preliminary_diagnosis.errors.df_gls import DfGlsPydant
     DfGlsExecuteValidationError
 from src.core.application.preliminary_diagnosis.errors.dickey_fuller import DickeyFullerPydanticValidationError
 from src.core.application.preliminary_diagnosis.errors.kpss import KpssPydanticValidationError
+from src.core.application.preliminary_diagnosis.errors.phillips_perron import PhillipsPerronPydanticValidationError
 from src.core.application.preliminary_diagnosis.schemas.common import StatTestResult
 from src.core.application.preliminary_diagnosis.schemas.df_gls import DfGlsParams
 from src.core.application.preliminary_diagnosis.schemas.dickey_fuller import DickeyFullerParams, DickeyFullerResult
@@ -64,7 +65,19 @@ def kpss(
     return kpss_uc.execute(request=request)
 
 
-@stationary_testing_router.post("/phillips_perron")
+@stationary_testing_router.post(
+    path="/phillips_perron",
+    responses={
+        200: {
+            "model": StatTestResult,
+            "description": "Успешный ответ",
+        },
+        422: {
+            "model": PhillipsPerronPydanticValidationError,
+            "description": "Ошибка валидации параметров"
+        }
+    }
+)
 @inject_sync
 def phillips_perron(
     request: PhillipsPerronParams,
