@@ -31,11 +31,11 @@ def fit_arimax(
             "description": "Успешный ответ"
         },
         400: {
-            "model": FitValidationError,
+            "model": NhitsFitValidationError,
             "description": "Ошибка валидации во время обучения",
         },
         422: {
-            "model": PydanticValidationError,
+            "model": NhitsPydanticValidationError,
             "description": "Ошибка валидации запроса",
         },
     }
