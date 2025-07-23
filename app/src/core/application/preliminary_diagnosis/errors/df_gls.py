@@ -27,7 +27,7 @@ class SingularMatrix(BaseModel):
     type: Literal["singular matrix"] = "singular matrix"
     detail: str = Field(
         default=(
-            "The maximum lag you are considering (4) results in an ADF regression with a "
+            "The maximum lag you are considering results in an ADF regression with a "
             "singular regressor matrix after including 3 lags, and so a specification test be run. "
             "This may occur if your series have little variation and so is locally constant, "
             "or may occur if you are attempting to test a very short series. You can manually set "

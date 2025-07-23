@@ -4,6 +4,7 @@ from dishka.integrations.fastapi import inject_sync
 
 from src.core.application.preliminary_diagnosis.errors.df_gls import DfGlsPydanticValidationError, \
     DfGlsExecuteValidationError
+from src.core.application.preliminary_diagnosis.errors.dickey_fuller import DickeyFullerPydanticValidationError
 from src.core.application.preliminary_diagnosis.schemas.common import StatTestResult
 from src.core.application.preliminary_diagnosis.schemas.df_gls import DfGlsParams
 from src.core.application.preliminary_diagnosis.schemas.dickey_fuller import DickeyFullerParams, DickeyFullerResult
@@ -20,7 +21,19 @@ from src.core.application.preliminary_diagnosis.use_cases.zivot_andrews import Z
 
 stationary_testing_router = APIRouter(prefix="/stationary_testing", tags=["Анализ ряда на стационарность"])
 
-@stationary_testing_router.post("/dickey_fuller")
+@stationary_testing_router.post(
+    path="/dickey_fuller",
+    responses={
+        200: {
+            "model": DickeyFullerResult,
+            "description": "Успешный ответ",
+        },
+        422: {
+            "model": DickeyFullerPydanticValidationError,
+            "description": "Ошибка валидации параметров"
+        }
+    }
+)
 @inject_sync
 def dickey_fuller(
     request: DickeyFullerParams,
@@ -29,7 +42,19 @@ def dickey_fuller(
     return dickey_fuller_uc.execute(request=request)
 
 
-@stationary_testing_router.post("/kpss")
+@stationary_testing_router.post(
+    path="/kpss",
+    responses={
+        200: {
+            "model": StatTestResult,
+            "description": "Успешный ответ",
+        },
+        422: {
+            "model": DickeyFullerPydanticValidationError,
+            "description": "Ошибка валидации параметров"
+        }
+    }
+)
 @inject_sync
 def kpss(
     request: KpssParams,
