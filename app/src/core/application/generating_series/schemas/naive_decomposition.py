@@ -49,8 +49,8 @@ class NaiveDecompositionParams(BaseModel):
 
 
 class NaiveDecompositionRequest(BaseModel):
-    ts: Timeseries
-    params: NaiveDecompositionParams
+    ts: Timeseries = Field(title="Временной ряд для разложения")
+    params: NaiveDecompositionParams = Field(title="Параметры разложения")
 
     @model_validator(mode="after")
     def validate_ts(self):
@@ -79,7 +79,19 @@ class NaiveDecompositionRequest(BaseModel):
 
 
 class NaiveDecompositionResult(BaseModel):
-    observed: Optional[Timeseries]
-    seasonal: Optional[Timeseries]
-    trend: Optional[Timeseries]
-    resid: Optional[Timeseries]
+    observed: Optional[Timeseries] = Field(
+        default=Timeseries(name="Наблюдаемые значения"),
+        title="Наблюдаемые значения"
+    )
+    seasonal: Optional[Timeseries] = Field(
+        default=Timeseries(name="Сезонная компонента"),
+        title="Сезонная компонента"
+    )
+    trend: Optional[Timeseries] = Field(
+        default=Timeseries(name="Трендовая компонента"),
+        title="Трендовая компонента"
+    )
+    resid: Optional[Timeseries] = Field(
+        default=Timeseries(name="Остатки"),
+        title="Остатки"
+    )

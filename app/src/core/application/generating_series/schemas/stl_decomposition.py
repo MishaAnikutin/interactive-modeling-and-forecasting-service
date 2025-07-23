@@ -88,8 +88,8 @@ class STLParams(BaseModel):
         return self
 
 class STLDecompositionRequest(BaseModel):
-    ts: Timeseries
-    params: STLParams
+    ts: Timeseries = Field(title="Временной ряд для разложения")
+    params: STLParams = Field(title="Параметры разложения")
 
     @model_validator(mode="after")
     def validate_period(self):
@@ -153,7 +153,19 @@ class STLDecompositionRequest(BaseModel):
         return self
 
 class STLDecompositionResult(BaseModel):
-    observed: Optional[Timeseries]
-    seasonal: Optional[Timeseries]
-    trend: Optional[Timeseries]
-    resid: Optional[Timeseries]
+    observed: Optional[Timeseries] = Field(
+        default=Timeseries(name="Наблюдаемые значения"),
+        title="Наблюдаемые значения"
+    )
+    seasonal: Optional[Timeseries] = Field(
+        default=Timeseries(name="Сезонная компонента"),
+        title="Сезонная компонента"
+    )
+    trend: Optional[Timeseries] = Field(
+        default=Timeseries(name="Трендовая компонента"),
+        title="Трендовая компонента"
+    )
+    resid: Optional[Timeseries] = Field(
+        default=Timeseries(name="Остатки"),
+        title="Остатки"
+    )
