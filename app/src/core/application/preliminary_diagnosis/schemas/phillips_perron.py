@@ -16,9 +16,22 @@ class TestType(str, Enum):
     rho = 'rho'
 
 class PhillipsPerronParams(StatTestParams):
-    lags: Optional[int] = Field(default=None, ge=0)
-    trend: TrendEnum = Field(default=TrendEnum.ConstantOnly)
-    test_type: TestType = Field(default=TestType.tau)
+    lags: Optional[int] = Field(
+        default=None,
+        ge=0,
+        title="Число лагов"
+    )
+    trend: TrendEnum = Field(
+        default=TrendEnum.ConstantOnly,
+        title="Компонента тренда, которую следует включить в тест"
+    )
+    test_type: TestType = Field(
+        default=TestType.tau,
+        title="Тип теста, который будет использоваться",
+        description=('The test to use when computing the test statistic. '
+                     '"tau" is based on the t-stat and "rho" uses a test based on '
+                     'nobs times the re-centered regression coefficient')
+    )
 
     @model_validator(mode='after')
     def validate_ts(self):

@@ -1,4 +1,6 @@
-from pydantic import BaseModel, model_validator
+from typing import Optional
+
+from pydantic import BaseModel, model_validator, Field
 
 from src.core.application.preliminary_diagnosis.schemas.common import StatTestParams, CriticalValues
 from src.shared.utils import validate_float_param
@@ -15,9 +17,9 @@ class RangeUnitRootParams(StatTestParams):
 
 
 class RangeUnitRootResult(BaseModel):
-    p_value: float
-    stat_value: float
-    critical_values: CriticalValues
+    p_value: Optional[float] = Field(default=0.05, title="p-value теста")
+    stat_value: Optional[float] = Field(title="Значение статистики теста")
+    critical_values: CriticalValues = Field(title="Критические значения для разных уровней значимости")
 
     @model_validator(mode='after')
     def validate_float(self):

@@ -27,9 +27,19 @@ class AutoLagEnum(str, Enum):
 
 
 class DickeyFullerParams(StatTestParams):
-    max_lags: Optional[int] = Field(default=None, ge=0)
-    autolag: Optional[LagMethodEnum] = Field(default=LagMethodEnum.AIC)
-    regression: RegressionEnum = Field(default=RegressionEnum.ConstantOnly)
+    max_lags: Optional[int] = Field(
+        default=None,
+        ge=0,
+        title="Максимальное число, которое может быть выбрано для лага"
+    )
+    autolag: Optional[LagMethodEnum] = Field(
+        default=LagMethodEnum.AIC,
+        title="Метод выбора длины лага"
+    )
+    regression: RegressionEnum = Field(
+        default=RegressionEnum.ConstantOnly,
+        title="Компонента тренда, которую следует включить в тест"
+    )
 
     @model_validator(mode='after')
     def validate_ts(self):
@@ -61,7 +71,9 @@ class DickeyFullerParams(StatTestParams):
 
 
 class DickeyFullerResult(StatTestResult):
-    information_criterion_max_value: Optional[float]
+    information_criterion_max_value: Optional[float] = Field(
+        title="Максимальное значение информационного критерия"
+    )
 
     @model_validator(mode="after")
     def validate_inf_crit(self):
