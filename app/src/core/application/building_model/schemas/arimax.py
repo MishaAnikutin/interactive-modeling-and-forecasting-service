@@ -12,15 +12,21 @@ class ArimaxParams(BaseModel):
 
 
 class ArimaxFitRequest(BaseModel):
-    dependent_variables: Timeseries
-    explanatory_variables: Optional[List[Timeseries]]
-    hyperparameters: ArimaxParams
-    fit_params: FitParams
+    dependent_variables: Timeseries = Field(
+        default=Timeseries(name="Зависимая переменная"),
+        title="Зависимая переменная"
+    )
+    explanatory_variables: Optional[List[Timeseries]] = Field(
+        default=[Timeseries(name="Объясняющая переменная"),],
+        title="Список объясняющих переменных"
+    )
+    hyperparameters: ArimaxParams = Field(title='Параметры модели ARIMAX')
+    fit_params: FitParams = Field(title="Общие параметры обучения")
 
 
 class ArimaxFitResult(BaseModel):
-    forecasts: Forecasts
-    coefficients: List[Coefficient]
-    model_metrics: ModelMetrics
-    weight_path: str
-    model_id: str
+    forecasts: Forecasts = Field(title="Прогнозы")
+    coefficients: List[Coefficient] = Field(title="Список коэффициентов")
+    model_metrics: ModelMetrics = Field(title="Метрики модели")
+    weight_path: str = Field(default="example.pth", title="Путь до весов модели")
+    model_id: str = Field(default="example", title="Идентификатор модели")
