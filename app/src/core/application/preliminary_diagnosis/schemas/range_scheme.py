@@ -2,6 +2,7 @@ from typing import Optional
 
 from pydantic import BaseModel, model_validator, Field
 
+from src.core.application.preliminary_diagnosis.errors.range_unit_root import ConstantTsError, LowCountObservationsError
 from src.core.application.preliminary_diagnosis.schemas.common import StatTestParams, CriticalValues
 from src.shared.utils import validate_float_param
 
@@ -10,9 +11,9 @@ class RangeUnitRootParams(StatTestParams):
     @model_validator(mode="after")
     def validate_ts(self):
         if min(self.ts.values) == max(self.ts.values):
-            raise ValueError("Raw is constant")
+            raise ValueError(ConstantTsError().detail)
         if len(self.ts.values) < 25:
-            raise ValueError("Raw should have at least 25 elements")
+            raise ValueError(LowCountObservationsError().detail)
         return self
 
 
