@@ -3,6 +3,7 @@ from typing import Optional
 
 from pydantic import Field, model_validator
 
+from src.core.application.preliminary_diagnosis.errors.phillips_perron import ConstantTsError, InvalidLagsError
 from src.core.application.preliminary_diagnosis.schemas.common import StatTestParams
 
 
@@ -20,7 +21,7 @@ class PhillipsPerronParams(StatTestParams):
         default=None,
         ge=0,
         title="Число лагов",
-        description="Число лагов"
+        description="Число лагов. Число лагов должно быть меньше числа наблюдений и больше или равно 0"
     )
     trend: TrendEnum = Field(
         default=TrendEnum.ConstantOnly,
@@ -30,19 +31,18 @@ class PhillipsPerronParams(StatTestParams):
     test_type: TestType = Field(
         default=TestType.tau,
         title="Тип теста, который будет использоваться",
-        description=('The test to use when computing the test statistic. '
-                     '"tau" is based on the t-stat and "rho" uses a test based on '
-                     'nobs times the re-centered regression coefficient')
+        description=(
+            "Параметр определяет тип теста для вычисления тестовой статистики: "
+            "- `tau` — использует t-статистику. "
+            "- `rho` — использует тест, основанный на произведении количества наблюдений (`nobs`) "
+            "и рецентрированного коэффициента регрессии."
+        )
     )
 
     @model_validator(mode='after')
     def validate_ts(self):
         if max(self.ts.values) == min(self.ts.values):
-            raise ValueError("Invalid input, ts is constant")
+            raise ValueError(ConstantTsError().detail)
         if (self.lags is not None) and (len(self.ts.values) - 1 < self.lags):
-            raise ValueError(
-                f"The number of observations {len(self.ts.values)} is less than the number of"
-                f"lags in the long-run covariance estimator, {self.lags}. You must have "
-                "lags <= nobs."
-            )
+            raise ValueError(InvalidLagsError().detail)
         return self
