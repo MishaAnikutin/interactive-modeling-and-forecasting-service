@@ -6,10 +6,12 @@ class SingularMatrix(BaseModel):
     type: Literal["singular matrix"] = "singular matrix"
     detail: str = Field(
         default=(
-            f"The regressor matrix is singular. The can happen if the data "
-            "contains regions of constant observations, if the number of "
-            f"lags is too large, or if the series is very "
-            "short."
+            "Матрица регрессоров является сингулярной. Это может произойти, если: "
+            "1. Данные содержат участки с постоянными значениями. "
+            "2. Количество лагов слишком велико. "
+            "3. Временной ряд слишком короткий. "
+            "Решение: Проверьте данные на наличие постоянных участков, "
+            "уменьшите количество лагов или увеличьте длину временного ряда."
         ),
         title="Описание ошибки"
     )
@@ -18,11 +20,10 @@ class SingularMatrix2(BaseModel):
     type: Literal["singular matrix 2"] = "singular matrix 2"
     detail: str = Field(
         default=(
-            "The maximum lag you are considering results in an ADF regression with a"
-            "singular regressor matrix after including lags, and so a specification test be "
-            "run. This may occur if your series have little variation and so is locally constant,"
-            "or may occur if you are attempting to test a very short series. You can manually set"
-            "maximum lag length to consider smaller models."
+            "Ошибка возникает, когда в регрессии ADF (тест Дики-Фуллера) матрица регрессоров становится сингулярной из-за выбранного максимального лага. Это может произойти, если: "
+            "1. Ваши данные имеют низкую вариацию и выглядят почти постоянными. "
+            "2. Вы анализируете слишком короткий временной ряд. "
+            "Решение: Уменьшите максимальное количество лагов вручную, чтобы использовать меньшие модели."
         ),
         title="Описание ошибки"
     )
@@ -37,13 +38,13 @@ class InvalidMaxLagError(BaseModel):
 class LowCountObservationsError(BaseModel):
     type: Literal["low count observations"] = "low count observations"
     detail: str = Field(
-        default="Слишком мало наблюдений для реализации теста с данными trend и lags"
+        default="Слишком мало наблюдений для реализации теста с данными regression и lags"
     )
 
 class LowCountObservationsError2(BaseModel):
     type: Literal["low count observations 2"] = "low count observations 2"
     detail: str = Field(
-        default="Число наблюдений должно быть как минимум len(trend) + lags + 3",
+        default="Число наблюдений должно быть как минимум len(regression) + lags + 3",
         title="Описание ошибки"
     )
 

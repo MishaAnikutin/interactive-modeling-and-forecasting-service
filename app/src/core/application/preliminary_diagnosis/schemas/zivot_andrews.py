@@ -22,13 +22,13 @@ class ZivotAndrewsParams(StatTestParams):
     lags: Optional[int] = Field(
         default=None, ge=0,
         title="Число лагов для ADF регрессии",
-        description="Число лагов для ADF регрессии"
+        description="Число лагов для ADF регрессии. Число наблюдений должно быть как минимум len(regression) + lags + 3"
     )
     max_lags: Optional[int] = Field(
         default=None,
         ge=0,
         title="Максимальное число, которое может быть выбрано для лага",
-        description="Максимальное число, которое может быть выбрано для лага"
+        description="Максимальное число, которое может быть выбрано для лага. max lag должен быть меньше чем число наблюдений"
     )
     trim: float = Field(
         default=0.15, ge=0.0, le=0.33,

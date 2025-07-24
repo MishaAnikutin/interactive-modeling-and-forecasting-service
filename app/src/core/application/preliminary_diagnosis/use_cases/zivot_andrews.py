@@ -2,6 +2,8 @@ from arch.unitroot import ZivotAndrews
 from arch.utility.exceptions import InfeasibleTestException
 from fastapi import HTTPException
 
+from src.core.application.preliminary_diagnosis.errors.zivot_andrews import SingularMatrix, InvalidMaxLagError, \
+    LowCountObservationsError2, LowCountObservationsError, SingularMatrix2
 from src.core.application.preliminary_diagnosis.schemas.common import CriticalValues, StatTestResult
 from src.core.application.preliminary_diagnosis.schemas.zivot_andrews import ZivotAndrewsParams
 from src.infrastructure.adapters.timeseries import PandasTimeseriesAdapter
@@ -40,28 +42,28 @@ class ZivotAndrewsUC:
             if "observations are needed to run an ADF" in str(exc):
                 raise HTTPException(
                     status_code=400,
-                    detail=str(exc)
+                    detail=LowCountObservationsError().detail
                 )
             elif "The maximum lag you are considering" in str(exc):
                 raise HTTPException(
                     status_code=400,
-                    detail=str(exc)
+                    detail=SingularMatrix().detail
                 )
             elif "The number of observations is too small to use the Zivot-Andrews" in str(exc):
                 raise HTTPException(
                     status_code=400,
-                    detail=str(exc)
+                    detail=LowCountObservationsError2().detail
                 )
             elif "The regressor matrix is singular." in str(exc):
                 raise HTTPException(
                     status_code=400,
-                    detail=str(exc)
+                    detail=SingularMatrix2().detail
                 )
             raise exc
         except ValueError as exc:
             if "maxlag should be < nobs" in str(exc):
                 raise HTTPException(
                     status_code=400,
-                    detail=str(exc)
+                    detail=InvalidMaxLagError().detail
                 )
             raise exc
