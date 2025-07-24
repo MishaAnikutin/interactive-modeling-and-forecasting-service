@@ -27,11 +27,10 @@ class SingularMatrix(BaseModel):
     type: Literal["singular matrix"] = "singular matrix"
     detail: str = Field(
         default=(
-            "The maximum lag you are considering results in an ADF regression with a "
-            "singular regressor matrix after including lags, and so a specification test be run. "
-            "This may occur if your series have little variation and so is locally constant, "
-            "or may occur if you are attempting to test a very short series. You can manually set "
-            "maximum lag length to consider smaller models."
+            "Ошибка возникает, когда в регрессии ADF (тест Дики-Фуллера) матрица регрессоров становится сингулярной из-за выбранного максимального лага. Это может произойти, если:"
+            "1. Ваши данные имеют низкую вариацию и выглядят почти постоянными."
+            "2. Вы анализируете слишком короткий временной ряд."
+            "Решение: Уменьшите максимальное количество лагов вручную, чтобы использовать меньшие модели."
         ),
         title="Описание ошибки"
     )
@@ -39,7 +38,7 @@ class SingularMatrix(BaseModel):
 class InvalidMaxLagError(BaseModel):
     type: Literal["invalid max lag"] = "invalid max lag"
     detail: str = Field(
-        default="max lag должен быть меньше чем число наблюдений",
+        default="max lag должен быть меньше, чем число наблюдений",
         title="Описание ошибки"
     )
 

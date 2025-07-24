@@ -2,6 +2,7 @@ from arch.unitroot import DFGLS
 from arch.utility.exceptions import InfeasibleTestException
 from fastapi import HTTPException
 
+from src.core.application.preliminary_diagnosis.errors.df_gls import SingularMatrix, InvalidMaxLagError
 from src.core.application.preliminary_diagnosis.schemas.common import CriticalValues, StatTestResult
 from src.core.application.preliminary_diagnosis.schemas.df_gls import DfGlsParams
 from src.infrastructure.adapters.timeseries import PandasTimeseriesAdapter
@@ -39,13 +40,13 @@ class DfGlsUC:
             if "The maximum lag you are considering" in str(exc):
                 raise HTTPException(
                     status_code=400,
-                    detail=str(exc)
+                    detail=SingularMatrix().detail
                 )
             raise exc
         except ValueError as exc:
             if "maxlag should be < nobs" in str(exc):
                 raise HTTPException(
                     status_code=400,
-                    detail=str(exc)
+                    detail=InvalidMaxLagError().detail
                 )
             raise exc
