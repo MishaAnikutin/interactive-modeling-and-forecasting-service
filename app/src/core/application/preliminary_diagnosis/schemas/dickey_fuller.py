@@ -4,6 +4,8 @@ from typing import Optional
 import numpy as np
 from pydantic import Field, model_validator
 
+from src.core.application.preliminary_diagnosis.errors.dickey_fuller import ConstantTsError, InvalidMaxLagsError, \
+    LowCountObservationsError
 from src.core.application.preliminary_diagnosis.schemas.common import StatTestParams, StatTestResult
 from src.shared.utils import validate_float_param
 
@@ -31,7 +33,9 @@ class DickeyFullerParams(StatTestParams):
         default=None,
         ge=0,
         title="Максимальное число, которое может быть выбрано для лага",
-        description="Максимальное число, которое может быть выбрано для лага",
+        description="Максимальное число, которое может быть выбрано для лага. "
+                    "Требования: max_lags < (nobs/2 - 1 - len(regression), "
+                    "где: - `nobs` — количество наблюдений в данных.",
     )
     autolag: Optional[LagMethodEnum] = Field(
         default=LagMethodEnum.AIC,
@@ -47,7 +51,7 @@ class DickeyFullerParams(StatTestParams):
     @model_validator(mode='after')
     def validate_ts(self):
         if max(self.ts.values) == min(self.ts.values):
-            raise ValueError("Invalid input, ts is constant")
+            raise ValueError(ConstantTsError().detail)
         return self
 
     @model_validator(mode='after')
@@ -60,16 +64,9 @@ class DickeyFullerParams(StatTestParams):
             # -1 for the diff
             maxlag = min(nobs // 2 - ntrend - 1, maxlag)
             if maxlag < 0:
-                raise ValueError(
-                    "sample size is too short to use selected "
-                    "regression component"
-                )
-        elif self.max_lags > nobs // 2 - ntrend - 1:
-            raise ValueError(
-                "maxlag must be less than (nobs/2 - 1 - ntrend) "
-                "where n trend is the number of included "
-                "deterministic regressors"
-            )
+                raise ValueError(LowCountObservationsError().detail)
+        elif self.max_lags >= nobs // 2 - ntrend - 1:
+            raise ValueError(InvalidMaxLagsError().detail)
         return self
 
 

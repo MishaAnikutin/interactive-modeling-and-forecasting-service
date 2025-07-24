@@ -14,17 +14,21 @@ class InvalidMaxLagsError(BaseModel):
     type: Literal["invalid max lags"] = "invalid max lags"
     detail: str = Field(
         title="Описание ошибки",
-        default="maxlag must be less than (nobs/2 - 1 - ntrend) "
-                "where n trend is the number of included "
-                "deterministic regressors"
+        default=(
+            "Ошибка указывает, что максимальное количество лагов max_lags превышает допустимое значение, "
+            "которое должно быть меньше `(nobs/2 - 1 - len(regression)`, "
+            "где: - `nobs` — количество наблюдений в данных.  "
+            "Решение: Уменьшите значение max_lags, "
+            "чтобы оно соответствовало указанному ограничению, "
+            "учитывая количество наблюдений и детерминированных регрессоров в вашей модели."
+        )
     )
 
 class LowCountObservationsError(BaseModel):
     type: Literal["low count observations"] = "low count observations"
     detail: str = Field(
         title="Описание ошибки",
-        default="sample size is too short to use selected "
-                "regression component"
+        default="Число наблюдений слишком маленькое для выбранного regression"
     )
 
 
