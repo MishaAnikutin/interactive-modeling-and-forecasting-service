@@ -4,6 +4,8 @@ from pydantic import BaseModel, Field, model_validator
 import numpy as np
 from statsmodels.tsa.tsatools import freq_to_period
 
+from src.core.application.generating_series.errors.naive_decomposition import ZeroOrNegativeError, MissingError, \
+    LowCountObservationsError, LowCountObservationsError2
 from src.core.domain import Timeseries
 from enum import Enum
 
@@ -15,36 +17,46 @@ class ModelEnum(str, Enum):
 class NaiveDecompositionParams(BaseModel):
     model: ModelEnum = Field(
         default=ModelEnum.additive,
-        description="Type of seasonal component. Abbreviations are accepted."
+        description="Параметр задаёт тип сезонной компоненты"
     )
     filt: Optional[list[float]] = Field(
         default=None,
-        description="The filter coefficients for filtering out the seasonal component. "
-                    "The concrete moving average method used in filtering is determined by two_sided."
+        description="Параметр задаёт коэффициенты фильтра для удаления сезонной компоненты из данных. "
+                    "Конкретный метод скользящего среднего, "
+                    "используемый для фильтрации, определяется параметром `two_sided`. "
+                    "Требование: длина списка filt (len(filt)) должна быть меньше или равна числа наблюдений"
     )
     period: Optional[int] = Field(
         default=None,
         gt=0,
-        description="Period of the series (e.g., 1 for annual, 4 for quarterly, etc). "
-                    "Must be used if x is not a pandas object or "
-                    "if the index of x does not have a frequency. "
-                    "Overrides default periodicity of x if x is a pandas object with a timeseries index."
+        le=1000,
+        description=(
+            "НЕ РЕКОМЕДНУЕТСЯ его менять с пустого значения!!! "
+            "Параметр указывает периодичность временного ряда "
+            "(например, 1 для годовых данных, 4 для квартальных и т.д.). "
+            "Ряд должен иметь как минимум 2 * period наблюдения, "
+            "где period - это сколько раз в году проходит сезон ряда "
+        )
     )
     two_sided: bool = Field(
         default=True,
-        description="The moving average method used in filtering. "
-                    "If True (default), a centered moving average is computed using the filt. "
-                    "If False, the filter coefficients are for past values only."
+        description=(
+            "Параметр определяет метод скользящего среднего, используемый для фильтрации: "
+            "- Если `True` (по умолчанию), вычисляется центрированное скользящее среднее "
+            "с использованием заданных коэффициентов фильтра (`filt`). "
+            "- Если `False`, коэффициенты фильтра применяются только к прошлым значениям."
+        )
     )
     extrapolate_trend: Optional[int] = Field(
         default=0, ge=0,
-        description="If set to > 0, the trend resulting from the convolution is linear "
-                    "least-squares extrapolated on both ends "
-                    "(or the single one if two_sided is False) "
-                    "considering this many (+1) closest points. "
-                    "If set to ‘freq’, use freq closest points. "
-                    "Setting this parameter results in no NaN values in trend or "
-                    "resid components."
+        description=(
+            "Параметр управляет экстраполяцией тренда, полученного в результате свёртки: "
+            "- Если значение > 0, тренд экстраполируется линейно методом наименьших квадратов "
+            "на обоих концах (или на одном, если `two_sided=False`), "
+            "используя указанное количество ближайших точек плюс одну. "
+            "- Если установлено значение `'freq'`, используются ближайшие точки в количестве, равном частоте ряда. "
+            "- Установка этого параметра исключает появление значений `NaN` в компонентах тренда или остатков."
+        )
     )
 
 
@@ -56,25 +68,18 @@ class NaiveDecompositionRequest(BaseModel):
     def validate_ts(self):
         x = np.array(self.ts.values)
         if not np.all(np.isfinite(x)):
-            raise ValueError("This function does not handle missing values")
+            raise ValueError(MissingError().detail)
         if self.params.model == ModelEnum.multiplicative.value:
             if np.any(x <= 0):
-                raise ValueError(
-                    "Multiplicative seasonality is not appropriate "
-                    "for zero and negative values"
-                )
+                raise ValueError(ZeroOrNegativeError().detail)
 
         period = self.params.period
         if period is None:
             period = freq_to_period(self.ts.data_frequency)
         if x.shape[0] < 2 * period:
-            raise ValueError(
-                f"x must have 2 complete cycles requires {2 * period} "
-                f"observations. x only has {x.shape[0]} observation(s)"
-            )
+            raise ValueError(LowCountObservationsError().detail)
         if x.shape[0] < len(self.params.filt):
-            raise ValueError(f"len of filt {len(self.params.filt)} must be less or equal to "
-                             f"number of observations {x.shape[0]}")
+            raise ValueError(LowCountObservationsError2().detail)
         return self
 
 
