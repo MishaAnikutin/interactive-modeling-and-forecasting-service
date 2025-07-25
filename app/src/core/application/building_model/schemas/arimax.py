@@ -32,7 +32,7 @@ class ArimaxFitRequest(BaseModel):
                     "Ряд должен быть не пустой."
     )
     hyperparameters: ArimaxParams = Field(title='Параметры модели ARIMAX')
-    fit_params: FitParams = Field(title="Общие параметры обучения")
+    fit_params: FitParams = Field(title="Общие параметры обучения", description="train_boundary должна быть раньше val_boundary ")
 
 
 class ArimaxFitResult(BaseModel):
