@@ -31,7 +31,7 @@ class AutoLagEnum(str, Enum):
 class DickeyFullerParams(StatTestParams):
     max_lags: Optional[int] = Field(
         default=None,
-        ge=0,
+        ge=0, le=10000,
         title="Максимальное число, которое может быть выбрано для лага",
         description="Максимальное число, которое может быть выбрано для лага. "
                     "Требования: max_lags < (nobs/2 - 1 - len(regression), "

@@ -19,7 +19,7 @@ class TestType(str, Enum):
 class PhillipsPerronParams(StatTestParams):
     lags: Optional[int] = Field(
         default=None,
-        ge=0,
+        ge=0, le=10000,
         title="Число лагов",
         description="Число лагов. Число лагов должно быть меньше числа наблюдений и больше или равно 0"
     )

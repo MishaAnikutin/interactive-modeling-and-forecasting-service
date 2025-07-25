@@ -91,6 +91,7 @@ class LstmParams(BaseModel):
     learning_rate: float = Field(
         default=1e-3,
         gt=0.0,
+        lt=1.0,
         title="Скорость обучения",
         description="Шаг обучения"
     )

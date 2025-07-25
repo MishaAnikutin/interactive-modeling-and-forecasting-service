@@ -9,12 +9,12 @@ from src.core.domain import Timeseries, DataFrequency
 
 class STLParams(BaseModel):
     period: Optional[int] = Field(
-        default=None, ge=2,
+        default=None, ge=2, lt=5000,
         description="Длина сезонного цикла; "
                     "Требование: Если ряд имеет годовую частотность, то period должен быть не пустым"
     )
     seasonal: int = Field(
-        default=7, ge=3,
+        default=7, ge=3, lt=5000,
         description="Нечетное число. Длина сезонного сглаживателя. Нечетное число."
     )
     trend: Optional[int] = Field(
@@ -28,7 +28,7 @@ class STLParams(BaseModel):
                     "4) при годовой частотности надо выбрать period согласно правилу выше"
     )
     low_pass: Optional[int] = Field(
-        default=None, ge=3,
+        default=None, ge=3, lt=5000,
         description="Длина низкочастотного сглаживателя, нечетное число low_pass > period. "
                     "Low pass должен быть целым число >= 3, которое больше period, если period указан. "
                     "Если period не указан, то: "
@@ -58,7 +58,7 @@ class STLParams(BaseModel):
     )
 
     seasonal_jump: int = Field(
-        default=1, gt=0,
+        default=1, gt=0, le=10000,
         description=(
             "Параметр — положительное целое число, определяющее шаг линейной интерполяции: "
             "- Если значение больше 1, метод LOESS применяется с интервалом в `seasonal_jump` точек, "

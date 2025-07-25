@@ -48,7 +48,7 @@ class NaiveDecompositionParams(BaseModel):
         )
     )
     extrapolate_trend: Optional[int] = Field(
-        default=0, ge=0,
+        default=0, ge=0, le=10000,
         description=(
             "Параметр управляет экстраполяцией тренда, полученного в результате свёртки: "
             "- Если значение > 0, тренд экстраполируется линейно методом наименьших квадратов "
