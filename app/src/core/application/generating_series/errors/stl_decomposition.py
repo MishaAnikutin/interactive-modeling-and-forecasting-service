@@ -14,7 +14,7 @@ class InvalidLowPassError(BaseModel):
     type: Literal["invalid low pass"] = "invalid low pass"
     detail: str = Field(
         default=(
-            "Low pass должен быть целым число >= 3, которое больше period, если period указан."
+            "Low pass должен быть нечетным целым число >= 3, которое больше period, если period указан."
             "Если period не указан, то: "
             "1) при дневной частотности low_pass >= 9 "
             "2) при месячной частотности low_pass >= 13 "
@@ -28,7 +28,7 @@ class InvalidTrendError(BaseModel):
     type: Literal["invalid trend"] = "invalid trend"
     detail: str = Field(
         default=(
-            "Trend должен быть целым число >= 3, которое больше period, если period указан."
+            "Trend должен быть нечетным целым число >= 3, которое больше period, если period указан."
             "Если period не указан, то: "
             "1) при дневной частотности period >= 365 "
             "2) при месячной частотности period >= 13 "
