@@ -10,6 +10,8 @@ from neuralforecast.losses.pytorch import (
 )
 
 from logs import logger
+from src.core.application.building_model.errors.nhits import HorizonValidationError, ValSizeError, PatienceStepsError, \
+    TrainSizeError
 from src.core.application.building_model.schemas.nhits import (
     NhitsParams,
     NhitsFitResult,
@@ -85,30 +87,26 @@ class NhitsAdapter(NeuralForecastInterface):
 
         if h == 0:
             raise HTTPException(
-                detail="Горизонт прогноза + размер тестовой выборки должен быть больше 0",
+                detail=HorizonValidationError().detail,
                 status_code=400,
             )
 
         if val_size != 0 and val_size < h:
             raise HTTPException(
-                detail="Размер валидационной выборки должен быть 0 "
-                       "или больше или равен величины горизонт прогнозирования + размер тестовой выборки "
-                       f"({val_size} < {h})",
+                detail=ValSizeError().detail,
                 status_code=400,
             )
 
         if val_size == 0 and nhits_params.early_stop_patience_steps > 0:
             raise HTTPException(
-                detail="Валидационная выборка должна быть не пустой, "
-                       "если ранняя остановка включена (early_stop_patience_steps > 0)",
+                detail=PatienceStepsError().detail,
                 status_code=400,
             )
 
         if 4 * h > train_target.shape[-1]:
             raise HTTPException(
                 status_code=400,
-                detail="Вы выбрали слишком большую тестовую выборку и горизонт прогноза "
-                       "либо слишком маленькую тренировочную."
+                detail=TrainSizeError().detail
             )
 
         # 2. Подготовка данных --------------------------------------------------------

@@ -143,7 +143,14 @@ class LstmFitRequest(BaseModel):
         title="Список объясняющих переменных"
     )
     hyperparameters: LstmParams = Field(title="Параметры модели LSTM")
-    fit_params: FitParams = Field(title="Общие параметры обучения")
+    fit_params: FitParams = Field(
+        title="Общие параметры обучения",
+        description="Горизонт прогноза + размер тестовой выборки должен быть больше 0. "
+                    "Размер валидационной выборки должен быть 0 или "
+                    "больше или равен величины горизонт прогнозирования + размер тестовой выборки. "
+                    "input_size + h + размер тестовой выборки должно быть <= размер обучающей выборки. "
+                    "input_size + h_train + размер тестовой выборки должно быть <= размер обучающей выборки. "
+    )
 
 
 class LstmFitResult(BaseModel):
