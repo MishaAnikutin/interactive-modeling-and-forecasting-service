@@ -6,6 +6,7 @@ from src.core.application.building_model.use_cases.fit_nhits import FitNhitsUC
 from src.core.application.building_model.use_cases.params import ArimaxParamsUC, NhitsParamsUC
 from src.core.application.generating_series.use_cases.naive_decomposition import NaiveDecompositionUC
 from src.core.application.generating_series.use_cases.stl_decomposition import STLDecompositionUC
+from src.core.application.model_diagnosis.use_cases.omnibus import OmnibusUC
 from src.core.application.preliminary_diagnosis.use_cases.df_gls import DfGlsUC
 from src.core.application.preliminary_diagnosis.use_cases.dicker_fuller import DickeuFullerUC
 from src.core.application.preliminary_diagnosis.use_cases.kpss import KpssUC
@@ -41,3 +42,6 @@ class CoreProvider(Provider):
     # команды для разложения ряда
     stl_decomposition_command = provide(STLDecompositionUC, provides=STLDecompositionUC)
     naive_decomposition_command = provide(NaiveDecompositionUC, provides=NaiveDecompositionUC)
+
+    # команды для анализа остатков
+    omnibus_command = provide(OmnibusUC, provides=OmnibusUC)
