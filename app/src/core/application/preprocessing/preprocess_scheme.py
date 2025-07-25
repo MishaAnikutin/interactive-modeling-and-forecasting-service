@@ -9,12 +9,18 @@ class Transformation(BaseModel):
 # 1. Дифференцирование
 class DiffTransformation(Transformation):
     type: Literal["diff"] = "diff"
-    diff_order: int = Field(title="Периоды сдвига для вычисления разности (допустимы отрицательные значения)",)
+    diff_order: int = Field(
+        title="Периоды сдвига для вычисления разности (допустимы отрицательные значения)",
+        description="- число наблюдений <= diff_order <= число наблюдений"
+    )
 
 # 2. Взятие лага
 class LagTransformation(Transformation):
     type: Literal["lag"] = "lag"
-    lag_order: int = Field(title="Периоды сдвига для вычисления лага (допустимы отрицательные значения)",)
+    lag_order: int = Field(
+        title="Периоды сдвига для вычисления лага (допустимы отрицательные значения)",
+        description="- число наблюдений <= diff_order <= число наблюдений"
+    )
 
 # 3. Логарифмирование
 class LogTransformation(Transformation):
@@ -23,7 +29,7 @@ class LogTransformation(Transformation):
 # 4. Потенцирование
 class PowTransformation(Transformation):
     type: Literal["pow"] = "pow"
-    pow_order: float = Field(..., gt=0, title="Показатель степени")
+    pow_order: float = Field(..., gt=0, title="Показатель степени", le=100)
 
 # 5. Нормализация
 class NormalizeTransformation(Transformation):
@@ -33,12 +39,12 @@ class NormalizeTransformation(Transformation):
 # 6. Экспоненциальное сглаживание (без параметров)
 class ExpSmoothTransformation(Transformation):
     type: Literal["exp_smooth"] = "exp_smooth"
-    span: int = Field(gt=0, title="Период окна экспоненциального сглаживания",)
+    span: int = Field(gt=0, title="Период окна экспоненциального сглаживания", le=1000)
 
 # 7. Преобразование Бокса-Кокса
 class BoxCoxTransformation(Transformation):
     type: Literal["boxcox"] = "boxcox"
-    param: float = Field(title="Параметр λ преобразования Бокса-Кокса",)
+    param: float = Field(title="Параметр λ преобразования Бокса-Кокса", ge=-1000, le=1000)
 
 # 8. Заполнение пропусков
 class FillMissingTransformation(Transformation):
@@ -52,7 +58,7 @@ class MovingAverageTransformation(Transformation):
     type: Literal["moving_avg"] = "moving_avg"
     window: int = Field(
         ...,
-        gt=0,
+        gt=0, le=1000,
         title="Размер окна скользящего среднего",
     )
 
