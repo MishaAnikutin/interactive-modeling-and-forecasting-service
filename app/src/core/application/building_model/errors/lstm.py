@@ -11,8 +11,11 @@ class HiddenSizeError(BaseModel):
     type: Literal["hidden_size"] = "hidden_size"
     detail: str = Field(
         default=(
-            "Hidden size must be greater than proj size."
-            "Proj size is equal to 1 if recurrent set to True and 0 otherwise."
+            "Размер скрытого слоя (hidden size) должен быть больше размера проекции (proj size). "
+            "Размер проекции (proj size) равен 1, "
+            "если параметр recurrent установлен в True, и 0 в противном случае. "
+            "Решение: Убедитесь, что размер скрытого слоя больше значения proj size "
+            "(1 при recurrent=True или 0 при recurrent=False)."
         ),
         title="Описание ошибки"
     )

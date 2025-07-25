@@ -5,6 +5,8 @@ from neuralforecast.losses.pytorch import MAE, MSE, RMSE, MAPE
 from neuralforecast.models import LSTM
 
 from logs import logger
+from src.core.application.building_model.errors.lstm import LstmTrainSizeError2, LstmTrainSizeError
+from src.core.application.building_model.errors.nhits import HorizonValidationError, ValSizeError, PatienceStepsError
 from src.core.application.building_model.schemas.lstm import LstmParams, LstmFitResult
 from src.core.domain import FitParams, DataFrequency
 from src.infrastructure.adapters.metrics import MetricsFactory
@@ -90,41 +92,32 @@ class LstmAdapter(NeuralForecastInterface):
         # валидация параметров
         if h == 0:
             raise HTTPException(
-                detail="Горизонт прогноза + размер тестовой выборки должен быть больше 0",
+                detail=HorizonValidationError().detail,
                 status_code=400,
             )
 
         if val_size != 0 and val_size < h:
             raise HTTPException(
-                detail="Размер валидационной выборки должен быть 0 "
-                       "или больше или равен величины горизонт прогнозирования + размер тестовой выборки "
-                       f"({val_size} < {h})",
+                detail=ValSizeError().detail,
                 status_code=400,
             )
 
         if val_size == 0 and lstm_params.early_stop_patience_steps > 0:
             raise HTTPException(
-                detail="Валидационная выборка должна быть не пустой, "
-                       "если ранняя остановка включена (early_stop_patience_steps > 0)",
+                detail=PatienceStepsError().detail,
                 status_code=400,
             )
 
         if lstm_params.input_size + h > train_target.shape[-1]:
             raise HTTPException(
                 status_code=400,
-                detail="Вы выбрали слишком большую тестовую выборку и горизонт прогноза "
-                       "либо слишком маленькую тренировочную. "
-                       "input_size + h + test_size должно быть <= train_size",
+                detail=LstmTrainSizeError().detail
             )
 
         if lstm_params.recurrent and lstm_params.input_size + lstm_params.h_train + test_size > train_target.shape[-1]:
             raise HTTPException(
                 status_code=400,
-                detail=(
-                    "При рекуррентном прогнозировании вы выбрали слишком большой h_train "
-                    "либо слишком маленькую обучающую выборку по сравнению с тестовой."
-                    "Должно быть input_size + h_train + test_size <= train_size"
-                )
+                detail=LstmTrainSizeError2().detail
             )
 
         # 2. Подготовка данных --------------------------------------------------------
