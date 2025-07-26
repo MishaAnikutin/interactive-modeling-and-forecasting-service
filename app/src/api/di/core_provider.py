@@ -6,6 +6,7 @@ from src.core.application.building_model.use_cases.fit_nhits import FitNhitsUC
 from src.core.application.building_model.use_cases.params import ArimaxParamsUC, NhitsParamsUC
 from src.core.application.generating_series.use_cases.naive_decomposition import NaiveDecompositionUC
 from src.core.application.generating_series.use_cases.stl_decomposition import STLDecompositionUC
+from src.core.application.model_diagnosis.use_cases.arch import ArchUC
 from src.core.application.model_diagnosis.use_cases.jarque_bera import JarqueBeraUC
 from src.core.application.model_diagnosis.use_cases.kstest import KolmogorovUC
 from src.core.application.model_diagnosis.use_cases.omnibus import OmnibusUC
@@ -49,3 +50,4 @@ class CoreProvider(Provider):
     omnibus_command = provide(OmnibusUC, provides=OmnibusUC)
     jarque_bera_command = provide(JarqueBeraUC, provides=JarqueBeraUC)
     kstest_command = provide(KolmogorovUC, provides=KolmogorovUC)
+    arch_command = provide(ArchUC, provides=ArchUC)

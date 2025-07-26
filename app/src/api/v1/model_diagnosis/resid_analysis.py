@@ -5,10 +5,12 @@ from fastapi import APIRouter
 from src.core.application.model_diagnosis.errors.jarque_bera import JarqueBeraPydanticValidationError
 from src.core.application.model_diagnosis.errors.kstest import KolmogorovPydanticValidationError
 from src.core.application.model_diagnosis.errors.omnibus import OmnibusPydanticValidationError
+from src.core.application.model_diagnosis.schemas.arch import ArchResult, ArchRequest
 from src.core.application.model_diagnosis.schemas.common import StatTestResult
 from src.core.application.model_diagnosis.schemas.jarque_bera import JarqueBeraRequest, JarqueBeraResult
 from src.core.application.model_diagnosis.schemas.kstest import KolmogorovRequest
 from src.core.application.model_diagnosis.schemas.omnibus import OmnibusRequest
+from src.core.application.model_diagnosis.use_cases.arch import ArchUC
 from src.core.application.model_diagnosis.use_cases.jarque_bera import JarqueBeraUC
 from src.core.application.model_diagnosis.use_cases.kstest import KolmogorovUC
 from src.core.application.model_diagnosis.use_cases.omnibus import OmnibusUC
@@ -80,3 +82,20 @@ def kstest_normal(
     kolmogorov_uc: FromDishka[KolmogorovUC]
 ) -> StatTestResult:
     return kolmogorov_uc.execute(request=request)
+
+
+@resid_analysis_router.post(
+    path="/arch",
+    responses={
+        200: {
+            "model": ArchResult,
+            "description": "Успешный ответ"
+        },
+    }
+)
+@inject_sync
+def arch(
+    request: ArchRequest,
+    arch_uc: FromDishka[ArchUC]
+) -> ArchResult:
+    return arch_uc.execute(request=request)
