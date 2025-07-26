@@ -7,6 +7,7 @@ from src.core.application.building_model.use_cases.params import ArimaxParamsUC,
 from src.core.application.generating_series.use_cases.naive_decomposition import NaiveDecompositionUC
 from src.core.application.generating_series.use_cases.stl_decomposition import STLDecompositionUC
 from src.core.application.model_diagnosis.use_cases.jarque_bera import JarqueBeraUC
+from src.core.application.model_diagnosis.use_cases.kstest import KolmogorovUC
 from src.core.application.model_diagnosis.use_cases.omnibus import OmnibusUC
 from src.core.application.preliminary_diagnosis.use_cases.df_gls import DfGlsUC
 from src.core.application.preliminary_diagnosis.use_cases.dicker_fuller import DickeuFullerUC
@@ -47,3 +48,4 @@ class CoreProvider(Provider):
     # команды для анализа остатков
     omnibus_command = provide(OmnibusUC, provides=OmnibusUC)
     jarque_bera_command = provide(JarqueBeraUC, provides=JarqueBeraUC)
+    kstest_command = provide(KolmogorovUC, provides=KolmogorovUC)
