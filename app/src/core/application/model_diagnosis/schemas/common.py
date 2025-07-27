@@ -1,9 +1,8 @@
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel, Field, model_validator
 
 from src.core.domain import Forecasts, Timeseries
-from src.shared.full_predict import get_full_predict
 from src.shared.utils import validate_float_param
 
 
@@ -13,15 +12,16 @@ class ResidAnalysisData(BaseModel):
         title="Прогнозы",
         description="Даты объединенного прогноза должны совпадать с датами исторических данных."
     )
-    ts: Timeseries = Field(
+
+    target: Timeseries = Field(
         title="Исходные данные",
         default=Timeseries(name="Исходные данные")
     )
 
-    @model_validator(mode="after")
-    def validate_data(self):
-        get_full_predict(self.ts, self.forecasts)
-        return self
+    exog: Optional[List[Timeseries]] = Field(
+        default=None,
+        title="Экзогенные переменные (опционально)"
+    )
 
 
 class StatTestResult(BaseModel):

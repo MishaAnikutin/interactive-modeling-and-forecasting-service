@@ -11,7 +11,7 @@ class OmnibusRequest(BaseModel):
 
     @model_validator(mode="after")
     def validate_nobs(self):
-        if len(self.data.ts.values) < 8:
+        if len(self.data.target.values) < 8:
             raise ValueError(LowCountObservationsError().detail)
         return self
 

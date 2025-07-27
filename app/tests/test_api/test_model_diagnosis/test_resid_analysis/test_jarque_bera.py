@@ -6,7 +6,8 @@ def test_jarque_bera(client, forecasts_lstm_base):
     jarque_json = {
         "data": {
             "forecasts": forecasts_lstm_base["forecasts"],
-            "ts": process_variable(balance_ts()),
+            "target": process_variable(balance_ts()),
+            "exog": None
         }
     }
 

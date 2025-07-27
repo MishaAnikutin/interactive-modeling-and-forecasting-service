@@ -6,11 +6,13 @@ from src.core.application.model_diagnosis.errors.jarque_bera import JarqueBeraPy
 from src.core.application.model_diagnosis.errors.kstest import KolmogorovPydanticValidationError
 from src.core.application.model_diagnosis.errors.omnibus import OmnibusPydanticValidationError
 from src.core.application.model_diagnosis.schemas.arch import ArchResult, ArchRequest
+from src.core.application.model_diagnosis.schemas.breusch_godfrey import BreuschGodfreyResult, BreuschGodfreyRequest
 from src.core.application.model_diagnosis.schemas.common import StatTestResult
 from src.core.application.model_diagnosis.schemas.jarque_bera import JarqueBeraRequest, JarqueBeraResult
 from src.core.application.model_diagnosis.schemas.kstest import KolmogorovRequest
 from src.core.application.model_diagnosis.schemas.omnibus import OmnibusRequest
 from src.core.application.model_diagnosis.use_cases.arch import ArchUC
+from src.core.application.model_diagnosis.use_cases.breusch_godfrey import AcorrBreuschGodfreyUC
 from src.core.application.model_diagnosis.use_cases.jarque_bera import JarqueBeraUC
 from src.core.application.model_diagnosis.use_cases.kstest import KolmogorovUC
 from src.core.application.model_diagnosis.use_cases.omnibus import OmnibusUC
@@ -99,3 +101,21 @@ def arch(
     arch_uc: FromDishka[ArchUC]
 ) -> ArchResult:
     return arch_uc.execute(request=request)
+
+
+@resid_analysis_router.post(
+    path="/breusch_godfrey",
+    responses={
+        200: {
+            "model": BreuschGodfreyResult,
+            "description": "Успешный ответ"
+        }
+
+    }
+)
+@inject_sync
+def breusch_godfrey(
+    request: BreuschGodfreyRequest,
+    breusch_godfrey_uc: FromDishka[AcorrBreuschGodfreyUC]
+) -> BreuschGodfreyResult:
+    return breusch_godfrey_uc.execute(request=request)

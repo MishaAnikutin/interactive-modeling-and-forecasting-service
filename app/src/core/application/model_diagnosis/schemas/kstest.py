@@ -11,6 +11,6 @@ class KolmogorovRequest(BaseModel):
 
     @model_validator(mode="after")
     def validate_nobs(self):
-        if len(self.data.ts.values) < 4:
+        if len(self.data.target.values) < 4:
             raise ValueError(LowCountObservationsError().detail)
         return self

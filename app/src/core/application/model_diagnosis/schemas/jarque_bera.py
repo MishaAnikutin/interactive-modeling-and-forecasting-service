@@ -11,7 +11,7 @@ class JarqueBeraRequest(BaseModel):
 
     @model_validator(mode="after")
     def validate_nobs(self):
-        if len(self.data.ts.values) < 2:
+        if len(self.data.target.values) < 2:
             raise ValueError(LowCountObservationsError().detail)
         return self
 
