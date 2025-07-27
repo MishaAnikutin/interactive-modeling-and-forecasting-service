@@ -2,8 +2,8 @@ from dishka import FromDishka
 from dishka.integrations.fastapi import inject_sync
 from fastapi import APIRouter
 
-from src.core.application.model_diagnosis.errors.arch import ArchValidationError
-from src.core.application.model_diagnosis.errors.jarque_bera import JarqueBeraPydanticValidationError, JBValidationError
+from src.core.application.model_diagnosis.errors.common import ResidAnalysisValidationError
+from src.core.application.model_diagnosis.errors.jarque_bera import JarqueBeraPydanticValidationError
 from src.core.application.model_diagnosis.errors.kstest import KolmogorovPydanticValidationError
 from src.core.application.model_diagnosis.errors.omnibus import OmnibusPydanticValidationError
 from src.core.application.model_diagnosis.schemas.arch import ArchResult, ArchRequest
@@ -34,6 +34,10 @@ resid_analysis_router = APIRouter(
         422: {
             "model": OmnibusPydanticValidationError,
             "description": "Ошибка валидации параметров"
+        },
+        400: {
+            "model": ResidAnalysisValidationError,
+            "description": "Ошибка в запросе"
         }
     }
 )
@@ -57,7 +61,7 @@ def resid_analysis(
             "description": "Ошибка валидации параметров"
         },
         400: {
-            "model": JBValidationError,
+            "model": ResidAnalysisValidationError,
             "description": "Ошибка в запросе"
         }
     }
@@ -80,6 +84,10 @@ def jarque_bera(
         422: {
             "model": KolmogorovPydanticValidationError,
             "description": "Ошибка валидации параметров"
+        },
+        400: {
+            "model": ResidAnalysisValidationError,
+            "description": "Ошибка в запросе"
         }
     }
 )
@@ -99,7 +107,7 @@ def kstest_normal(
             "description": "Успешный ответ"
         },
         400: {
-            "model": ArchValidationError,
+            "model": ResidAnalysisValidationError,
             "description": "Ошибка в запросе"
         }
     }
@@ -118,8 +126,11 @@ def arch(
         200: {
             "model": BreuschGodfreyResult,
             "description": "Успешный ответ"
+        },
+        400: {
+            "model": ResidAnalysisValidationError,
+            "description": "Ошибка в запросе"
         }
-
     }
 )
 @inject_sync
