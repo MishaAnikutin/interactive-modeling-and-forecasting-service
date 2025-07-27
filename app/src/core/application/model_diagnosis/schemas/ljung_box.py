@@ -52,11 +52,11 @@ class LjungBoxRequest(BaseModel):
     @model_validator(mode="after")
     def validate_lags(self):
         if isinstance(self.lags, int):
-            if self.lags <= 0:
+            if self.lags <= 0 or self.lags > 10000:
                 raise ValueError(InvalidLagsError().detail)
         elif isinstance(self.lags, list):
             for lag in self.lags:
-                if lag <= 0:
+                if lag <= 0 or lag > 10000:
                     raise ValueError(InvalidLagsError().detail)
         return self
 
