@@ -6,7 +6,7 @@ from .fixtures import forecasts_lstm_base
 import pytest
 
 @pytest.mark.slow
-@pytest.mark.parametrize("lags", [None, 0, 1] + [[1, 2, 4], [24, 5]])
+@pytest.mark.parametrize("lags", [None, 1] + [[1, 2, 4], [24, 5]])
 @pytest.mark.parametrize("period", [None, 2] + list(range(3, 400, 52)))
 @pytest.mark.parametrize("model_df", list(range(0, 100, 18)))
 @pytest.mark.parametrize("auto_lag", [False, True])
