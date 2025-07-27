@@ -1,14 +1,8 @@
+import math
 from typing import Optional
 
 
 def validate_float_param(param: Optional[float]) -> Optional[float]:
-    if param is not None:
-        if (
-                param == float("inf") or
-                param == float("-inf") or
-                param == float("nan")
-        ):
-            return None
-        else:
-            return round(param, 4)
+    if param is not None and math.isfinite(param):
+        return round(param, 4)
     return None
