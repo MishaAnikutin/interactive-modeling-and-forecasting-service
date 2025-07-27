@@ -3,6 +3,8 @@ from typing import List
 
 from fastapi import HTTPException
 
+from src.core.application.building_model.errors.alignment import NotSupportedFreqError, NotLastDayOfMonthError, \
+    EmptyError
 from src.core.domain import DataFrequency
 
 
@@ -16,7 +18,7 @@ class FrequencyDeterminer:
         if not timestamps:
             raise HTTPException(
                 status_code=400,
-                detail="Ряд должен быть не пустой"
+                detail=EmptyError().detail
             )
 
         return None
@@ -33,7 +35,7 @@ class FrequencyDeterminer:
                 if not self._is_last_day_of_month(ts):
                     raise HTTPException(
                         status_code=400,
-                        detail=f"Дата не является последним днем месяца"
+                        detail=NotLastDayOfMonthError().detail
                     )
         return None
 
@@ -106,7 +108,7 @@ class FrequencyDeterminer:
         else:
             raise HTTPException(
                 status_code=400,
-                detail="Ряд имеет неподдерживаемую частотность. Разрешенные: [Y, Q, M, D]"
+                detail=NotSupportedFreqError().detail
             )
 
         # Валидация формата дат для определенной частотности

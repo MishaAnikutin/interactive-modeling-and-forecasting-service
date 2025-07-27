@@ -3,6 +3,7 @@ from typing import List
 import pandas as pd
 from fastapi import HTTPException
 
+from src.core.application.building_model.errors.alignment import NotEqualToTargetError, NotEqualToExpectedError
 from src.core.domain import Timeseries, DataFrequency
 from . import PandasTimeseriesAdapter
 from .frequency_determiner import FrequencyDeterminer
@@ -17,8 +18,7 @@ class TimeseriesAlignment:
         freq_type = self._freq_determiner.determine(ts.dates)
         if freq_type != ts.data_frequency:
             raise HTTPException(
-                detail=f"Не соответствует полученных тип ряда и заявленный для {ts.name}. "
-                       f"Определенное системой: {freq_type}, Заявленное: {ts.data_frequency}",
+                detail=NotEqualToExpectedError().detail,
                 status_code=400
             )
         return freq_type
@@ -30,8 +30,7 @@ class TimeseriesAlignment:
             freq_type = self.is_ts_freq_equal_to_expected(ts_obj)
             if freq_type != target.data_frequency:
                 raise HTTPException(
-                    detail=f"Частотность экзогенной переменной {ts_obj.name} не соответствует частотности целевой переменной. "
-                           f"Экзогенная переменная: {freq_type}, Целевая переменная: {target_data_frequency}",
+                    detail=NotEqualToTargetError().detail,
                     status_code=400
                 )
             # Создаем временной ряд
