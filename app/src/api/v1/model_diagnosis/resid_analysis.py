@@ -6,9 +6,9 @@ from src.core.application.model_diagnosis.errors.common import ResidAnalysisVali
 from src.core.application.model_diagnosis.errors.jarque_bera import JarqueBeraPydanticValidationError
 from src.core.application.model_diagnosis.errors.kstest import KolmogorovPydanticValidationError
 from src.core.application.model_diagnosis.errors.omnibus import OmnibusPydanticValidationError
-from src.core.application.model_diagnosis.schemas.arch import ArchResult, ArchRequest
-from src.core.application.model_diagnosis.schemas.breusch_godfrey import BreuschGodfreyResult, BreuschGodfreyRequest
-from src.core.application.model_diagnosis.schemas.common import StatTestResult
+from src.core.application.model_diagnosis.schemas.arch import ArchRequest
+from src.core.application.model_diagnosis.schemas.breusch_godfrey import BreuschGodfreyRequest
+from src.core.application.model_diagnosis.schemas.common import StatTestResult, DiagnosticsResult
 from src.core.application.model_diagnosis.schemas.jarque_bera import JarqueBeraRequest, JarqueBeraResult
 from src.core.application.model_diagnosis.schemas.kstest import KolmogorovRequest
 from src.core.application.model_diagnosis.schemas.omnibus import OmnibusRequest
@@ -103,7 +103,7 @@ def kstest_normal(
     path="/arch",
     responses={
         200: {
-            "model": ArchResult,
+            "model": DiagnosticsResult,
             "description": "Успешный ответ"
         },
         400: {
@@ -116,7 +116,7 @@ def kstest_normal(
 def arch(
     request: ArchRequest,
     arch_uc: FromDishka[ArchUC]
-) -> ArchResult:
+) -> DiagnosticsResult:
     return arch_uc.execute(request=request)
 
 
@@ -124,7 +124,7 @@ def arch(
     path="/breusch_godfrey",
     responses={
         200: {
-            "model": BreuschGodfreyResult,
+            "model": DiagnosticsResult,
             "description": "Успешный ответ"
         },
         400: {
@@ -137,5 +137,5 @@ def arch(
 def breusch_godfrey(
     request: BreuschGodfreyRequest,
     breusch_godfrey_uc: FromDishka[AcorrBreuschGodfreyUC]
-) -> BreuschGodfreyResult:
+) -> DiagnosticsResult:
     return breusch_godfrey_uc.execute(request=request)

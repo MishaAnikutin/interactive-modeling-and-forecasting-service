@@ -1,13 +1,10 @@
 import numpy as np
-import pandas as pd
 from scipy import stats
 from statsmodels.regression.linear_model import OLS
 from statsmodels.tsa.tsatools import lagmat
 
-from src.core.application.model_diagnosis.schemas.breusch_godfrey import (
-    BreuschGodfreyRequest,
-    BreuschGodfreyResult,
-)
+from src.core.application.model_diagnosis.schemas.breusch_godfrey import BreuschGodfreyRequest
+from src.core.application.model_diagnosis.schemas.common import DiagnosticsResult
 from src.core.application.model_diagnosis.use_cases.interface import ResidAnalysisInterface
 from src.infrastructure.adapters.timeseries import TimeseriesAlignment, PandasTimeseriesAdapter
 from src.shared.full_predict import get_full_predict
@@ -67,7 +64,7 @@ class AcorrBreuschGodfreyUC(ResidAnalysisInterface):
     ):
         super().__init__(ts_aligner, ts_adapter)
 
-    def execute(self, request: BreuschGodfreyRequest) -> BreuschGodfreyResult:
+    def execute(self, request: BreuschGodfreyRequest) -> DiagnosticsResult:
         target, exog_df = self._aligned_data(request.data.target, request.data.exog)
         residuals = get_residuals(
             y_true=target,
@@ -81,7 +78,7 @@ class AcorrBreuschGodfreyUC(ResidAnalysisInterface):
             exog=exog_arr,
             nlags=request.nlags,
         )
-        return BreuschGodfreyResult(
+        return DiagnosticsResult(
             lmval=lm,
             lmpval=lm_p,
             fval=f_val,
