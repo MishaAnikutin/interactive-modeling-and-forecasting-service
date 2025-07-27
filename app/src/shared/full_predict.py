@@ -1,3 +1,5 @@
+from fastapi import HTTPException
+
 from src.core.domain import Forecasts, Timeseries
 from src.shared.empty_ts import form_empty_ts
 from src.core.application.model_diagnosis.errors.common import NotEqualFreqError, NotEqualLenError, NotEqualDatesError
@@ -19,11 +21,11 @@ def get_full_predict(ts: Timeseries, forecasts: Forecasts) -> Timeseries:
     )
 
     if validation_predict.data_frequency != target_freq or test_predict.data_frequency != target_freq:
-        raise ValueError(NotEqualFreqError().detail)
+        raise HTTPException(detail=NotEqualFreqError().detail, status_code=400)
     if len(full_predict.dates) != len(ts.dates):
-        raise ValueError(NotEqualLenError().detail)
+        raise HTTPException(detail=NotEqualLenError().detail, status_code=400)
     if len(full_predict.values) != len(ts.values):
-        raise ValueError(NotEqualLenError().detail)
+        raise HTTPException(detail=NotEqualLenError().detail, status_code=400)
     if full_predict.dates != ts.dates:
-        raise ValueError(NotEqualDatesError().detail)
+        raise HTTPException(detail=NotEqualDatesError().detail, status_code=400)
     return full_predict

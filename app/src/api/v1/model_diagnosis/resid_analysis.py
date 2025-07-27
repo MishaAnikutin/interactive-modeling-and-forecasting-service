@@ -2,7 +2,8 @@ from dishka import FromDishka
 from dishka.integrations.fastapi import inject_sync
 from fastapi import APIRouter
 
-from src.core.application.model_diagnosis.errors.jarque_bera import JarqueBeraPydanticValidationError
+from src.core.application.model_diagnosis.errors.arch import ArchValidationError
+from src.core.application.model_diagnosis.errors.jarque_bera import JarqueBeraPydanticValidationError, JBValidationError
 from src.core.application.model_diagnosis.errors.kstest import KolmogorovPydanticValidationError
 from src.core.application.model_diagnosis.errors.omnibus import OmnibusPydanticValidationError
 from src.core.application.model_diagnosis.schemas.arch import ArchResult, ArchRequest
@@ -54,6 +55,10 @@ def resid_analysis(
         422: {
             "model": JarqueBeraPydanticValidationError,
             "description": "Ошибка валидации параметров"
+        },
+        400: {
+            "model": JBValidationError,
+            "description": "Ошибка в запросе"
         }
     }
 )
@@ -93,6 +98,10 @@ def kstest_normal(
             "model": ArchResult,
             "description": "Успешный ответ"
         },
+        400: {
+            "model": ArchValidationError,
+            "description": "Ошибка в запросе"
+        }
     }
 )
 @inject_sync
