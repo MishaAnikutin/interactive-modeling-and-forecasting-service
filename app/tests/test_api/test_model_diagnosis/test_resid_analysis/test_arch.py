@@ -4,7 +4,7 @@ from .fixtures import forecasts_lstm_base
 import pytest
 
 @pytest.mark.slow
-@pytest.mark.parametrize("nlags", [None, 0] + list(range(1, 100, 29)))
+@pytest.mark.parametrize("nlags", [None, ] + list(range(1, 100, 29)))
 @pytest.mark.parametrize("period", [None, 2] + list(range(3, 400, 52)))
 @pytest.mark.parametrize("ddof", list(range(0, 100, 18)))
 @pytest.mark.parametrize("cov_type", ["nonrobust", "HC2"])

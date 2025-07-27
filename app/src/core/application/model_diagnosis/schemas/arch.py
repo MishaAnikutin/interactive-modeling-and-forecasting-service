@@ -12,7 +12,7 @@ class ArchOrLmRequest(BaseModel):
     )
     nlags: Optional[int] = Field(
         default=None,
-        ge=0, le=10000,
+        ge=1, le=10000,
         title="Максимальный лаг"
     )
 
