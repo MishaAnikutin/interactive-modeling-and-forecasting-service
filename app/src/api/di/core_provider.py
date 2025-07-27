@@ -10,6 +10,7 @@ from src.core.application.model_diagnosis.use_cases.arch import ArchUC
 from src.core.application.model_diagnosis.use_cases.breusch_godfrey import AcorrBreuschGodfreyUC
 from src.core.application.model_diagnosis.use_cases.jarque_bera import JarqueBeraUC
 from src.core.application.model_diagnosis.use_cases.kstest import KolmogorovUC
+from src.core.application.model_diagnosis.use_cases.ljung_box import LjungBoxUC
 from src.core.application.model_diagnosis.use_cases.lm import LmUC
 from src.core.application.model_diagnosis.use_cases.omnibus import OmnibusUC
 from src.core.application.preliminary_diagnosis.use_cases.df_gls import DfGlsUC
@@ -55,3 +56,4 @@ class CoreProvider(Provider):
     arch_command = provide(ArchUC, provides=ArchUC)
     breusch_godfrey_command = provide(AcorrBreuschGodfreyUC, provides=AcorrBreuschGodfreyUC)
     lm_command = provide(LmUC, provides=LmUC)
+    ljung_box_command = provide(LjungBoxUC, provides=LjungBoxUC)

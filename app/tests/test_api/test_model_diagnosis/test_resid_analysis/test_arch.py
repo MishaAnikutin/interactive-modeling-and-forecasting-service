@@ -22,6 +22,10 @@ def test_arch(
             "target": process_variable(balance_ts()),
             "exog": None
         },
+        "nlags": nlags,
+        "period": period,
+        "ddof": ddof,
+        "cov_type": cov_type,
     }
 
     arch_result = client.post(
