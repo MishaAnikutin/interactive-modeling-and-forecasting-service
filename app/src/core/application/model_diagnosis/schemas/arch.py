@@ -5,7 +5,8 @@ from pydantic import BaseModel, Field
 from src.core.application.model_diagnosis.schemas.common import ResidAnalysisData
 
 
-class ArchRequest(BaseModel):
+class ArchOrLmRequest(BaseModel):
+    """Данный реквест подходит под ARCH и LM тесты"""
     data: ResidAnalysisData = Field(
         title="Прогноз и исхдоные данные"
     )

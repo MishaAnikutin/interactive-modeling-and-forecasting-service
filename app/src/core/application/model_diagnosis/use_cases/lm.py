@@ -8,7 +8,7 @@ from src.shared.full_predict import get_full_predict
 from src.shared.get_residuals import get_residuals
 
 
-class ArchUC(ResidAnalysisInterface):
+class LmUC(ResidAnalysisInterface):
     def __init__(
             self,
             ts_aligner: TimeseriesAlignment,
@@ -23,7 +23,7 @@ class ArchUC(ResidAnalysisInterface):
             y_pred=get_full_predict(target, request.data.forecasts)
         )
         lmval, lmpval, fval, fpval = acorr_lm(
-            resid=residuals ** 2,
+            resid=residuals,
             ddof=request.ddof,
             nlags=request.nlags,
             cov_type=request.cov_type,

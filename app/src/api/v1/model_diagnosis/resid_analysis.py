@@ -6,7 +6,7 @@ from src.core.application.model_diagnosis.errors.common import ResidAnalysisVali
 from src.core.application.model_diagnosis.errors.jarque_bera import JarqueBeraPydanticValidationError
 from src.core.application.model_diagnosis.errors.kstest import KolmogorovPydanticValidationError
 from src.core.application.model_diagnosis.errors.omnibus import OmnibusPydanticValidationError
-from src.core.application.model_diagnosis.schemas.arch import ArchRequest
+from src.core.application.model_diagnosis.schemas.arch import ArchOrLmRequest
 from src.core.application.model_diagnosis.schemas.breusch_godfrey import BreuschGodfreyRequest
 from src.core.application.model_diagnosis.schemas.common import StatTestResult, DiagnosticsResult
 from src.core.application.model_diagnosis.schemas.jarque_bera import JarqueBeraRequest, JarqueBeraResult
@@ -114,7 +114,7 @@ def kstest_normal(
 )
 @inject_sync
 def arch(
-    request: ArchRequest,
+    request: ArchOrLmRequest,
     arch_uc: FromDishka[ArchUC]
 ) -> DiagnosticsResult:
     return arch_uc.execute(request=request)
@@ -139,3 +139,23 @@ def breusch_godfrey(
     breusch_godfrey_uc: FromDishka[AcorrBreuschGodfreyUC]
 ) -> DiagnosticsResult:
     return breusch_godfrey_uc.execute(request=request)
+
+@resid_analysis_router.post(
+    path='/lm',
+    responses={
+        200: {
+            "model": DiagnosticsResult,
+            "description": "Успешный ответ"
+        },
+        400: {
+            "model": ResidAnalysisValidationError,
+            "description": "Ошибка в запросе"
+        }
+    }
+)
+@inject_sync
+def lm(
+    request: ArchOrLmRequest,
+    lm_uc: FromDishka[ArchUC]
+) -> DiagnosticsResult:
+    return lm_uc.execute(request=request)
