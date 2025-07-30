@@ -20,6 +20,7 @@ from src.core.application.preliminary_diagnosis.use_cases.phillips_perron import
 from src.core.application.preliminary_diagnosis.use_cases.range_uc import RangeUnitRootUC
 from src.core.application.preliminary_diagnosis.use_cases.zivot_andrews import ZivotAndrewsUC
 from src.core.application.preprocessing.preprocessing_uc import PreprocessUC
+from src.core.application.preprocessing.inverse_preprocessing_uc import InversePreprocessUC
 
 
 class CoreProvider(Provider):
@@ -44,6 +45,7 @@ class CoreProvider(Provider):
 
     # предобработка ряда
     preprocess_command = provide(PreprocessUC, provides=PreprocessUC)
+    undo_preprocess_command = provide(InversePreprocessUC, provides=InversePreprocessUC)
 
     # команды для разложения ряда
     stl_decomposition_command = provide(STLDecompositionUC, provides=STLDecompositionUC)

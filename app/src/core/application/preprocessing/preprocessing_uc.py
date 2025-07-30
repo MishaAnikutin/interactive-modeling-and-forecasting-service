@@ -1,5 +1,8 @@
-from src.core.application.preprocessing.preprocess_scheme import PreprocessingRequest, DiffTransformation
-from src.core.domain import Timeseries
+from src.core.application.preprocessing.preprocess_scheme import (
+    PreprocessingRequest,
+    PreprocessingResponse,
+    PreprocessContext
+)
 from src.infrastructure.adapters.preprocessing.preprocess_factory import PreprocessFactory
 from src.infrastructure.adapters.timeseries import PandasTimeseriesAdapter
 
@@ -13,12 +16,17 @@ class PreprocessUC:
         self._ts_adapter = ts_adapter
         self._preprocess_factory = preprocess_factory
 
-    def execute(self, request: PreprocessingRequest) -> Timeseries:
+    def execute(self, request: PreprocessingRequest) -> PreprocessingResponse:
         x = self._ts_adapter.to_series(request.ts)
+        contexts: list[PreprocessContext] = list()
 
-        for transformation in request.transformations:
-            x = self._preprocess_factory.apply(x, transformation)
+        for step, transformation in enumerate(request.transformations):
+            x, context = self._preprocess_factory.apply(x, transformation)
+
+            if context is not None:
+                context.step = step + 1
+                contexts.append(context)
 
         ts = self._ts_adapter.from_series(x, request.ts.data_frequency)
 
-        return ts
+        return PreprocessingResponse(preprocessed_ts=ts, contexts=contexts)
