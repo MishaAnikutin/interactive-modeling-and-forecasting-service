@@ -1,7 +1,7 @@
 from datetime import datetime
 import pytest
 
-from src.core.application.building_model.schemas.lstm import LstmParams
+from src.core.application.building_model.schemas.gru import GruParams
 from src.core.domain import FitParams, Timeseries
 from tests.common.params_permutations import VALID_COMBINATIONS_EXTENDED_exog, aligned_size
 from tests.conftest import client, balance_ts, ca_ts, u_total_ts, balance, ipp_eu_ts
@@ -11,15 +11,15 @@ from tests.test_api.utils import process_variable
 
 
 @pytest.mark.parametrize(
-    "lstm_params, fit_params, dependent_variables",
+    "gru_params, fit_params, dependent_variables",
     [
         ( # самый базовый кейс с дефолтными значениями параметров
-            LstmParams(),
+            GruParams(),
             FitParams(),
             Timeseries()
         ),
         ( # месячные данные
-            LstmParams(),
+            GruParams(),
             FitParams(
                 train_boundary=datetime(2020, 12, 31),
                 val_boundary=datetime(2024, 1,31)
@@ -27,7 +27,7 @@ from tests.test_api.utils import process_variable
             balance_ts()
         ),
         ( # квартальные данные
-            LstmParams(),
+            GruParams(),
             FitParams(
                 train_boundary=datetime(2019, 6, 30),
                 val_boundary=datetime(2021, 6, 30),
@@ -36,7 +36,7 @@ from tests.test_api.utils import process_variable
             ca_ts()
         ),
         ( # годовые данные
-            LstmParams(),
+            GruParams(),
             FitParams(
                 train_boundary=datetime(2012, 12, 31),
                 val_boundary=datetime(2021, 12, 31),
@@ -46,8 +46,8 @@ from tests.test_api.utils import process_variable
         )
     ]
 )
-def test_lstm_fit_without_exog(
-    lstm_params,
+def test_gru_fit_without_exog(
+    gru_params,
     fit_params,
     dependent_variables,
     client
@@ -55,11 +55,11 @@ def test_lstm_fit_without_exog(
     data = dict(
         dependent_variables=process_variable(dependent_variables),
         explanatory_variables=None,
-        hyperparameters=lstm_params.model_dump(),
+        hyperparameters=gru_params.model_dump(),
         fit_params=process_fit_params(fit_params),
     )
     result = client.post(
-        url='/api/v1/building_model/lstm/fit',
+        url='/api/v1/building_model/gru/fit',
         json=data
     )
 
@@ -73,7 +73,7 @@ def test_lstm_fit_without_exog(
     "h, test_size, val_size",
     VALID_COMBINATIONS_EXTENDED_exog,
 )
-def test_lstm_fit_with_exog(
+def test_gru_fit_with_exog(
     h: int,
     test_size: int,
     val_size: int,
@@ -116,17 +116,17 @@ def test_lstm_fit_with_exog(
         forecast_horizon=h
     )
 
-    lstm_params = LstmParams()
+    gru_params = GruParams()
 
     # 6. Отправка запроса
     data = dict(
         dependent_variables=process_variable(aligned_balance),
         explanatory_variables=[process_variable(ipp_eu_ts_reduced)],
-        hyperparameters=lstm_params.model_dump(),
+        hyperparameters=gru_params.model_dump(),
         fit_params=process_fit_params(fit_params),
     )
     result = client.post(
-        url='/api/v1/building_model/lstm/fit',
+        url='/api/v1/building_model/gru/fit',
         json=data
     )
 
@@ -168,7 +168,7 @@ def test_lstm_fit_with_exog(
     "h, test_size, val_size",
     [(3, 1, 7)],
 )
-def test_lstm_fit_exog_grid_params(
+def test_gru_fit_exog_grid_params(
         input_size: int,
         inference_input_size,
         h_train: int,
@@ -219,7 +219,7 @@ def test_lstm_fit_exog_grid_params(
         forecast_horizon=h
     )
 
-    lstm_params = LstmParams(
+    gru_params = GruParams(
         input_size=input_size,
         inference_input_size=inference_input_size,
         h_train=h_train,
@@ -234,20 +234,20 @@ def test_lstm_fit_exog_grid_params(
     data = dict(
         dependent_variables=process_variable(aligned_balance),
         explanatory_variables=[process_variable(ipp_eu_ts_reduced)],
-        hyperparameters=lstm_params.model_dump(),
+        hyperparameters=gru_params.model_dump(),
         fit_params=process_fit_params(fit_params),
     )
     result = client.post(
-        url='/api/v1/building_model/lstm/fit',
+        url='/api/v1/building_model/gru/fit',
         json=data
     )
 
     received_data = result.json()
-    if lstm_params.input_size + fit_params.forecast_horizon + test_size > total_size - test_size - val_size:
+    if gru_params.input_size + fit_params.forecast_horizon + test_size > total_size - test_size - val_size:
         assert result.status_code == 400, received_data
         return
     elif recurrent:
-        if lstm_params.input_size + h_train + test_size > total_size - test_size - val_size:
+        if gru_params.input_size + h_train + test_size > total_size - test_size - val_size:
             assert result.status_code == 400, received_data
             return
     assert result.status_code == 200, received_data
