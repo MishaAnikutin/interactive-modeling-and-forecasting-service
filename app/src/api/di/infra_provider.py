@@ -1,12 +1,18 @@
 from dishka import Provider, Scope, provide
 
 from src.infrastructure.adapters.metrics import MetricsFactory
-from src.infrastructure.adapters.model_storage import IModelStorage, MockModelStorage
-from src.infrastructure.adapters.modeling import ArimaxAdapter
-from src.infrastructure.adapters.modeling.gru import GruAdapter
-from src.infrastructure.adapters.modeling.lstm import LstmAdapter
-from src.infrastructure.adapters.modeling.nhits import NhitsAdapter
+from src.infrastructure.adapters.model_storage import MockModelStorage, IModelStorage
+
+from src.infrastructure.adapters.modeling import (
+    ArimaxAdapter,
+    GruAdapter,
+    LstmAdapter,
+    NhitsAdapter
+)
+
+from src.infrastructure.adapters.predicting.arimax import PredictArimaxAdapter
 from src.infrastructure.adapters.preprocessing.preprocess_factory import PreprocessFactory
+from src.infrastructure.adapters.serializer import Base64PickleSerializer, ModelSerializer
 from src.infrastructure.adapters.timeseries import (
     PandasTimeseriesAdapter,
     TimeseriesAlignment,
@@ -24,12 +30,16 @@ class InfraProvider(Provider):
     ts_alignment = provide(TimeseriesAlignment, provides=TimeseriesAlignment)
     freq_determiner = provide(FrequencyDeterminer, provides=FrequencyDeterminer)
     ts_spliter = provide(TimeseriesTrainTestSplit, provides=TimeseriesTrainTestSplit)
+    model_serializer = provide(Base64PickleSerializer, provides=ModelSerializer)
 
     arimax = provide(ArimaxAdapter, provides=ArimaxAdapter)
+    arimax_predictor = provide(PredictArimaxAdapter, provides=PredictArimaxAdapter)
+
     nhits = provide(NhitsAdapter, provides=NhitsAdapter)
     lstm = provide(LstmAdapter, provides=LstmAdapter)
     gru = provide(GruAdapter, provides=GruAdapter)
 
+    # TODO: депрекейтед
     model_storage = provide(MockModelStorage, provides=IModelStorage)
 
     metrics_factory = provide(MetricsFactory, provides=MetricsFactory)

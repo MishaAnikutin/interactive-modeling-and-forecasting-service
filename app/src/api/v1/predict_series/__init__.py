@@ -1,0 +1,1 @@
+from .predict import model_predict_router

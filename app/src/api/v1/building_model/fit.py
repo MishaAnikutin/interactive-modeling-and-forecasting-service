@@ -5,7 +5,7 @@ from dishka.integrations.fastapi import inject_sync
 from src.core.application.building_model.errors.arimax import ArimaxFitValidationError
 from src.core.application.building_model.errors.lstm import LstmFitValidationError, LstmPydanticValidationError
 from src.core.application.building_model.errors.nhits import NhitsFitValidationError, NhitsPydanticValidationError
-from src.core.application.building_model.schemas.arimax import ArimaxFitRequest, ArimaxFitResult
+from src.core.application.building_model.schemas.arimax import ArimaxFitRequest, ArimaxFitResult, ArimaxFitResponse
 from src.core.application.building_model.schemas.gru import GruFitRequest, GruFitResult
 from src.core.application.building_model.schemas.lstm import LstmFitRequest, LstmFitResult
 from src.core.application.building_model.schemas.nhits import NhitsFitRequest, NhitsFitResult
@@ -34,7 +34,7 @@ fit_model_router = APIRouter(prefix="/building_model", tags=["Построени
 def fit_arimax(
     request: ArimaxFitRequest,
     fit_arimax_uc: FromDishka[FitArimaxUC]
-) -> ArimaxFitResult:
+) -> ArimaxFitResponse:
     return fit_arimax_uc.execute(request=request)
 
 

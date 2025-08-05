@@ -1,14 +1,18 @@
 import pandas as pd
 from typing import List
 import statsmodels.api as sm
+from statsmodels.tsa.statespace.sarimax import SARIMAXResultsWrapper
+
 from logs import logger
 
-from src.core.domain import FitParams, Coefficient, DataFrequency
 from src.core.application.building_model.schemas.arimax import ArimaxParams, ArimaxFitResult
-from src.infrastructure.adapters.modeling.interface import MlAdapterInterface
+# FIXME: схемки это конечно ничего, но получается что инфра зависит от слоя приложения
 
+from src.infrastructure.adapters.modeling.interface import MlAdapterInterface
 from src.infrastructure.adapters.timeseries import TimeseriesTrainTestSplit
 from src.infrastructure.adapters.metrics import MetricsFactory
+
+from src.core.domain import FitParams, Coefficient, DataFrequency
 
 
 class ArimaxAdapter(MlAdapterInterface):
@@ -18,6 +22,7 @@ class ArimaxAdapter(MlAdapterInterface):
             self,
             metric_factory: MetricsFactory,
             ts_train_test_split: TimeseriesTrainTestSplit,
+            # FIXME: кстати, а не нарушается ли SRP? этот класс и делит выборки и обучает модель
     ):
         super().__init__(metric_factory, ts_train_test_split)
         self._log = logger.getChild(self.__class__.__name__)
@@ -30,7 +35,7 @@ class ArimaxAdapter(MlAdapterInterface):
             arimax_params: ArimaxParams,
             fit_params: FitParams,
             data_frequency: DataFrequency,
-    ) -> ArimaxFitResult:
+    ) -> tuple[ArimaxFitResult, SARIMAXResultsWrapper]:
         self._log.debug("Старт обучения ARIMAX")
 
         # 1. Разделение данных -------------------------------------------------------
@@ -130,13 +135,12 @@ class ArimaxAdapter(MlAdapterInterface):
         coefficients = self._parse_coefficients(results)
 
         # 7. Результат ---------------------------------------------------------------
-        return ArimaxFitResult(
+        result = ArimaxFitResult(
             coefficients=coefficients,
             model_metrics=metrics,
-            forecasts=forecasts,
-            weight_path='',
-            model_id='',
+            forecasts=forecasts
         )
+        return result, results
 
     def _parse_coefficients(self, results) -> List[Coefficient]:
         return [

@@ -1,18 +1,15 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from pydantic import BaseModel, Field
 
-from src.core.domain import Timeseries, FitParams, Forecasts, Coefficient, ModelMetrics
+from src.core.domain import Timeseries
 
 
-class ArimaxParams(BaseModel):
-    p: int = Field(default=0, ge=0, le=10000)
-    d: int = Field(default=0, ge=0, le=10000)
-    q: int = Field(default=0, ge=0, le=10000)
+class PredictRequest(BaseModel):
+    model_weight: str
+    forecast_steps: int
 
-
-class ArimaxFitRequest(BaseModel):
-    dependent_variables: Timeseries = Field(
+    dependent_variables: Union[Timeseries, List[Timeseries]] = Field(
         default=Timeseries(name="Зависимая переменная"),
         title="Зависимая переменная",
         description="Каждый заявленный тип частотности должен соответствовать определенному системой. "
@@ -22,7 +19,7 @@ class ArimaxFitRequest(BaseModel):
                     "Ряд должен быть не пустой."
     )
     explanatory_variables: Optional[List[Timeseries]] = Field(
-        default=[Timeseries(name="Объясняющая переменная"),],
+        default=[Timeseries(name="Объясняющая переменная"), ],
         title="Список объясняющих переменных",
         description="Каждый заявленный тип частотности должен соответствовать определенному системой. "
                     "Тип частотности экзогенной переменной должен быть равен частотности зависимой. "
@@ -31,18 +28,8 @@ class ArimaxFitRequest(BaseModel):
                     "Каждая дата должна является последним днем месяца, если это не дневные данные. "
                     "Ряд должен быть не пустой."
     )
-    hyperparameters: ArimaxParams = Field(title='Параметры модели ARIMAX')
-    fit_params: FitParams = Field(title="Общие параметры обучения", description="train_boundary должна быть раньше val_boundary ")
 
 
-class ArimaxFitResult(BaseModel):
-    forecasts: Forecasts = Field(title="Прогнозы")
-    coefficients: List[Coefficient] = Field(title="Список коэффициентов")
-    model_metrics: ModelMetrics = Field(title="Метрики модели")
-
-
-class ArimaxFitResponse(BaseModel):
-    fit_result: ArimaxFitResult
-
-    # FIXME: в этом костыле тут не просто байты pickle а еще в utf-8
-    serialized_model_weight: str = Field(title='Сериализованные веса модели')
+class PredictResponse(BaseModel):
+    in_sample_predict: Timeseries
+    out_of_sample_predict: Timeseries

@@ -5,6 +5,7 @@ from src.core.application.building_model.use_cases.fit_gru import FitGruUC
 from src.core.application.building_model.use_cases.fit_lstm import FitLstmUC
 from src.core.application.building_model.use_cases.fit_nhits import FitNhitsUC
 from src.core.application.building_model.use_cases.params import ArimaxParamsUC, NhitsParamsUC
+from src.core.application.predict_series.use_cases.predict_arimax import PredictArimaxUC
 from src.core.application.generating_series.use_cases.naive_decomposition import NaiveDecompositionUC
 from src.core.application.generating_series.use_cases.stl_decomposition import STLDecompositionUC
 from src.core.application.model_diagnosis.use_cases.arch import ArchUC
@@ -32,6 +33,9 @@ class CoreProvider(Provider):
     nhits_fit_command = provide(FitNhitsUC, provides=FitNhitsUC)
     lstm_fit_command = provide(FitLstmUC, provides=FitLstmUC)
     gru_fit_command = provide(FitGruUC, provides=FitGruUC)
+
+    # команды для прогнозирования моделями
+    arimax_predict_command = provide(PredictArimaxUC, provides=PredictArimaxUC)
 
     # параметры моделей
     arimax_params_command = provide(ArimaxParamsUC, provides=ArimaxParamsUC)
