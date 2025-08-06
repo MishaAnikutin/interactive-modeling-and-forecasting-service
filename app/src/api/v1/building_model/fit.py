@@ -6,7 +6,7 @@ from src.core.application.building_model.errors.arimax import ArimaxFitValidatio
 from src.core.application.building_model.errors.lstm import LstmFitValidationError, LstmPydanticValidationError
 from src.core.application.building_model.errors.nhits import NhitsFitValidationError, NhitsPydanticValidationError
 from src.core.application.building_model.schemas.arimax import ArimaxFitRequest, ArimaxFitResult, ArimaxFitResponse
-from src.core.application.building_model.schemas.gru import GruFitRequest, GruFitResult
+from src.core.application.building_model.schemas.gru import GruFitRequest, GruFitResult, GruFitResponse
 from src.core.application.building_model.schemas.lstm import LstmFitRequest, LstmFitResult
 from src.core.application.building_model.schemas.nhits import NhitsFitRequest, NhitsFitResult
 from src.core.application.building_model.use_cases.fit_arimax import FitArimaxUC
@@ -21,7 +21,7 @@ fit_model_router = APIRouter(prefix="/building_model", tags=["Построени
     path="/arimax/fit",
     responses={
         200: {
-            "model": ArimaxFitResult,
+            "model": ArimaxFitResponse,
             "description": "Успешный ответ"
         },
         400: {
@@ -92,7 +92,7 @@ def fit_lstm(
     path="/gru/fit",
     responses={
         200: {
-            "model": GruFitResult,
+            "model": GruFitResponse,
             "description": "Успешный ответ"
         },
         400: {
@@ -109,5 +109,5 @@ def fit_lstm(
 def fit_gru(
     request: GruFitRequest,
     fit_gru_uc: FromDishka[FitGruUC]
-) -> GruFitResult:
+) -> GruFitResponse:
     return fit_gru_uc.execute(request=request)
