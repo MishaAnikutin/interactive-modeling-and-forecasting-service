@@ -26,8 +26,3 @@ class ModelData(BaseModel):
                     "Каждая дата должна является последним днем месяца, если это не дневные данные. "
                     "Ряд должен быть не пустой."
     )
-    fit_params: FitParams = Field(
-        default=FitParams(),
-        title="Общие параметры обучения",
-        description="train_boundary должна быть раньше val_boundary ",
-    )

@@ -15,6 +15,11 @@ class ArimaxParams(BaseModel):
 class ArimaxFitRequest(BaseModel):
     model_data: ModelData = Field(default=ModelData())
     hyperparameters: ArimaxParams = Field(title='Параметры модели ARIMAX')
+    fit_params: FitParams = Field(
+        default=FitParams(),
+        title="Общие параметры обучения",
+        description="train_boundary должна быть раньше val_boundary ",
+    )
 
 
 class ArimaxFitResult(BaseModel):
