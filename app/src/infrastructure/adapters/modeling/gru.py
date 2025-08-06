@@ -154,7 +154,7 @@ class GruAdapter(NeuralForecastInterface):
         )
         nf = NeuralForecast(models=[model], freq=data_frequency)
         nf.fit(df=train_df, val_size=val_size)
-        weights = model.model.state_dict()
+        weights = model.state_dict()
 
         # 4. Прогнозы -----------------------------------------------------------------
         # 4.1 train
