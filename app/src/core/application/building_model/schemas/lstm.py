@@ -6,6 +6,7 @@ from neuralforecast.losses.pytorch import MAE, MSE, RMSE, MAPE
 from src.core.application.building_model.errors.lstm import HiddenSizeError
 from src.core.application.building_model.schemas.nhits import ScalerType, LossEnum
 from src.core.domain import Timeseries, FitParams, Forecasts, ModelMetrics
+from src.core.domain.model.model_data import ModelData
 
 
 class LstmParams(BaseModel):
@@ -135,25 +136,7 @@ class LstmParams(BaseModel):
 
 
 class LstmFitRequest(BaseModel):
-    dependent_variables: Timeseries = Field(
-        default=Timeseries(name="Зависимая переменная"),
-        title="Зависимая переменная",
-        description="Каждый заявленный тип частотности должен соответствовать определенному системой. "
-                    "Ряд должен иметь постоянную частотность. "
-                    "Разрешенные частотность: [Y, Q, M, D]. "
-                    "Каждая дата должна является последним днем месяца, если это не дневные данные. "
-                    "Ряд должен быть не пустой."
-    )
-    explanatory_variables: Optional[List[Timeseries]] = Field(
-        default=[Timeseries(name="Объясняющая переменная"), ],
-        title="Список объясняющих переменных",
-        description="Каждый заявленный тип частотности должен соответствовать определенному системой. "
-                    "Тип частотности экзогенной переменной должен быть равен частотности зависимой. "
-                    "Ряд должен иметь постоянную частотность. "
-                    "Разрешенные частотность: [Y, Q, M, D]. "
-                    "Каждая дата должна является последним днем месяца, если это не дневные данные. "
-                    "Ряд должен быть не пустой."
-    )
+    model_data: ModelData = Field(default=ModelData())
     hyperparameters: LstmParams = Field(title="Параметры модели LSTM")
     fit_params: FitParams = Field(
         title="Общие параметры обучения",

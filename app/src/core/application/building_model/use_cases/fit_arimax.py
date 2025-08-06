@@ -40,7 +40,7 @@ class FitArimaxUC:
             exog=exog_df,
             arimax_params=request.hyperparameters,
             fit_params=request.fit_params,
-            data_frequency=request.dependent_variables.data_frequency,
+            data_frequency=request.model_data.dependent_variables.data_frequency,
         )
 
         serialized_model_weight: str = self._model_serializer.serialize(model_weight)
