@@ -1,11 +1,11 @@
-from typing import Optional, List
+from typing import Optional
 
 from pydantic import BaseModel, Field, model_validator
 from neuralforecast.losses.pytorch import MAE, MSE, RMSE, MAPE
 
 from src.core.application.building_model.errors.lstm import HiddenSizeError
 from src.core.application.building_model.schemas.nhits import ScalerType, LossEnum
-from src.core.domain import Timeseries, FitParams, Forecasts, ModelMetrics
+from src.core.domain import FitParams, Forecasts, ModelMetrics
 from src.core.domain.model.model_data import ModelData
 
 

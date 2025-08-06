@@ -1,11 +1,9 @@
-import pandas as pd
-
 from src.core.application.predict_series.schemas.schemas import PredictRequest, PredictResponse
 from src.infrastructure.adapters.predicting.arimax import PredictArimaxAdapter
 from src.infrastructure.adapters.timeseries import TimeseriesAlignment, PandasTimeseriesAdapter
 
 
-class PredictArimaxUC:
+class PredictGruUC:
     def __init__(
         self,
         ts_aligner: TimeseriesAlignment,

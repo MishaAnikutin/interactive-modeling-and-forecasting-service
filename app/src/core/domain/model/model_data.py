@@ -2,7 +2,7 @@ from typing import Optional, List
 
 from pydantic import BaseModel, Field
 
-from src.core.domain import FitParams, Timeseries
+from src.core.domain import Timeseries
 
 
 class ModelData(BaseModel):

@@ -1,33 +1,22 @@
-from typing import List, Optional, Union
-
 from pydantic import BaseModel, Field
 
 from src.core.domain import Timeseries
+from src.core.domain.model.model_data import ModelData
 
 
 class PredictRequest(BaseModel):
-    model_weight: str
-    forecast_steps: int
-
-    dependent_variables: Union[Timeseries, List[Timeseries]] = Field(
-        default=Timeseries(name="Зависимая переменная"),
-        title="Зависимая переменная",
-        description="Каждый заявленный тип частотности должен соответствовать определенному системой. "
-                    "Ряд должен иметь постоянную частотность. "
-                    "Разрешенные частотность: [Y, Q, M, D]. "
-                    "Каждая дата должна является последним днем месяца, если это не дневные данные. "
-                    "Ряд должен быть не пустой."
+    model_weight: str = Field(
+        default="example",
+        title="Веса модели",
+        description="Веса модели в UTF-8 формате после преобразования в pickle"
     )
-    explanatory_variables: Optional[List[Timeseries]] = Field(
-        default=[Timeseries(name="Объясняющая переменная"), ],
-        title="Список объясняющих переменных",
-        description="Каждый заявленный тип частотности должен соответствовать определенному системой. "
-                    "Тип частотности экзогенной переменной должен быть равен частотности зависимой. "
-                    "Ряд должен иметь постоянную частотность. "
-                    "Разрешенные частотность: [Y, Q, M, D]. "
-                    "Каждая дата должна является последним днем месяца, если это не дневные данные. "
-                    "Ряд должен быть не пустой."
+    forecast_steps: int = Field(
+        ge=0,
+        le=10000,
+        default=0,
+        title="Число шагов прогноза"
     )
+    model_data: ModelData = Field(default=ModelData())
 
 
 class PredictResponse(BaseModel):
