@@ -1,6 +1,4 @@
-import pandas as pd
-
-from src.core.application.predict_series.schemas.schemas import PredictRequest, PredictResponse
+from src.core.application.predict_series.schemas.schemas import PredictArimaxRequest, PredictResponse
 from src.infrastructure.adapters.predicting.arimax import PredictArimaxAdapter
 from src.infrastructure.adapters.timeseries import TimeseriesAlignment, PandasTimeseriesAdapter
 
@@ -16,17 +14,17 @@ class PredictArimaxUC:
         self._ts_aligner = ts_aligner
         self._predict_adapter = predict_adapter
 
-    def execute(self, request: PredictRequest) -> PredictResponse:
-        target, exog_df = self._ts_aligner.align(request.model_data)
+    def execute(self, request: PredictArimaxRequest) -> PredictResponse:
+        target, exog_df = self._ts_aligner.align(request.predict_params.model_data)
 
         in_sample, out_of_sample = self._predict_adapter.execute(
-            model_weight=request.model_weight,
+            model_weight=request.predict_params.model_weight,
             steps=request.forecast_steps,
             target=target,
             exog_df=exog_df
         )
 
-        freq = request.model_data.dependent_variables.data_frequency
+        freq = request.predict_params.model_data.dependent_variables.data_frequency
         in_sample_predict = self._ts_adapter.from_series(in_sample, freq)
         out_of_sample_predict = self._ts_adapter.from_series(out_of_sample, freq)
 
