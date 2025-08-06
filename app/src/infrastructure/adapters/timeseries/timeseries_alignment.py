@@ -1,10 +1,11 @@
-from typing import List
+from typing import List, Optional
 
 import pandas as pd
 from fastapi import HTTPException
 
 from src.core.application.building_model.errors.alignment import NotEqualToTargetError, NotEqualToExpectedError
 from src.core.domain import Timeseries, DataFrequency
+from src.core.domain.model.model_data import ModelData
 from . import PandasTimeseriesAdapter
 from .frequency_determiner import FrequencyDeterminer
 
@@ -23,8 +24,29 @@ class TimeseriesAlignment:
             )
         return freq_type
 
+    def align(self, model_data: ModelData) -> tuple[pd.DataFrame, Optional[pd.DataFrame]]:
+        self.is_ts_freq_equal_to_expected(model_data.dependent_variables)
+
+        if model_data.explanatory_variables:
+            df = self.compare(
+                timeseries_list=model_data.explanatory_variables,
+                target=model_data.dependent_variables
+            )
+
+            target = df[model_data.dependent_variables.name]
+            if type(target) == pd.DataFrame:
+                target = target.iloc[:, 0]
+            exog_df = df.drop(columns=[model_data.dependent_variables.name])
+            if exog_df.empty:
+                exog_df = None
+        else:
+            target = self._pandas_adapter.to_series(model_data.dependent_variables)
+            exog_df = None
+
+        return target, exog_df
+
     def compare(self, timeseries_list: List[Timeseries], target: Timeseries) -> pd.DataFrame:
-        target_data_frequency = self.is_ts_freq_equal_to_expected(target)
+        self.is_ts_freq_equal_to_expected(target)
         series_list = [self._pandas_adapter.to_series(target)]
         for ts_obj in timeseries_list:
             freq_type = self.is_ts_freq_equal_to_expected(ts_obj)

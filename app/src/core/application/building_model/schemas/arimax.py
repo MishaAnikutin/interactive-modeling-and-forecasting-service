@@ -3,6 +3,7 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 
 from src.core.domain import Timeseries, FitParams, Forecasts, Coefficient, ModelMetrics
+from src.core.domain.model.model_data import ModelData
 
 
 class ArimaxParams(BaseModel):
@@ -12,27 +13,8 @@ class ArimaxParams(BaseModel):
 
 
 class ArimaxFitRequest(BaseModel):
-    dependent_variables: Timeseries = Field(
-        default=Timeseries(name="Зависимая переменная"),
-        title="Зависимая переменная",
-        description="Каждый заявленный тип частотности должен соответствовать определенному системой. "
-                    "Ряд должен иметь постоянную частотность. "
-                    "Разрешенные частотность: [Y, Q, M, D]. "
-                    "Каждая дата должна является последним днем месяца, если это не дневные данные. "
-                    "Ряд должен быть не пустой."
-    )
-    explanatory_variables: Optional[List[Timeseries]] = Field(
-        default=[Timeseries(name="Объясняющая переменная"),],
-        title="Список объясняющих переменных",
-        description="Каждый заявленный тип частотности должен соответствовать определенному системой. "
-                    "Тип частотности экзогенной переменной должен быть равен частотности зависимой. "
-                    "Ряд должен иметь постоянную частотность. "
-                    "Разрешенные частотность: [Y, Q, M, D]. "
-                    "Каждая дата должна является последним днем месяца, если это не дневные данные. "
-                    "Ряд должен быть не пустой."
-    )
+    model_data: ModelData = Field(default=ModelData())
     hyperparameters: ArimaxParams = Field(title='Параметры модели ARIMAX')
-    fit_params: FitParams = Field(title="Общие параметры обучения", description="train_boundary должна быть раньше val_boundary ")
 
 
 class ArimaxFitResult(BaseModel):

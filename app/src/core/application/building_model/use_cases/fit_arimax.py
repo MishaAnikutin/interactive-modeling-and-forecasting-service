@@ -30,24 +30,7 @@ class FitArimaxUC:
         self._model_serializer = model_serializer
 
     def execute(self, request: ArimaxFitRequest) -> ArimaxFitResult:
-        self._ts_aligner.is_ts_freq_equal_to_expected(request.dependent_variables)
-
-        # FIXME: думаю это надо скрыть в TimeseriesAligner
-        if request.explanatory_variables:
-            df = self._ts_aligner.compare(
-                timeseries_list=request.explanatory_variables,
-                target=request.dependent_variables
-            )
-
-            target = df[request.dependent_variables.name]
-            if type(target) == pd.DataFrame:
-                target = target.iloc[:, 0]
-            exog_df = df.drop(columns=[request.dependent_variables.name])
-            if exog_df.empty:
-                exog_df = None
-        else:
-            target = self._ts_adapter.to_series(request.dependent_variables)
-            exog_df = None
+        target, exog_df = self._ts_aligner.align(request.model_data)
 
         # FIXME: тут по идее инфраструктурный слой протекает в бизнес логику.
         #  Если так возвращать model_weight то бизнес логика зависит от statsmodels
