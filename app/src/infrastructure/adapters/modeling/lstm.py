@@ -1,3 +1,5 @@
+from typing import Any
+
 import pandas as pd
 from fastapi import HTTPException
 from neuralforecast import NeuralForecast
@@ -7,7 +9,7 @@ from neuralforecast.models import LSTM
 from logs import logger
 from src.core.application.building_model.errors.lstm import LstmTrainSizeError2, LstmTrainSizeError
 from src.core.application.building_model.errors.nhits import HorizonValidationError, ValSizeError, PatienceStepsError
-from src.core.application.building_model.schemas.lstm import LstmParams, LstmFitResult
+from src.core.application.building_model.schemas.lstm import LstmParams, LstmFitResult, LstmFitResponse
 from src.core.domain import FitParams, DataFrequency
 from src.infrastructure.adapters.metrics import MetricsFactory
 from src.infrastructure.adapters.modeling.neural_forecast import NeuralForecastInterface
@@ -69,7 +71,7 @@ class LstmAdapter(NeuralForecastInterface):
         lstm_params: LstmParams,
         fit_params: FitParams,
         data_frequency: DataFrequency
-    ) -> LstmFitResult:
+    ) -> tuple[LstmFitResponse, dict[str, Any]]:
         # 1. Train / val / test split -------------------------------------------------
         (
             exog_train,
@@ -152,6 +154,7 @@ class LstmAdapter(NeuralForecastInterface):
         )
         nf = NeuralForecast(models=[model], freq=data_frequency)
         nf.fit(df=train_df, val_size=val_size)
+        weights = model.state_dict()
 
         # 4. Прогнозы -----------------------------------------------------------------
         # 4.1 train
@@ -197,9 +200,8 @@ class LstmAdapter(NeuralForecastInterface):
             y_test_true=test_target,
             y_test_pred=fcst_test,
         )
-        return LstmFitResult(
+        fit_result = LstmFitResult(
             forecasts=forecasts,
             model_metrics=metrics,
-            weight_path='заглушка',
-            model_id='заглушка',
         )
+        return fit_result, weights

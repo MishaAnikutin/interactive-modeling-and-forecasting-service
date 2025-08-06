@@ -1,5 +1,5 @@
 import uuid
-from typing import Dict
+from typing import Dict, Any
 
 import pandas as pd
 from fastapi import HTTPException
@@ -65,7 +65,7 @@ class NhitsAdapter(NeuralForecastInterface):
             nhits_params: NhitsParams,
             fit_params: FitParams,
             data_frequency: DataFrequency,
-    ) -> NhitsFitResult:
+    ) -> tuple[NhitsFitResult, dict[str, Any]]:
         # 1. Train / val / test split -------------------------------------------------
         (
             exog_train,
@@ -142,6 +142,7 @@ class NhitsAdapter(NeuralForecastInterface):
         )
         nf = NeuralForecast(models=[model], freq=data_frequency)
         nf.fit(df=train_df, val_size=val_size)
+        weights = model.state_dict()
 
         # 4. Прогнозы -----------------------------------------------------------------
         # 4.1 train
@@ -189,9 +190,8 @@ class NhitsAdapter(NeuralForecastInterface):
             y_test_true=test_target,
             y_test_pred=fcst_test,
         )
-        return NhitsFitResult(
+        fit_result = NhitsFitResult(
             forecasts=forecasts,
             model_metrics=metrics,
-            weight_path=str('заглушка'),
-            model_id=str(uuid.uuid4()),
         )
+        return fit_result, weights

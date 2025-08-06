@@ -200,9 +200,8 @@ class GruAdapter(NeuralForecastInterface):
             y_test_true=test_target,
             y_test_pred=fcst_test,
         )
-        return GruFitResult(
+        fit_result = GruFitResult(
             forecasts=forecasts,
             model_metrics=metrics,
-            weight_path='заглушка',
-            model_id='заглушка',
-        ), weights
+        )
+        return fit_result, weights

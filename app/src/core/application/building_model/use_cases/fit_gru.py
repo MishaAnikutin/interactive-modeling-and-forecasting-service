@@ -1,4 +1,4 @@
-from src.core.application.building_model.schemas.gru import GruFitRequest, GruFitResult, GruFitResponse
+from src.core.application.building_model.schemas.gru import GruFitRequest, GruFitResponse
 from src.infrastructure.adapters.modeling.gru import GruAdapter
 from src.infrastructure.adapters.serializer import ModelSerializer
 from src.infrastructure.adapters.timeseries import TimeseriesAlignment, PandasTimeseriesAdapter
@@ -17,7 +17,7 @@ class FitGruUC:
         self._model_adapter = model_adapter
         self._model_serializer = model_serializer
 
-    def execute(self, request: GruFitRequest) -> GruFitResult:
+    def execute(self, request: GruFitRequest) -> GruFitResponse:
         target, exog_df = self._ts_aligner.align(request.model_data)
 
         model_result, model_weight = self._model_adapter.fit(

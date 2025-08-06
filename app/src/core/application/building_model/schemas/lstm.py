@@ -152,5 +152,7 @@ class LstmFitRequest(BaseModel):
 class LstmFitResult(BaseModel):
     forecasts: Forecasts = Field(title="Прогнозы")
     model_metrics: ModelMetrics = Field(title="Метрики модели")
-    weight_path: str = Field(default="example.pth", title="Путь до весов модели")
-    model_id: str = Field(default="example", title="Идентификатор модели")
+
+class LstmFitResponse(BaseModel):
+    fit_result: LstmFitResult
+    serialized_model_weight: str = Field(title='Сериализованные веса модели')

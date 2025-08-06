@@ -152,12 +152,8 @@ class GruFitRequest(BaseModel):
 class GruFitResult(BaseModel):
     forecasts: Forecasts = Field(title="Прогнозы")
     model_metrics: ModelMetrics = Field(title="Метрики модели")
-    weight_path: str = Field(default="example.pth", title="Путь до весов модели")
-    model_id: str = Field(default="example", title="Идентификатор модели")
 
 
 class GruFitResponse(BaseModel):
     fit_result: GruFitResult
-
-    # FIXME: в этом костыле тут не просто байты pickle а еще в utf-8
     serialized_model_weight: str = Field(title='Сериализованные веса модели')

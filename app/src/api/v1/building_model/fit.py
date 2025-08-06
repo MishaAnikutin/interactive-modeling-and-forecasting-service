@@ -1,14 +1,14 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from dishka import FromDishka
 from dishka.integrations.fastapi import inject_sync
 
 from src.core.application.building_model.errors.arimax import ArimaxFitValidationError
 from src.core.application.building_model.errors.lstm import LstmFitValidationError, LstmPydanticValidationError
 from src.core.application.building_model.errors.nhits import NhitsFitValidationError, NhitsPydanticValidationError
-from src.core.application.building_model.schemas.arimax import ArimaxFitRequest, ArimaxFitResult, ArimaxFitResponse
-from src.core.application.building_model.schemas.gru import GruFitRequest, GruFitResult, GruFitResponse
-from src.core.application.building_model.schemas.lstm import LstmFitRequest, LstmFitResult
-from src.core.application.building_model.schemas.nhits import NhitsFitRequest, NhitsFitResult
+from src.core.application.building_model.schemas.arimax import ArimaxFitRequest, ArimaxFitResponse
+from src.core.application.building_model.schemas.gru import GruFitRequest, GruFitResponse
+from src.core.application.building_model.schemas.lstm import LstmFitRequest, LstmFitResponse
+from src.core.application.building_model.schemas.nhits import NhitsFitRequest, NhitsFitResponse
 from src.core.application.building_model.use_cases.fit_arimax import FitArimaxUC
 from src.core.application.building_model.use_cases.fit_gru import FitGruUC
 from src.core.application.building_model.use_cases.fit_lstm import FitLstmUC
@@ -42,7 +42,7 @@ def fit_arimax(
     path="/nhits/fit",
     responses={
         200: {
-            "model": NhitsFitResult,
+            "model": NhitsFitResponse,
             "description": "Успешный ответ"
         },
         400: {
@@ -59,7 +59,7 @@ def fit_arimax(
 def fit_nhits(
     request: NhitsFitRequest,
     fit_nhits_uc: FromDishka[FitNhitsUC]
-) -> NhitsFitResult:
+) -> NhitsFitResponse:
     return fit_nhits_uc.execute(request=request)
 
 
@@ -67,7 +67,7 @@ def fit_nhits(
     path="/lstm/fit",
     responses={
         200: {
-            "model": LstmFitResult,
+            "model": LstmFitResponse,
             "description": "Успешный ответ"
         },
         400: {
@@ -84,7 +84,7 @@ def fit_nhits(
 def fit_lstm(
     request: LstmFitRequest,
     fit_lstm_uc: FromDishka[FitLstmUC]
-) -> LstmFitResult:
+) -> LstmFitResponse:
     return fit_lstm_uc.execute(request=request)
 
 

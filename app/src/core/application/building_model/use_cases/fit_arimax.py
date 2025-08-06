@@ -1,8 +1,4 @@
-import base64
-
-import pandas as pd
-
-from src.core.application.building_model.schemas.arimax import ArimaxFitRequest, ArimaxFitResult, ArimaxFitResponse
+from src.core.application.building_model.schemas.arimax import ArimaxFitRequest, ArimaxFitResponse
 
 from src.infrastructure.adapters.modeling import ArimaxAdapter
 from src.infrastructure.adapters.serializer import ModelSerializer
@@ -29,7 +25,7 @@ class FitArimaxUC:
         self._model_adapter = model_adapter
         self._model_serializer = model_serializer
 
-    def execute(self, request: ArimaxFitRequest) -> ArimaxFitResult:
+    def execute(self, request: ArimaxFitRequest) -> ArimaxFitResponse:
         target, exog_df = self._ts_aligner.align(request.model_data)
 
         # FIXME: тут по идее инфраструктурный слой протекает в бизнес логику.
