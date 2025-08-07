@@ -1,5 +1,5 @@
 from dishka import FromDishka
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from dishka.integrations.fastapi import inject_sync
 
 from src.core.domain import Timeseries
@@ -19,7 +19,10 @@ def preprocessing(
     request: PreprocessingRequest,
     preprocess_uc: FromDishka[PreprocessUC],
 ) -> PreprocessingResponse:
-    return preprocess_uc.execute(request)
+    try:
+        return preprocess_uc.execute(request)
+    except ValueError as detail:
+        raise HTTPException(status_code=400, detail=str(detail))
 
 
 @preprocessing_router.post("/inverse", summary='Вернуть ряд к исходному после предобработок')
@@ -28,4 +31,7 @@ def inverse_preprocessing(
     request: InversePreprocessingRequest,
     inverse_preprocess_uc: FromDishka[InversePreprocessUC],
 ) -> Timeseries:
-    return inverse_preprocess_uc.execute(request)
+    try:
+        return inverse_preprocess_uc.execute(request)
+    except ValueError as detail:
+        raise HTTPException(status_code=400, detail=str(detail))

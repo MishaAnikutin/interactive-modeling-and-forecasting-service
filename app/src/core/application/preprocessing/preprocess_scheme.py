@@ -14,7 +14,8 @@ class DiffTransformation(Transformation):
     type: Literal["diff"] = "diff"
     diff_order: int = Field(
         title="Периоды сдвига для вычисления разности (допустимы отрицательные значения)",
-        description="- число наблюдений <= diff_order <= число наблюдений"
+        description="- число наблюдений <= diff_order <= число наблюдений",
+        default=1
     )
 
 
@@ -23,7 +24,8 @@ class LagTransformation(Transformation):
     type: Literal["lag"] = "lag"
     lag_order: int = Field(
         title="Периоды сдвига для вычисления лага (допустимы отрицательные значения)",
-        description="- число наблюдений <= diff_order <= число наблюдений"
+        description="- число наблюдений <= diff_order <= число наблюдений",
+        default=1
     )
 
 # 3. Логарифмирование
@@ -35,7 +37,7 @@ class LogTransformation(Transformation):
 # 4. Потенцирование
 class PowTransformation(Transformation):
     type: Literal["pow"] = "pow"
-    pow_order: float = Field(..., gt=0, title="Показатель степени", le=100)
+    pow_order: float = Field(gt=0, title="Показатель степени", le=100, default=2)
 
 
 class MinMaxTransformation(Transformation):
@@ -49,20 +51,20 @@ class StandardTransformation(Transformation):
 # 6. Экспоненциальное сглаживание (без параметров)
 class ExpSmoothTransformation(Transformation):
     type: Literal["exp_smooth"] = "exp_smooth"
-    span: int = Field(gt=0, title="Период окна экспоненциального сглаживания", le=1000)
+    span: int = Field(gt=0, title="Период окна экспоненциального сглаживания", le=1000, default=3)
 
 
 # 7. Преобразование Бокса-Кокса
 class BoxCoxTransformation(Transformation):
     type: Literal["boxcox"] = "boxcox"
-    param: float = Field(title="Параметр λ преобразования Бокса-Кокса", ge=-1000, le=1000)
+    param: float = Field(title="Параметр λ преобразования Бокса-Кокса", ge=-1000, le=1000, default=1)
 
 
 # 8. Заполнение пропусков
 class FillMissingTransformation(Transformation):
     type: Literal["fillna"] = "fillna"
     method: Literal["last", "backward", "mean", "median", "mode"] = Field(
-        title="Метод заполнения пропусков"
+        title="Метод заполнения пропусков", default='last'
     )
 
 
@@ -70,14 +72,15 @@ class FillMissingTransformation(Transformation):
 class MovingAverageTransformation(Transformation):
     type: Literal["moving_avg"] = "moving_avg"
     window: int = Field(
-        ...,
         gt=0, le=1000,
         title="Размер окна скользящего среднего",
+        default=3,
     )
 
 
 TransformationUnion = Annotated[
     Union[
+        BoxCoxTransformation,
         DiffTransformation,
         LagTransformation,
         LogTransformation,
@@ -85,7 +88,6 @@ TransformationUnion = Annotated[
         MinMaxTransformation,
         StandardTransformation,
         ExpSmoothTransformation,
-        BoxCoxTransformation,
         FillMissingTransformation,
         MovingAverageTransformation
     ],
