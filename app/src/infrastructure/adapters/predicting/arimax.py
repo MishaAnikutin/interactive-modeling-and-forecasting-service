@@ -23,6 +23,6 @@ class PredictArimaxAdapter:
         model = model.apply(target, exog=exog_df)
 
         in_sample = model.get_prediction().predicted_mean
-        out_of_sample = model.get_forecast(steps=steps)
+        out_of_sample = model.get_forecast(steps=steps, exog=exog_df.iloc[-1]).predicted_mean
 
         return in_sample, out_of_sample

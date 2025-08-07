@@ -59,27 +59,32 @@ class MlAdapterInterface(ABC):
         train_predict: pd.Series,
         validation_predict: pd.Series,
         test_predict: pd.Series,
-        forecast: pd.Series
+        forecast: pd.Series,
+        data_frequency: DataFrequency
     ) -> Forecasts:
         return Forecasts(
             train_predict=Timeseries(
                 dates=train_predict.index.tolist(),
                 values=train_predict.values.tolist(),
+                data_frequency=data_frequency,
                 name="Прогноз на обучающей выборке",
             ),
             validation_predict=Timeseries(
                 dates=validation_predict.index.tolist(),
                 values=validation_predict.values.tolist(),
+                data_frequency=data_frequency,
                 name="Прогноз на валидационной выборке"
-            )  if not validation_predict.empty else None,
+        )  if not validation_predict.empty else None,
             test_predict=Timeseries(
                 dates=test_predict.index.tolist(),
                 values=test_predict.values.tolist(),
+                data_frequency=data_frequency,
                 name="Прогноз на тестовой выборке"
             )  if not test_predict.empty else None,
             forecast=Timeseries(
                 dates=forecast.index.tolist(),
                 values=forecast.values.tolist(),
+                data_frequency=data_frequency,
                 name="Вневыборочный прогноз"
             ) if not forecast.empty else None,
         )

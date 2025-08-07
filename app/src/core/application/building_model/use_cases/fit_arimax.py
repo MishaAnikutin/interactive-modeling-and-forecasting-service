@@ -1,4 +1,5 @@
 from src.core.application.building_model.schemas.arimax import ArimaxFitRequest, ArimaxFitResponse
+from src.infrastructure.adapters.archiver import ModelArchiver
 
 from src.infrastructure.adapters.modeling import ArimaxAdapter
 from src.infrastructure.adapters.serializer import ModelSerializer
@@ -16,16 +17,18 @@ class FitArimaxUC:
         model_adapter: ArimaxAdapter,
         ts_aligner: TimeseriesAlignment,
         ts_adapter: PandasTimeseriesAdapter,
-        model_serializer: ModelSerializer,  # FIXME: по идее сам сериализатор должен быть скрыт в
+        archiver: ModelArchiver,
+        serializer: ModelSerializer,        # FIXME: по идее сам сериализатор должен быть скрыт в
                                             #  инфраструктурный слой. Т.к. тут неправильно будет написать
                                             #  даже ModelSerializer[statsmodels.tsa.statespace.sarimax.SARIMAXResultsWrapper]
     ):
         self._ts_adapter = ts_adapter
         self._ts_aligner = ts_aligner
         self._model_adapter = model_adapter
-        self._model_serializer = model_serializer
+        self._serializer = serializer
+        self._archiver = archiver
 
-    def execute(self, request: ArimaxFitRequest) -> ArimaxFitResponse:
+    def execute(self, request: ArimaxFitRequest) -> bytes:
         target, exog_df = self._ts_aligner.align(request.model_data)
 
         # FIXME: тут по идее инфраструктурный слой протекает в бизнес логику.
@@ -39,9 +42,9 @@ class FitArimaxUC:
             data_frequency=request.model_data.dependent_variables.data_frequency,
         )
 
-        serialized_model_weight: str = self._model_serializer.serialize(model_weight)
+        data_dict: dict = model_result.model_dump()
+        model_bytes: bytes = self._serializer.serialize(model_weight)
 
-        return ArimaxFitResponse(
-            fit_result=model_result,
-            serialized_model_weight=serialized_model_weight
-        )
+        archive: bytes = self._archiver.execute(data_dict=data_dict, model_bytes=model_bytes)
+
+        return archive

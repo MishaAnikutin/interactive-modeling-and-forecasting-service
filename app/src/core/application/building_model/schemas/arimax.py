@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Any
 
 from pydantic import BaseModel, Field
 
@@ -30,6 +30,4 @@ class ArimaxFitResult(BaseModel):
 
 class ArimaxFitResponse(BaseModel):
     fit_result: ArimaxFitResult
-
-    # FIXME: в этом костыле тут не просто байты pickle а еще в utf-8
-    serialized_model_weight: str = Field(title='Сериализованные веса модели')
+    model_weight: Any = Field(title='веса модели, которые нужно сериализовать и сохранить в S3')

@@ -12,7 +12,8 @@ from src.infrastructure.adapters.modeling import (
 from src.infrastructure.adapters.predicting.arimax import PredictArimaxAdapter
 from src.infrastructure.adapters.predicting.gru import PredictGruAdapter
 from src.infrastructure.adapters.preprocessing.preprocess_factory import PreprocessFactory
-from src.infrastructure.adapters.serializer import Base64PickleSerializer, ModelSerializer
+from src.infrastructure.adapters.serializer import PickleSerializer, ModelSerializer
+from src.infrastructure.adapters.archiver import ModelArchiver, ZipArchiver
 from src.infrastructure.adapters.timeseries import (
     PandasTimeseriesAdapter,
     TimeseriesAlignment,
@@ -30,7 +31,8 @@ class InfraProvider(Provider):
     ts_alignment = provide(TimeseriesAlignment, provides=TimeseriesAlignment)
     freq_determiner = provide(FrequencyDeterminer, provides=FrequencyDeterminer)
     ts_spliter = provide(TimeseriesTrainTestSplit, provides=TimeseriesTrainTestSplit)
-    model_serializer = provide(Base64PickleSerializer, provides=ModelSerializer)
+    model_serializer = provide(PickleSerializer, provides=ModelSerializer)
+    model_archiver = provide(ZipArchiver, provides=ModelArchiver)
 
     arimax = provide(ArimaxAdapter, provides=ArimaxAdapter)
     arimax_predictor = provide(PredictArimaxAdapter, provides=PredictArimaxAdapter)

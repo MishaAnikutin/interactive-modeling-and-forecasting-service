@@ -118,7 +118,8 @@ class ArimaxAdapter(MlAdapterInterface):
             train_predict=train_predict,
             validation_predict=val_predict,
             test_predict=test_predict,
-            forecast=forecast
+            forecast=forecast,
+            data_frequency=data_frequency
         )
 
         # 5. Метрики -----------------------------------------------------------------
