@@ -13,7 +13,7 @@ class PredictArimaxAdapter:
 
     def execute(
             self,
-            model_weight: str,
+            model_weight: bytes,
             steps: int,
             target: pd.Series,
             exog_df: Optional[pd.DataFrame]
