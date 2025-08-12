@@ -1,5 +1,3 @@
-from typing import Any
-
 import pandas as pd
 from fastapi import HTTPException
 from neuralforecast import NeuralForecast
@@ -71,7 +69,7 @@ class GruAdapter(NeuralForecastInterface):
         gru_params: GruParams,
         fit_params: FitParams,
         data_frequency: DataFrequency
-    ) -> tuple[GruFitResult, dict[str, Any]]:
+    ) -> tuple[GruFitResult, NeuralForecast]:
         # 1. Train / val / test split -------------------------------------------------
         (
             exog_train,
@@ -154,7 +152,6 @@ class GruAdapter(NeuralForecastInterface):
         )
         nf = NeuralForecast(models=[model], freq=data_frequency)
         nf.fit(df=train_df, val_size=val_size)
-        weights = model.state_dict()
 
         # 4. Прогнозы -----------------------------------------------------------------
         # 4.1 train
@@ -177,6 +174,8 @@ class GruAdapter(NeuralForecastInterface):
 
         # ------------------------------------------------------------------
         # 5. Сборка результата
+        # test_predict, future_predict = self._split_predict(test_size, all_forecasts)
+        # train_predict, validation_predict = self._split_predict(val_size, fcst_train)
 
         # делим прогноз на валидационную и обучающую часть
         if val_size > 0:
@@ -191,6 +190,7 @@ class GruAdapter(NeuralForecastInterface):
             validation_predict=validation_predict,
             test_predict=fcst_test,
             forecast=fcst_future,
+            data_frequency=data_frequency,
         )
         metrics = self._calculate_metrics(
             y_train_true=train_target,
@@ -204,4 +204,4 @@ class GruAdapter(NeuralForecastInterface):
             forecasts=forecasts,
             model_metrics=metrics,
         )
-        return fit_result, weights
+        return fit_result, nf
