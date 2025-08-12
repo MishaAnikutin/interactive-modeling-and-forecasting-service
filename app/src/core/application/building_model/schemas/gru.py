@@ -152,8 +152,3 @@ class GruFitRequest(BaseModel):
 class GruFitResult(BaseModel):
     forecasts: Forecasts = Field(title="Прогнозы")
     model_metrics: ModelMetrics = Field(title="Метрики модели")
-
-
-class GruFitResponse(BaseModel):
-    fit_result: GruFitResult
-    serialized_model_weight: str = Field(title='Сериализованные веса модели')
