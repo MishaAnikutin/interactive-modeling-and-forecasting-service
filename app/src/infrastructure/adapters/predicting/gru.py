@@ -5,17 +5,16 @@ from fastapi import HTTPException
 from neuralforecast import NeuralForecast
 from neuralforecast.losses.pytorch import MAPE, RMSE, MSE, MAE
 from neuralforecast.models import GRU
+from neuralforecast.tsdataset import TimeSeriesDataset
 
 from src.core.application.building_model.schemas.gru import GruParams
 from src.core.domain import DataFrequency, Timeseries
+from src.infrastructure.adapters.modeling.neural_forecast import future_index
 from src.infrastructure.adapters.serializer import ModelSerializer
 
 
 class PredictGruAdapter:
-    def __init__(
-            self,
-            model_serializer: ModelSerializer
-    ):
+    def __init__(self, model_serializer: ModelSerializer):
         self._model_serializer = model_serializer
 
     @staticmethod
@@ -46,36 +45,62 @@ class PredictGruAdapter:
         return df
 
     @staticmethod
-    def _get_out_of_sample_forecast(
-        forecast: pd.Series
-    ) -> Timeseries:
-        ...
+    def _future_df(
+            steps: int,
+            train_df: pd.Series,
+            freq: DataFrequency,
+    ):
+        last_ds = train_df['ds'].max()
+        future_dates = future_index(
+            last_dt=last_ds,
+            data_frequency=freq,
+            periods=steps,
+        )
+        futr_df = pd.DataFrame({"unique_id": "ts", "ds": future_dates})
+
+        return futr_df
 
     def execute(
             self,
-            model_weight: str,
-            params: GruParams,
+            model_weight: bytes,
+            steps: int,
             target: pd.Series,
             exog_df: Optional[pd.DataFrame],
             data_frequency: DataFrequency,
     ) -> tuple[pd.Series, pd.Series]:
+        deserialized_nf: NeuralForecast = self._model_serializer.undo_serialize(model_weight)
+        train_df = self._to_panel(target=target, exog=exog_df)
 
-        model = GRU(
-            ...
+        dataset, uids, _, ds = TimeSeriesDataset.from_df(
+            df=train_df,
+            static_df=None,
+            id_col='unique_id',
+            time_col='ds',
+            target_col='y'
+        )
+        deserialized_nf.dataset = dataset
+        deserialized_nf.uids = uids
+        deserialized_nf.ds = ds
+        deserialized_nf.h = steps
+        deserialized_nf.models[0].h = steps
+
+        deserialized_insample = deserialized_nf.predict_insample()
+        deserialized_insample = (
+            deserialized_insample
+            .loc[deserialized_insample['ds']
+            .isin(train_df['ds'])]
+            .drop_duplicates('ds', keep='last')
+            .set_index('ds')['GRU']
         )
 
-        # загружаем старые веса
-        old_state_dict = self._model_serializer.undo_serialize(model_weight)
-        model.load_state_dict(old_state_dict)
-        model.eval()
+        future_df = self._future_df(
+            train_df=train_df,
+            steps=steps,
+            freq=data_frequency,
+        )
 
-        nf = NeuralForecast(models=[model], freq=data_frequency)
+        fcst_df = deserialized_nf.predict()
+        out_of_sample = fcst_df["GRU"]
+        out_of_sample.index = future_df['ds']
 
-        fcst_insample_df = nf.predict_insample()
-        forecasts = nf.predict(futr_df=...)['GRU']
-
-
-        in_sample = ...
-        out_of_sample = ...
-
-        return in_sample, out_of_sample
+        return deserialized_insample, out_of_sample

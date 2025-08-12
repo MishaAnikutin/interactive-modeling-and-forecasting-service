@@ -22,25 +22,25 @@ model_predict_router = APIRouter(prefix="/model_predicting", tags=["Прогно
 @inject_sync
 def predict_arimax(
     predict_arimax_uc: FromDishka[PredictArimaxUC],
-    request: PredictArimaxRequest = Body(...),
+    request: PredictArimaxRequest,
     model_file: UploadFile = File(..., description="Файл модели в формате .pickle"),
 ) -> PredictResponse:
     return predict_arimax_uc.execute(request=request, model_bytes=model_file.file.read())
 
 
-# FIXME: пока закоммитил, чтобы у бэкендеров не было путаницы пока у нас схемы разыне
-# @model_predict_router.post(
-#     path="/gru/predict",
-#     responses={
-#         200: {
-#             "model": PredictResponse,
-#             "description": "Успешный ответ"
-#         },
-#     }
-# )
+@model_predict_router.post(
+    path="/gru/predict",
+    responses={
+        200: {
+            "model": PredictResponse,
+            "description": "Успешный ответ"
+        },
+    }
+)
 @inject_sync
-def fit_gru(
+def predict_gru(
+    predict_gru_uc: FromDishka[PredictGruUC],
     request: PredictGruRequest,
-    predict_gru_uc: FromDishka[PredictGruUC]
+    model_file: UploadFile = File(..., description="Файл модели в формате .pickle"),
 ) -> PredictResponse:
-    return predict_gru_uc.execute(request=request)
+    return predict_gru_uc.execute(request=request, model_bytes=model_file.file.read())

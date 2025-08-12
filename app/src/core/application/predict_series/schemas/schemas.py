@@ -7,13 +7,8 @@ from src.core.domain import Timeseries
 from src.core.domain.model.model_data import ModelData
 
 
-class PredictParams(BaseModel):
-    """Данные для получения прогнозов, зная веса."""
-    model_data: ModelData = Field(default=ModelData())
-
-
 class PredictArimaxRequest(BaseModel):
-    predict_params: PredictParams = Field(default=PredictParams())
+    predict_params: ModelData = Field(default=ModelData(), title="Новые данные для прогноза")
     forecast_steps: int = Field(
         gt=0,
         le=10000,
@@ -30,9 +25,19 @@ class PredictArimaxRequest(BaseModel):
 
 
 class PredictGruRequest(BaseModel):
-    predict_params: PredictParams = Field(default=PredictParams())
-    gru_params: GruParams = Field(default=GruParams())
-
+    predict_params: ModelData = Field(default=ModelData(), title="Новые данные для прогноза")
+    forecast_steps: int = Field(
+        gt=0,
+        le=10000,
+        default=1,
+        title="Число шагов прогноза"
+    )
+    @model_validator(mode='before')
+    @classmethod
+    def validate_to_json(cls, value):
+        if isinstance(value, str):
+            return cls(**json.loads(value))
+        return value
 
 class PredictResponse(BaseModel):
     in_sample_predict: Timeseries

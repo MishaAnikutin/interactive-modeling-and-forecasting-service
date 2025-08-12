@@ -14,17 +14,18 @@ class PredictGruUC:
         self._ts_aligner = ts_aligner
         self._predict_adapter = predict_adapter
 
-    def execute(self, request: PredictGruRequest) -> PredictResponse:
-        target, exog_df = self._ts_aligner.align(request.model_data)
+    def execute(self, model_bytes: bytes, request: PredictGruRequest) -> PredictResponse:
+        target, exog_df = self._ts_aligner.align(request.predict_params)
+        freq = request.predict_params.dependent_variables.data_frequency
 
         in_sample, out_of_sample = self._predict_adapter.execute(
-            model_weight=request.model_weight,
-            params=request.gru_params,
+            model_weight=model_bytes,
             target=target,
-            exog_df=exog_df
+            exog_df=exog_df,
+            steps=request.forecast_steps,
+            data_frequency=freq
         )
 
-        freq = request.model_data.dependent_variables.data_frequency
         in_sample_predict = self._ts_adapter.from_series(in_sample, freq)
         out_of_sample_predict = self._ts_adapter.from_series(out_of_sample, freq)
 
