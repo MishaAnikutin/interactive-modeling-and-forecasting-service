@@ -85,3 +85,13 @@ class NeuralForecastInterface(MlAdapterInterface, ABC):
                 "ds": futr_index_expanded,
             }
         )
+
+    @staticmethod
+    def _split_predict(left_size: int, predict: pd.DataFrame):
+        if left_size > 0:
+            left_predict = predict.iloc[:-left_size]
+            right_predict = predict.iloc[-left_size:]
+        else:
+            left_predict = predict.copy()
+            right_predict = pd.Series()
+        return left_predict, right_predict
