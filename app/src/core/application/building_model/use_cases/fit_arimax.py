@@ -1,7 +1,10 @@
-from src.core.application.building_model.schemas.arimax import ArimaxFitRequest, ArimaxFitResponse
-from src.infrastructure.adapters.archiver import ModelArchiver
+from src.core.application.building_model.errors.arimax import ArimaxFitValidationError, \
+    ConstantInExogAndSpecificationError
+from src.core.application.building_model.schemas.arimax import ArimaxFitRequest
 
+from src.infrastructure.adapters.archiver import ModelArchiver
 from src.infrastructure.adapters.modeling import ArimaxAdapter
+from src.infrastructure.adapters.modeling.errors.arimax import ConstantInExogAndSpecification
 from src.infrastructure.adapters.serializer import ModelSerializer
 from src.infrastructure.adapters.timeseries import (
     PandasTimeseriesAdapter,
@@ -29,6 +32,7 @@ class FitArimaxUC:
         self._archiver = archiver
 
     def execute(self, request: ArimaxFitRequest) -> bytes:
+        print(request)
         target, exog_df = self._ts_aligner.align(request.model_data)
 
         # FIXME: тут по идее инфраструктурный слой протекает в бизнес логику.

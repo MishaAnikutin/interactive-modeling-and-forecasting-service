@@ -1,9 +1,24 @@
-from typing import Annotated, Union
+from typing import Annotated, Union, Literal
 
 from pydantic import Field, BaseModel
 
-from src.core.application.building_model.errors.alignment import NotLastDayOfMonthError, NotSupportedFreqError, \
-    NotConstantFreqError, EmptyError, NotEqualToTargetError, NotEqualToExpectedError
+from src.core.application.building_model.errors.alignment import (
+    EmptyError,
+    NotConstantFreqError,
+    NotEqualToTargetError,
+    NotSupportedFreqError,
+    NotLastDayOfMonthError,
+    NotEqualToExpectedError,
+)
+
+
+class ConstantInExogAndSpecificationError(BaseModel):
+    type: Literal["constant in exog and specification"] = "constant in exog and specification"
+    detail: str = Field(
+        default="Модель включает в себя константу тренда, однако экзогенные переменные также включают константный ряд",
+        title="Описание ошибки"
+    )
+
 
 FitValidationErrorType = Annotated[
     Union[
@@ -12,10 +27,12 @@ FitValidationErrorType = Annotated[
         NotConstantFreqError,
         NotSupportedFreqError,
         NotLastDayOfMonthError,
-        EmptyError
+        EmptyError,
+        ConstantInExogAndSpecificationError
     ],
     Field(discriminator="type")
 ]
+
 
 class ArimaxFitValidationError(BaseModel):
     msg: FitValidationErrorType = Field(

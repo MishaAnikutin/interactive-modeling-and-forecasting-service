@@ -21,6 +21,7 @@ from src.infrastructure.adapters.timeseries import (
     TimeseriesAlignment,
     FrequencyDeterminer,
     TimeseriesTrainTestSplit,
+    TimeseriesExtender
 )
 
 
@@ -31,6 +32,7 @@ class InfraProvider(Provider):
         PandasTimeseriesAdapter, provides=PandasTimeseriesAdapter
     )
     ts_alignment = provide(TimeseriesAlignment, provides=TimeseriesAlignment)
+    ts_extender = provide(TimeseriesExtender, provides=TimeseriesExtender)
     freq_determiner = provide(FrequencyDeterminer, provides=FrequencyDeterminer)
     ts_spliter = provide(TimeseriesTrainTestSplit, provides=TimeseriesTrainTestSplit)
     model_serializer = provide(PickleSerializer, provides=ModelSerializer)

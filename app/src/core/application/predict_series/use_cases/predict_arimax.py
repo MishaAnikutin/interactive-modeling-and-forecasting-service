@@ -15,19 +15,17 @@ class PredictArimaxUC:
         self._predict_adapter = predict_adapter
 
     def execute(self, model_bytes: bytes, request: PredictRequest) -> PredictResponse:
-        target, exog_df = self._ts_aligner.align(request.predict_params.model_data)
+        target, exog_df = self._ts_aligner.align(request.predict_params)
+        freq = request.predict_params.dependent_variables.data_frequency
 
         in_sample, out_of_sample = self._predict_adapter.execute(
             model_weight=model_bytes,
             steps=request.forecast_steps,
             target=target,
-            exog_df=exog_df
+            exog_df=exog_df,
+            data_frequency=freq
         )
 
-        in_sample.name = 'Внутривыборочный прогноз'
-        out_of_sample.name = 'Вневыборочный прогноз'
-
-        freq = request.predict_params.model_data.dependent_variables.data_frequency
         in_sample_predict = self._ts_adapter.from_series(in_sample, freq)
         out_of_sample_predict = self._ts_adapter.from_series(out_of_sample, freq)
 

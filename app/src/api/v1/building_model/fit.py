@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Response, HTTPException
 from dishka import FromDishka
 from dishka.integrations.fastapi import inject_sync
 
@@ -13,6 +13,7 @@ from src.core.application.building_model.use_cases.fit_arimax import FitArimaxUC
 from src.core.application.building_model.use_cases.fit_gru import FitGruUC
 from src.core.application.building_model.use_cases.fit_lstm import FitLstmUC
 from src.core.application.building_model.use_cases.fit_nhits import FitNhitsUC
+from src.infrastructure.adapters.modeling.errors.arimax import ConstantInExogAndSpecification
 
 fit_model_router = APIRouter(prefix="/building_model", tags=["Построение модели"])
 
@@ -31,7 +32,11 @@ def fit_arimax(
     request: ArimaxFitRequest,
     fit_arimax_uc: FromDishka[FitArimaxUC]
 ) -> Response:
-    archive_response = fit_arimax_uc.execute(request=request)
+    try:
+        archive_response = fit_arimax_uc.execute(request=request)
+    except ConstantInExogAndSpecification as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
     return Response(
         content=archive_response,
         media_type="application/octet-stream",
@@ -51,6 +56,7 @@ def fit_arimax(
         },
     }
 )
+
 @inject_sync
 def fit_nhits(
     request: NhitsFitRequest,

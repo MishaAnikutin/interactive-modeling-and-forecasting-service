@@ -3,14 +3,14 @@ from typing import List
 import statsmodels.api as sm
 from statsmodels.tsa.statespace.sarimax import SARIMAXResultsWrapper
 
-from logs import logger
-
-from src.core.application.building_model.schemas.arimax import ArimaxParams, ArimaxFitResult
 # FIXME: схемки это конечно ничего, но получается что инфра зависит от слоя приложения
+from src.core.application.building_model.schemas.arimax import ArimaxParams, ArimaxFitResult
 
+from .errors.arimax import ConstantInExogAndSpecification
+from logs import logger
+from src.infrastructure.adapters.metrics import MetricsFactory
 from src.infrastructure.adapters.modeling.interface import MlAdapterInterface
 from src.infrastructure.adapters.timeseries import TimeseriesTrainTestSplit
-from src.infrastructure.adapters.metrics import MetricsFactory
 
 from src.core.domain import FitParams, Coefficient, DataFrequency
 
@@ -38,7 +38,6 @@ class ArimaxAdapter(MlAdapterInterface):
     ) -> tuple[ArimaxFitResult, SARIMAXResultsWrapper]:
         self._log.debug("Старт обучения ARIMAX")
 
-        # 1. Разделение данных -------------------------------------------------------
         (
             exog_train,
             train_target,
@@ -53,15 +52,17 @@ class ArimaxAdapter(MlAdapterInterface):
             exog=exog,
         )
 
-        # 2. Создаём и обучаем модель ------------------------------------------------
-        # Используем SARIMAX вместо ARIMA для поддержки метода apply()
-        model = sm.tsa.SARIMAX(
-            endog=train_target,
-            exog=exog_train,
-            order=(arimax_params.p, arimax_params.d, arimax_params.q),
-            seasonal_order=(0, 0, 0, 0),  # Без сезонности
-            trend='c'  # Константа
-        )
+        try:
+            model = sm.tsa.SARIMAX(
+                endog=train_target,
+                exog=exog_train,
+                order=(arimax_params.p, arimax_params.d, arimax_params.q),
+                seasonal_order=(0, 0, 0, 0),  # Без сезонности
+                trend='c'  # Константа
+            )
+        except ValueError:
+            raise ConstantInExogAndSpecification
+
         results = model.fit(disp=False)
         self._log.info("Модель обучена", extra={"aic": results.aic, "bic": results.bic})
 
@@ -122,7 +123,6 @@ class ArimaxAdapter(MlAdapterInterface):
             data_frequency=data_frequency
         )
 
-        # 5. Метрики -----------------------------------------------------------------
         metrics = self._calculate_metrics(
             y_train_true=train_target,
             y_train_pred=train_predict,
@@ -132,16 +132,14 @@ class ArimaxAdapter(MlAdapterInterface):
             y_test_pred=test_predict,
         )
 
-        # 6. Коэффициенты ------------------------------------------------------------
         coefficients = self._parse_coefficients(results)
 
-        # 7. Результат ---------------------------------------------------------------
-        result = ArimaxFitResult(
+        fit_result = ArimaxFitResult(
             coefficients=coefficients,
             model_metrics=metrics,
             forecasts=forecasts
         )
-        return result, results
+        return fit_result, results
 
     def _parse_coefficients(self, results) -> List[Coefficient]:
         return [
