@@ -154,7 +154,6 @@ class LstmAdapter(NeuralForecastInterface):
         )
         nf = NeuralForecast(models=[model], freq=data_frequency)
         nf.fit(df=train_df, val_size=val_size)
-        weights = model.state_dict()
 
         # 4. Прогнозы -----------------------------------------------------------------
         # 4.1 train
@@ -191,6 +190,7 @@ class LstmAdapter(NeuralForecastInterface):
             validation_predict=validation_predict,
             test_predict=fcst_test,
             forecast=fcst_future,
+            data_frequency=data_frequency,
         )
         metrics = self._calculate_metrics(
             y_train_true=train_target,
@@ -204,4 +204,4 @@ class LstmAdapter(NeuralForecastInterface):
             forecasts=forecasts,
             model_metrics=metrics,
         )
-        return fit_result, weights
+        return fit_result, nf

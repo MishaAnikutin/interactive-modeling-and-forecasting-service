@@ -1,13 +1,10 @@
-import uuid
-from typing import Dict, Any
+from typing import Any
 
 import pandas as pd
 from fastapi import HTTPException
 from neuralforecast import NeuralForecast
 from neuralforecast.models import NHITS
-from neuralforecast.losses.pytorch import (
-    MAE, MSE, RMSE, MAPE, DistributionLoss, IQLoss, MQLoss,
-)
+from neuralforecast.losses.pytorch import MAE, MSE, RMSE, MAPE
 
 from logs import logger
 from src.core.application.building_model.errors.nhits import HorizonValidationError, ValSizeError, PatienceStepsError, \
@@ -142,7 +139,6 @@ class NhitsAdapter(NeuralForecastInterface):
         )
         nf = NeuralForecast(models=[model], freq=data_frequency)
         nf.fit(df=train_df, val_size=val_size)
-        weights = model.state_dict()
 
         # 4. Прогнозы -----------------------------------------------------------------
         # 4.1 train
@@ -179,6 +175,7 @@ class NhitsAdapter(NeuralForecastInterface):
             validation_predict=validation_predict,
             test_predict=fcst_test,
             forecast=fcst_future,
+            data_frequency=data_frequency,
         )
 
         # делим исходные данные на валидационную и обучающую часть
@@ -194,4 +191,4 @@ class NhitsAdapter(NeuralForecastInterface):
             forecasts=forecasts,
             model_metrics=metrics,
         )
-        return fit_result, weights
+        return fit_result, nf

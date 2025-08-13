@@ -1,4 +1,4 @@
-from src.core.application.building_model.schemas.gru import GruFitRequest, GruFitResult
+from src.core.application.building_model.schemas.gru import GruFitRequest
 from src.infrastructure.adapters.archiver import ModelArchiver
 from src.infrastructure.adapters.modeling.gru import GruAdapter
 from src.infrastructure.adapters.serializer import ModelSerializer

@@ -7,8 +7,8 @@ from src.core.application.building_model.errors.lstm import LstmFitValidationErr
 from src.core.application.building_model.errors.nhits import NhitsFitValidationError, NhitsPydanticValidationError
 from src.core.application.building_model.schemas.arimax import ArimaxFitRequest
 from src.core.application.building_model.schemas.gru import GruFitRequest
-from src.core.application.building_model.schemas.lstm import LstmFitRequest, LstmFitResponse
-from src.core.application.building_model.schemas.nhits import NhitsFitRequest, NhitsFitResponse
+from src.core.application.building_model.schemas.lstm import LstmFitRequest
+from src.core.application.building_model.schemas.nhits import NhitsFitRequest
 from src.core.application.building_model.use_cases.fit_arimax import FitArimaxUC
 from src.core.application.building_model.use_cases.fit_gru import FitGruUC
 from src.core.application.building_model.use_cases.fit_lstm import FitLstmUC
@@ -17,7 +17,15 @@ from src.core.application.building_model.use_cases.fit_nhits import FitNhitsUC
 fit_model_router = APIRouter(prefix="/building_model", tags=["Построение модели"])
 
 
-@fit_model_router.post("/arimax/fit")
+@fit_model_router.post(
+    path="/arimax/fit",
+    responses={
+        400: {
+            "model": ArimaxFitValidationError,
+            "description": "Ошибка валидации во время обучения",
+        },
+    }
+)
 @inject_sync
 def fit_arimax(
     request: ArimaxFitRequest,
@@ -29,55 +37,55 @@ def fit_arimax(
         media_type="application/octet-stream",
     )
 
-#
-# @fit_model_router.post(
-#     path="/nhits/fit",
-#     responses={
-#         200: {
-#             "model": NhitsFitResponse,
-#             "description": "Успешный ответ"
-#         },
-#         400: {
-#             "model": NhitsFitValidationError,
-#             "description": "Ошибка валидации во время обучения",
-#         },
-#         422: {
-#             "model": NhitsPydanticValidationError,
-#             "description": "Ошибка валидации запроса",
-#         },
-#     }
-# )
+
+@fit_model_router.post(
+    path="/nhits/fit",
+    responses={
+        400: {
+            "model": NhitsFitValidationError,
+            "description": "Ошибка валидации во время обучения",
+        },
+        422: {
+            "model": NhitsPydanticValidationError,
+            "description": "Ошибка валидации запроса",
+        },
+    }
+)
 @inject_sync
 def fit_nhits(
     request: NhitsFitRequest,
     fit_nhits_uc: FromDishka[FitNhitsUC]
-) -> NhitsFitResponse:
-    return fit_nhits_uc.execute(request=request)
+) -> Response:
+    archive_response = fit_nhits_uc.execute(request=request)
+    return Response(
+        content=archive_response,
+        media_type="application/octet-stream",
+    )
 
-#
-# @fit_model_router.post(
-#     path="/lstm/fit",
-#     responses={
-#         200: {
-#             "model": LstmFitResponse,
-#             "description": "Успешный ответ"
-#         },
-#         400: {
-#             "model": LstmFitValidationError,
-#             "description": "Ошибка валидации во время обучения",
-#         },
-#         422: {
-#             "model": LstmPydanticValidationError,
-#             "description": "Ошибка валидации запроса",
-#         },
-#     }
-# )
+
+@fit_model_router.post(
+    path="/lstm/fit",
+    responses={
+        400: {
+            "model": LstmFitValidationError,
+            "description": "Ошибка валидации во время обучения",
+        },
+        422: {
+            "model": LstmPydanticValidationError,
+            "description": "Ошибка валидации запроса",
+        },
+    }
+)
 @inject_sync
 def fit_lstm(
     request: LstmFitRequest,
     fit_lstm_uc: FromDishka[FitLstmUC]
-) -> LstmFitResponse:
-    return fit_lstm_uc.execute(request=request)
+) -> Response:
+    archive_response = fit_lstm_uc.execute(request=request)
+    return Response(
+        content=archive_response,
+        media_type="application/octet-stream",
+    )
 
 
 @fit_model_router.post(
