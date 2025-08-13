@@ -1,6 +1,6 @@
-import pandas as pd
 from typing import Optional
 
+import pandas as pd
 from neuralforecast import NeuralForecast
 from neuralforecast.tsdataset import TimeSeriesDataset
 
@@ -9,7 +9,7 @@ from src.infrastructure.adapters.predicting.neural_predict import NeuralPredictA
 from src.infrastructure.adapters.serializer import ModelSerializer
 
 
-class PredictGruAdapter(NeuralPredictAdapter):
+class PredictLstmAdapter(NeuralPredictAdapter):
     def __init__(self, model_serializer: ModelSerializer):
         self._model_serializer = model_serializer
 
@@ -19,7 +19,7 @@ class PredictGruAdapter(NeuralPredictAdapter):
             steps: int,
             target: pd.Series,
             exog_df: Optional[pd.DataFrame],
-            data_frequency: DataFrequency,
+            data_frequency: DataFrequency
     ) -> tuple[pd.Series, pd.Series]:
         deserialized_nf: NeuralForecast = self._model_serializer.undo_serialize(model_weight)
         train_df = self._to_panel(target=target, exog=exog_df)
@@ -43,7 +43,7 @@ class PredictGruAdapter(NeuralPredictAdapter):
             .loc[deserialized_insample['ds']
             .isin(train_df['ds'])]
             .drop_duplicates('ds', keep='last')
-            .set_index('ds')['GRU']
+            .set_index('ds')['LSTM']
         )
 
         future_df = self._future_df(
@@ -53,7 +53,8 @@ class PredictGruAdapter(NeuralPredictAdapter):
         )
 
         fcst_df = deserialized_nf.predict()
-        out_of_sample = fcst_df["GRU"]
+        out_of_sample = fcst_df["LSTM"]
         out_of_sample.index = future_df['ds']
 
         return deserialized_insample, out_of_sample
+
