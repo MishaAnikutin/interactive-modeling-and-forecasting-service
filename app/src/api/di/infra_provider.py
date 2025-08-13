@@ -11,6 +11,8 @@ from src.infrastructure.adapters.modeling import (
 
 from src.infrastructure.adapters.predicting.arimax import PredictArimaxAdapter
 from src.infrastructure.adapters.predicting.gru import PredictGruAdapter
+from src.infrastructure.adapters.predicting.lstm import PredictLstmAdapter
+from src.infrastructure.adapters.predicting.nhits import PredictNhitsAdapter
 from src.infrastructure.adapters.preprocessing.preprocess_factory import PreprocessFactory
 from src.infrastructure.adapters.serializer import PickleSerializer, ModelSerializer
 from src.infrastructure.adapters.archiver import ModelArchiver, ZipArchiver
@@ -38,10 +40,13 @@ class InfraProvider(Provider):
     arimax_predictor = provide(PredictArimaxAdapter, provides=PredictArimaxAdapter)
 
     nhits = provide(NhitsAdapter, provides=NhitsAdapter)
-    nhits_predictor = provide(PredictGruAdapter, provides=PredictGruAdapter)
+    nhits_predictor = provide(PredictNhitsAdapter, provides=PredictNhitsAdapter)
 
     lstm = provide(LstmAdapter, provides=LstmAdapter)
+    lstm_predictor = provide(PredictLstmAdapter, provides=PredictLstmAdapter)
+
     gru = provide(GruAdapter, provides=GruAdapter)
+    gru_predictor = provide(PredictGruAdapter, provides=PredictGruAdapter)
 
     metrics_factory = provide(MetricsFactory, provides=MetricsFactory)
 

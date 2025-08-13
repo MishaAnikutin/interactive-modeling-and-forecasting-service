@@ -16,6 +16,8 @@ from src.core.application.model_diagnosis.use_cases.ljung_box import LjungBoxUC
 from src.core.application.model_diagnosis.use_cases.lm import LmUC
 from src.core.application.model_diagnosis.use_cases.omnibus import OmnibusUC
 from src.core.application.predict_series.use_cases.predict_gru import PredictGruUC
+from src.core.application.predict_series.use_cases.predict_lstm import PredictLstmUC
+from src.core.application.predict_series.use_cases.predict_nhits import PredictNhitsUC
 from src.core.application.preliminary_diagnosis.use_cases.df_gls import DfGlsUC
 from src.core.application.preliminary_diagnosis.use_cases.dicker_fuller import DickeuFullerUC
 from src.core.application.preliminary_diagnosis.use_cases.kpss import KpssUC
@@ -38,6 +40,8 @@ class CoreProvider(Provider):
     # команды для прогнозирования моделями
     arimax_predict_command = provide(PredictArimaxUC, provides=PredictArimaxUC)
     gru_predict_command = provide(PredictGruUC, provides=PredictGruUC)
+    lstm_predict_command = provide(PredictLstmUC, provides=PredictLstmUC)
+    nhits_predict_command = provide(PredictNhitsUC, provides=PredictNhitsUC)
 
     # параметры моделей
     arimax_params_command = provide(ArimaxParamsUC, provides=ArimaxParamsUC)
