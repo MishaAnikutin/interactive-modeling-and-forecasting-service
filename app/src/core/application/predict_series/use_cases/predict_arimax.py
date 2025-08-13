@@ -1,4 +1,4 @@
-from src.core.application.predict_series.schemas.schemas import PredictArimaxRequest, PredictResponse
+from src.core.application.predict_series.schemas.schemas import PredictResponse, PredictRequest
 from src.infrastructure.adapters.predicting.arimax import PredictArimaxAdapter
 from src.infrastructure.adapters.timeseries import TimeseriesAlignment, PandasTimeseriesAdapter
 
@@ -14,7 +14,7 @@ class PredictArimaxUC:
         self._ts_aligner = ts_aligner
         self._predict_adapter = predict_adapter
 
-    def execute(self, model_bytes: bytes, request: PredictArimaxRequest) -> PredictResponse:
+    def execute(self, model_bytes: bytes, request: PredictRequest) -> PredictResponse:
         target, exog_df = self._ts_aligner.align(request.predict_params.model_data)
 
         in_sample, out_of_sample = self._predict_adapter.execute(
