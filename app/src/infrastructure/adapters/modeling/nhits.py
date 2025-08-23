@@ -106,12 +106,16 @@ class NhitsAdapter(NeuralForecastInterface):
         assert test_size + train_df.shape[0] == target.shape[0]
 
         # 3. Создаём и обучаем модель -------------------------------------------------
+        hyperparameters = hyperparameters.model_dump()
+        hyperparameters['stack_types'] = ['identity'] * hyperparameters['n_stacks']
+        del hyperparameters['n_stacks']
+
         model = NHITS(
             hist_exog_list=[exog_col for exog_col in exog.columns] if exog is not None else None,
             accelerator='cpu',
             h=h,
             input_size=h * 3,
-            **hyperparameters.model_dump()
+            **hyperparameters
         )
         nf = NeuralForecast(models=[model], freq=data_frequency)
         nf.fit(df=train_df, val_size=val_size)

@@ -1,13 +1,19 @@
-from typing import Optional, List
+from typing import Optional
 
 from pydantic import BaseModel, Field, model_validator
 from neuralforecast.losses.pytorch import MAE, MSE, RMSE, MAPE
 
 from src.core.application.building_model.errors.lstm import HiddenSizeError
 from src.core.application.building_model.schemas.nhits import ScalerType, LossEnum
-from src.core.domain import Timeseries, FitParams, Forecasts, ModelMetrics
+from src.core.domain import FitParams, Forecasts, ModelMetrics
 from src.core.domain.model.model_data import ModelData
 
+loss_map = {
+    "MAE": MAE,
+    "MSE": MSE,
+    "RMSE": RMSE,
+    "MAPE": MAPE,
+}
 
 class GruParams(BaseModel):
     input_size: int = Field(
@@ -115,34 +121,15 @@ class GruParams(BaseModel):
     )
 
     @model_validator(mode='after')
-    def validate_hidden_size(self):
-        loss_map = {
-            "MAE": MAE,
-            "MSE": MSE,
-            "RMSE": RMSE,
-            "MAPE": MAPE,
-        }
+    def implement_torch_loss(self):
+        if self.valid_loss is None:
+            self.valid_loss = self.loss
         loss = loss_map[self.loss]()
+        self.loss = loss
+        self.valid_loss = loss_map[self.valid_loss]()
         proj_size = loss.outputsize_multiplier if self.recurrent else 0
         if proj_size >= self.encoder_hidden_size:
             raise ValueError(HiddenSizeError().detail)
-        return self
-
-    @model_validator(mode='after')
-    def implement_torch_loss(self):
-        loss_map = {
-            "MAE": MAE,
-            "MSE": MSE,
-            "RMSE": RMSE,
-            "MAPE": MAPE,
-        }
-        self.loss = loss_map[self.loss]()
-        return self
-
-    @model_validator(mode='after')
-    def validate_valid_loss(self):
-        if self.valid_loss is None:
-            self.valid_loss = self.loss
         return self
 
 

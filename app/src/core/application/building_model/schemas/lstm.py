@@ -8,6 +8,12 @@ from src.core.application.building_model.schemas.nhits import ScalerType, LossEn
 from src.core.domain import FitParams, Forecasts, ModelMetrics
 from src.core.domain.model.model_data import ModelData
 
+loss_map = {
+    "MAE": MAE,
+    "MSE": MSE,
+    "RMSE": RMSE,
+    "MAPE": MAPE,
+}
 
 class LstmParams(BaseModel):
     input_size: int = Field(
@@ -115,23 +121,15 @@ class LstmParams(BaseModel):
     )
 
     @model_validator(mode='after')
-    def validate_hidden_size(self):
-        loss_map = {
-            "MAE": MAE,
-            "MSE": MSE,
-            "RMSE": RMSE,
-            "MAPE": MAPE,
-        }
+    def implement_torch_loss(self):
+        if self.valid_loss is None:
+            self.valid_loss = self.loss
         loss = loss_map[self.loss]()
+        self.loss = loss
+        self.valid_loss = loss_map[self.valid_loss]()
         proj_size = loss.outputsize_multiplier if self.recurrent else 0
         if proj_size >= self.encoder_hidden_size:
             raise ValueError(HiddenSizeError().detail)
-        return self
-
-    @model_validator(mode='after')
-    def validate_valid_loss(self):
-        if self.valid_loss is None:
-            self.valid_loss = self.loss
         return self
 
 

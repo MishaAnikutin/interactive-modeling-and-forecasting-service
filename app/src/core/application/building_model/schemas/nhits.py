@@ -1,15 +1,21 @@
 from enum import Enum
-from typing import List, Optional
+from neuralforecast.losses.pytorch import MAE, MSE, RMSE, MAPE
 
 from pydantic import BaseModel, Field, model_validator
 
 from src.core.application.building_model.errors.nhits import ListLengthError, KernelSizeError
 from src.core.domain import (
-    Timeseries,
     FitParams,
     Forecasts,
     ModelMetrics,
 )
+
+loss_map = {
+    "MAE": MAE,
+    "MSE": MSE,
+    "RMSE": RMSE,
+    "MAPE": MAPE,
+}
 from src.core.domain.model.model_data import ModelData
 
 
@@ -101,6 +107,12 @@ class NhitsParams(BaseModel):
             len(self.n_blocks) != len(self.n_pool_kernel_size)
         ):
             raise ValueError(ListLengthError().detail)
+        return self
+
+    @model_validator(mode='after')
+    def implement_torch_loss(self):
+        self.loss = loss_map[self.loss]()
+        self.valid_loss = loss_map[self.valid_loss]()
         return self
 
     @model_validator(mode='after')
