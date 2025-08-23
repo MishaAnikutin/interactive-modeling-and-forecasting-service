@@ -33,16 +33,7 @@ class GruAdapter(NeuralForecastInterface):
             "RMSE": RMSE,
             "MAPE": MAPE,
         }
-        if hyperparameters.loss not in loss_map:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Loss '{hyperparameters.loss}' is not supported. Supported losses are: {list(loss_map.keys())}",
-            )
-        if hyperparameters.valid_loss not in loss_map:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Loss '{hyperparameters.valid_loss}' is not supported. Supported losses are: {list(loss_map.keys())}",
-            )
+
         return {
             "input_size": hyperparameters.input_size,
             "inference_input_size": hyperparameters.inference_input_size,
