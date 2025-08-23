@@ -129,6 +129,17 @@ class GruParams(BaseModel):
         return self
 
     @model_validator(mode='after')
+    def implement_torch_loss(self):
+        loss_map = {
+            "MAE": MAE,
+            "MSE": MSE,
+            "RMSE": RMSE,
+            "MAPE": MAPE,
+        }
+        self.loss = loss_map[self.loss]()
+        return self
+
+    @model_validator(mode='after')
     def validate_valid_loss(self):
         if self.valid_loss is None:
             self.valid_loss = self.loss

@@ -25,34 +25,6 @@ class GruAdapter(NeuralForecastInterface):
         super().__init__(metric_factory, ts_train_test_split)
         self._log = logger.getChild(self.__class__.__name__)
 
-    @staticmethod
-    def _process_params(hyperparameters: GruParams) -> dict:
-        loss_map = {
-            "MAE": MAE,
-            "MSE": MSE,
-            "RMSE": RMSE,
-            "MAPE": MAPE,
-        }
-
-        return {
-            "input_size": hyperparameters.input_size,
-            "inference_input_size": hyperparameters.inference_input_size,
-            "h_train": hyperparameters.h_train,
-            "encoder_n_layers": hyperparameters.encoder_n_layers,
-            "encoder_hidden_size": hyperparameters.encoder_hidden_size,
-            "encoder_dropout": hyperparameters.encoder_dropout,
-            "decoder_hidden_size": hyperparameters.decoder_hidden_size,
-            "decoder_layers": hyperparameters.decoder_layers,
-            "recurrent": hyperparameters.recurrent,
-            "loss": loss_map[hyperparameters.loss](),
-            "valid_loss": loss_map[hyperparameters.valid_loss](),
-            "max_steps": hyperparameters.max_steps,
-            "learning_rate": hyperparameters.learning_rate,
-            "early_stop_patience_steps": hyperparameters.early_stop_patience_steps,
-            "val_check_steps": hyperparameters.val_check_steps,
-            "scaler_type": hyperparameters.scaler_type,
-        }
-
     def fit(
         self,
         target: pd.Series,
@@ -139,7 +111,7 @@ class GruAdapter(NeuralForecastInterface):
             hist_exog_list=[exog_col for exog_col in exog.columns] if exog is not None else None,
             accelerator='cpu',
             h=h,
-            **self._process_params(hyperparameters)
+            **hyperparameters.model_dump()
         )
         nf = NeuralForecast(models=[model], freq=data_frequency)
         nf.fit(df=train_df, val_size=val_size)

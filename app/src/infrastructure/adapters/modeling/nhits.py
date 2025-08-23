@@ -31,30 +31,6 @@ class NhitsAdapter(NeuralForecastInterface):
         super().__init__(metric_factory, ts_train_test_split)
         self._log = logger.getChild(self.__class__.__name__)
 
-    @staticmethod
-    def _process_params(hyperparameters: NhitsParams) -> dict:
-        loss_map = {
-            "MAE": MAE,
-            "MSE": MSE,
-            "RMSE": RMSE,
-            "MAPE": MAPE,
-        }
-        return {
-            "stack_types": hyperparameters.n_stacks * ['identity'],
-            "n_blocks": hyperparameters.n_blocks,
-            "n_pool_kernel_size": hyperparameters.n_pool_kernel_size,
-            "pooling_mode": hyperparameters.pooling_mode,
-            "interpolation_mode": hyperparameters.interpolation_mode,
-            "activation": hyperparameters.activation,
-            "max_steps": hyperparameters.max_steps,
-            "early_stop_patience_steps": hyperparameters.early_stop_patience_steps,
-            "val_check_steps": hyperparameters.val_check_steps,
-            "learning_rate": hyperparameters.learning_rate,
-            "scaler_type": hyperparameters.scaler_type,
-            "loss": loss_map[hyperparameters.loss](),
-            "valid_loss": loss_map[hyperparameters.valid_loss](),
-        }
-
     def fit(
             self,
             target: pd.Series,
@@ -135,7 +111,7 @@ class NhitsAdapter(NeuralForecastInterface):
             accelerator='cpu',
             h=h,
             input_size=h * 3,
-            **self._process_params(hyperparameters)
+            **hyperparameters.model_dump()
         )
         nf = NeuralForecast(models=[model], freq=data_frequency)
         nf.fit(df=train_df, val_size=val_size)
