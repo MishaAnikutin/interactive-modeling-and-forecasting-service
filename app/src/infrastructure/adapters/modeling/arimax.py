@@ -1,5 +1,6 @@
 import pandas as pd
 from typing import List
+from logging import Logger
 import statsmodels.api as sm
 from statsmodels.tsa.statespace.sarimax import SARIMAXResultsWrapper
 
@@ -7,7 +8,6 @@ from statsmodels.tsa.statespace.sarimax import SARIMAXResultsWrapper
 from src.core.application.building_model.schemas.arimax import ArimaxParams, ArimaxFitResult
 
 from .errors.arimax import ConstantInExogAndSpecification
-from logs import logger
 from src.infrastructure.adapters.metrics import MetricsFactory
 from src.infrastructure.adapters.modeling.interface import MlAdapterInterface
 from src.infrastructure.adapters.timeseries import TimeseriesTrainTestSplit
@@ -20,12 +20,13 @@ class ArimaxAdapter(MlAdapterInterface):
 
     def __init__(
             self,
+            logger: Logger,
             metric_factory: MetricsFactory,
             ts_train_test_split: TimeseriesTrainTestSplit,
     ):
         super().__init__(metric_factory, ts_train_test_split)
         self._log = logger.getChild(self.__class__.__name__)
-        self._ts_spliter = ts_train_test_split  # Сохраняем для удобства
+        self._ts_spliter = ts_train_test_split
 
     def fit(
             self,
