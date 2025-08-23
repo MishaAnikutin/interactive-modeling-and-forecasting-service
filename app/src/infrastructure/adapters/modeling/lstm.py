@@ -3,7 +3,6 @@ from typing import Any
 import pandas as pd
 from fastapi import HTTPException
 from neuralforecast import NeuralForecast
-from neuralforecast.losses.pytorch import MAE, MSE, RMSE, MAPE
 from neuralforecast.models import LSTM
 
 from logs import logger

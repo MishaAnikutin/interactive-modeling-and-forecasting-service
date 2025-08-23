@@ -4,7 +4,6 @@ import pandas as pd
 from fastapi import HTTPException
 from neuralforecast import NeuralForecast
 from neuralforecast.models import NHITS
-from neuralforecast.losses.pytorch import MAE, MSE, RMSE, MAPE
 
 from logs import logger
 from src.core.application.building_model.errors.nhits import HorizonValidationError, ValSizeError, PatienceStepsError, \

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Optional
+from typing import TypeVar
 
 import pandas as pd
 
