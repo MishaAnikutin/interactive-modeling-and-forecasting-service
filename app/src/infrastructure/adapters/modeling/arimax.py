@@ -32,7 +32,7 @@ class ArimaxAdapter(MlAdapterInterface):
             self,
             target: pd.Series,
             exog: pd.DataFrame | None,
-            arimax_params: ArimaxParams,
+            hyperparameters: ArimaxParams,
             fit_params: FitParams,
             data_frequency: DataFrequency,
     ) -> tuple[ArimaxFitResult, SARIMAXResultsWrapper]:
@@ -56,7 +56,7 @@ class ArimaxAdapter(MlAdapterInterface):
             model = sm.tsa.SARIMAX(
                 endog=train_target,
                 exog=exog_train,
-                order=(arimax_params.p, arimax_params.d, arimax_params.q),
+                order=(hyperparameters.p, hyperparameters.d, hyperparameters.q),
                 seasonal_order=(0, 0, 0, 0),  # Без сезонности
                 trend='c'  # Константа
             )

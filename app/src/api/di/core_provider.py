@@ -1,10 +1,6 @@
 from dishka import Provider, Scope, provide
 
-from src.core.application.building_model.use_cases.fit_arimax import FitArimaxUC
-from src.core.application.building_model.use_cases.fit_gru import FitGruUC
-from src.core.application.building_model.use_cases.fit_lstm import FitLstmUC
-from src.core.application.building_model.use_cases.fit_nhits import FitNhitsUC
-from src.core.application.building_model.use_cases.params import ArimaxParamsUC, NhitsParamsUC
+from src.core.application.building_model.use_cases.models import FitArimaxUC, FitGruUC, FitLstmUC, FitNhitsUC
 from src.core.application.predict_series.use_cases.predict_arimax import PredictArimaxUC
 from src.core.application.generating_series.use_cases.naive_decomposition import NaiveDecompositionUC
 from src.core.application.generating_series.use_cases.stl_decomposition import STLDecompositionUC
@@ -42,10 +38,6 @@ class CoreProvider(Provider):
     gru_predict_command = provide(PredictGruUC, provides=PredictGruUC)
     lstm_predict_command = provide(PredictLstmUC, provides=PredictLstmUC)
     nhits_predict_command = provide(PredictNhitsUC, provides=PredictNhitsUC)
-
-    # параметры моделей
-    arimax_params_command = provide(ArimaxParamsUC, provides=ArimaxParamsUC)
-    nhits_params_command = provide(NhitsParamsUC, provides=NhitsParamsUC)
 
     # тесты на стационарность
     dickey_fuller_command = provide(DickeuFullerUC, provides=DickeuFullerUC)
