@@ -9,6 +9,7 @@ from src.infrastructure.adapters.timeseries import (
     TimeseriesAlignment,
 )
 
+
 class FitRequestProtocol(Protocol):
     model_data: ...
     hyperparameters: ...
