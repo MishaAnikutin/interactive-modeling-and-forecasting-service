@@ -12,7 +12,7 @@ ModelFitResult = TypeVar("ModelFitResult")
 
 
 class MlAdapterInterface(ABC):
-    metrics = ()
+    metrics = ("RMSE", "MAPE", "R2")
 
     def __init__(
         self,

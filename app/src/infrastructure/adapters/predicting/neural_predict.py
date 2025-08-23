@@ -5,8 +5,9 @@ import pandas as pd
 from fastapi import HTTPException
 
 from src.core.domain import DataFrequency
-from src.infrastructure.adapters.modeling.neural_forecast import future_index
 
+def future_index(**kwargs):
+    pass
 
 class NeuralPredictAdapter(ABC):
     @abstractmethod
