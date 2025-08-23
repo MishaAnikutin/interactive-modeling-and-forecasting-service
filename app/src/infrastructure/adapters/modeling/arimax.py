@@ -22,7 +22,6 @@ class ArimaxAdapter(MlAdapterInterface):
             self,
             metric_factory: MetricsFactory,
             ts_train_test_split: TimeseriesTrainTestSplit,
-            # FIXME: кстати, а не нарушается ли SRP? этот класс и делит выборки и обучает модель
     ):
         super().__init__(metric_factory, ts_train_test_split)
         self._log = logger.getChild(self.__class__.__name__)
