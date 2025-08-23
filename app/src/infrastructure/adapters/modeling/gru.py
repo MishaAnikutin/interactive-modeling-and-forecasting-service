@@ -26,47 +26,47 @@ class GruAdapter(NeuralForecastInterface):
         self._log = logger.getChild(self.__class__.__name__)
 
     @staticmethod
-    def _process_params(lstm_params: GruParams) -> dict:
+    def _process_params(hyperparameters: GruParams) -> dict:
         loss_map = {
             "MAE": MAE,
             "MSE": MSE,
             "RMSE": RMSE,
             "MAPE": MAPE,
         }
-        if lstm_params.loss not in loss_map:
+        if hyperparameters.loss not in loss_map:
             raise HTTPException(
                 status_code=400,
-                detail=f"Loss '{lstm_params.loss}' is not supported. Supported losses are: {list(loss_map.keys())}",
+                detail=f"Loss '{hyperparameters.loss}' is not supported. Supported losses are: {list(loss_map.keys())}",
             )
-        if lstm_params.valid_loss not in loss_map:
+        if hyperparameters.valid_loss not in loss_map:
             raise HTTPException(
                 status_code=400,
-                detail=f"Loss '{lstm_params.valid_loss}' is not supported. Supported losses are: {list(loss_map.keys())}",
+                detail=f"Loss '{hyperparameters.valid_loss}' is not supported. Supported losses are: {list(loss_map.keys())}",
             )
         return {
-            "input_size": lstm_params.input_size,
-            "inference_input_size": lstm_params.inference_input_size,
-            "h_train": lstm_params.h_train,
-            "encoder_n_layers": lstm_params.encoder_n_layers,
-            "encoder_hidden_size": lstm_params.encoder_hidden_size,
-            "encoder_dropout": lstm_params.encoder_dropout,
-            "decoder_hidden_size": lstm_params.decoder_hidden_size,
-            "decoder_layers": lstm_params.decoder_layers,
-            "recurrent": lstm_params.recurrent,
-            "loss": loss_map[lstm_params.loss](),
-            "valid_loss": loss_map[lstm_params.valid_loss](),
-            "max_steps": lstm_params.max_steps,
-            "learning_rate": lstm_params.learning_rate,
-            "early_stop_patience_steps": lstm_params.early_stop_patience_steps,
-            "val_check_steps": lstm_params.val_check_steps,
-            "scaler_type": lstm_params.scaler_type,
+            "input_size": hyperparameters.input_size,
+            "inference_input_size": hyperparameters.inference_input_size,
+            "h_train": hyperparameters.h_train,
+            "encoder_n_layers": hyperparameters.encoder_n_layers,
+            "encoder_hidden_size": hyperparameters.encoder_hidden_size,
+            "encoder_dropout": hyperparameters.encoder_dropout,
+            "decoder_hidden_size": hyperparameters.decoder_hidden_size,
+            "decoder_layers": hyperparameters.decoder_layers,
+            "recurrent": hyperparameters.recurrent,
+            "loss": loss_map[hyperparameters.loss](),
+            "valid_loss": loss_map[hyperparameters.valid_loss](),
+            "max_steps": hyperparameters.max_steps,
+            "learning_rate": hyperparameters.learning_rate,
+            "early_stop_patience_steps": hyperparameters.early_stop_patience_steps,
+            "val_check_steps": hyperparameters.val_check_steps,
+            "scaler_type": hyperparameters.scaler_type,
         }
 
     def fit(
         self,
         target: pd.Series,
         exog: pd.DataFrame | None,
-        gru_params: GruParams,
+        hyperparameters: GruParams,
         fit_params: FitParams,
         data_frequency: DataFrequency
     ) -> tuple[GruFitResult, NeuralForecast]:
@@ -102,19 +102,19 @@ class GruAdapter(NeuralForecastInterface):
                 status_code=400,
             )
 
-        if val_size == 0 and gru_params.early_stop_patience_steps > 0:
+        if val_size == 0 and hyperparameters.early_stop_patience_steps > 0:
             raise HTTPException(
                 detail=PatienceStepsError().detail,
                 status_code=400,
             )
 
-        if gru_params.input_size + h > train_target.shape[-1]:
+        if hyperparameters.input_size + h > train_target.shape[-1]:
             raise HTTPException(
                 status_code=400,
                 detail=LstmTrainSizeError().detail
             )
 
-        if gru_params.recurrent and gru_params.input_size + gru_params.h_train + test_size > train_target.shape[-1]:
+        if hyperparameters.recurrent and hyperparameters.input_size + hyperparameters.h_train + test_size > train_target.shape[-1]:
             raise HTTPException(
                 status_code=400,
                 detail=LstmTrainSizeError2().detail
@@ -148,7 +148,7 @@ class GruAdapter(NeuralForecastInterface):
             hist_exog_list=[exog_col for exog_col in exog.columns] if exog is not None else None,
             accelerator='cpu',
             h=h,
-            **self._process_params(gru_params)
+            **self._process_params(hyperparameters)
         )
         nf = NeuralForecast(models=[model], freq=data_frequency)
         nf.fit(df=train_df, val_size=val_size)
