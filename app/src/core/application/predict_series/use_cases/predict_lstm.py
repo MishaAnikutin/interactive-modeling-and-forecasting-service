@@ -1,5 +1,5 @@
 from src.core.application.predict_series.use_cases.neural_predict import BaseNeuralPredict
-from src.infrastructure.adapters.predicting.lstm import PredictLstmAdapter
+from src.infrastructure.adapters.predicting.neural_predict.models import PredictLstmAdapter
 from src.infrastructure.adapters.timeseries import TimeseriesAlignment, PandasTimeseriesAdapter
 
 

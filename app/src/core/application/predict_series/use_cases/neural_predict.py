@@ -1,5 +1,5 @@
 from src.core.application.predict_series.schemas.schemas import PredictResponse, PredictRequest
-from src.infrastructure.adapters.predicting.neural_predict import NeuralPredictAdapter
+from src.infrastructure.adapters.predicting.neural_predict.neural_predict import NeuralPredictAdapter
 from src.infrastructure.adapters.timeseries import TimeseriesAlignment, PandasTimeseriesAdapter
 
 

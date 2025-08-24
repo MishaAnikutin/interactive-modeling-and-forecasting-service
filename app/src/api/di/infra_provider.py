@@ -10,9 +10,7 @@ from src.infrastructure.adapters.modeling import (
 )
 
 from src.infrastructure.adapters.predicting.arimax import PredictArimaxAdapter
-from src.infrastructure.adapters.predicting.gru import PredictGruAdapter
-from src.infrastructure.adapters.predicting.lstm import PredictLstmAdapter
-from src.infrastructure.adapters.predicting.nhits import PredictNhitsAdapter
+from src.infrastructure.adapters.predicting.neural_predict.models import PredictGruAdapter, PredictNhitsAdapter, PredictLstmAdapter
 from src.infrastructure.adapters.preprocessing.preprocess_factory import PreprocessFactory
 from src.infrastructure.adapters.serializer import PickleSerializer, ModelSerializer
 from src.infrastructure.adapters.archiver import ModelArchiver, ZipArchiver

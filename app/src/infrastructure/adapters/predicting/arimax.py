@@ -3,11 +3,12 @@ from typing import Optional
 from statsmodels.tsa.statespace.sarimax import SARIMAXResultsWrapper
 
 from src.core.domain import DataFrequency
+from src.infrastructure.adapters.predicting.interface import BasePredictor
 from src.infrastructure.adapters.serializer import ModelSerializer
 from src.infrastructure.adapters.timeseries import TimeseriesExtender
 
 
-class PredictArimaxAdapter:
+class PredictArimaxAdapter(BasePredictor):
 
     def __init__(self, model_serializer: ModelSerializer, ts_extender: TimeseriesExtender):
         self._model_serializer = model_serializer
