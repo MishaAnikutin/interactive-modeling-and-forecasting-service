@@ -2,18 +2,24 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+class BoundariesError(BaseModel):
+    type: Literal["boundaries"] = "boundaries"
+    detail: str = Field(
+        default="Границы выборок должны быть внутри датасета",
+        title="Описание ошибки"
+    )
+
+class NoDataAfterAlignmentError(BaseModel):
+    type: Literal["no data after alignment"] = "no data after alignment"
+    detail: str = Field(
+        default="После выравнивания не осталось данных",
+        title="Описание ошибки"
+    )
 
 class NotEqualToExpectedError(BaseModel):
     type: Literal["equal"] = "equal"
     detail: str = Field(
         default="Не соответствует полученный тип частотности ряда и заявленный для переменной",
-        title="Описание ошибки"
-    )
-
-class NotEqualToTargetError(BaseModel):
-    type: Literal["target"] = "target"
-    detail: str = Field(
-        default="Частотность экзогенной переменной не соответствует частотности целевой переменной.",
         title="Описание ошибки"
     )
 

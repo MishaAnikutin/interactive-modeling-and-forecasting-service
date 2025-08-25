@@ -5,11 +5,26 @@ from pydantic import Field, BaseModel
 from src.core.application.building_model.errors.alignment import (
     EmptyError,
     NotConstantFreqError,
-    NotEqualToTargetError,
+    NoDataAfterAlignmentError,
+    BoundariesError,
     NotSupportedFreqError,
     NotLastDayOfMonthError,
     NotEqualToExpectedError,
 )
+
+
+PydanticValidationErrorType = Annotated[
+    Union[
+        BoundariesError,
+    ],
+    Field(discriminator="type")
+]
+
+class ArimaxPydanticValidationError(BaseModel):
+    msg: PydanticValidationErrorType = Field(
+        title="Описание ошибки",
+        default=BoundariesError()
+    )
 
 
 class ConstantInExogAndSpecificationError(BaseModel):
@@ -23,7 +38,7 @@ class ConstantInExogAndSpecificationError(BaseModel):
 FitValidationErrorType = Annotated[
     Union[
         NotEqualToExpectedError,
-        NotEqualToTargetError,
+        NoDataAfterAlignmentError,
         NotConstantFreqError,
         NotSupportedFreqError,
         NotLastDayOfMonthError,

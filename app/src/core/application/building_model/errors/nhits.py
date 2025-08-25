@@ -3,7 +3,7 @@ from typing import Annotated, Union, Literal
 from pydantic import BaseModel, Field
 
 from src.core.application.building_model.errors.alignment import NotEqualToExpectedError, NotConstantFreqError, \
-    NotEqualToTargetError, NotLastDayOfMonthError, NotSupportedFreqError, EmptyError
+    NoDataAfterAlignmentError, NotLastDayOfMonthError, NotSupportedFreqError, EmptyError, BoundariesError
 
 
 class ListLengthError(BaseModel):
@@ -26,6 +26,7 @@ PydanticValidationErrorType = Annotated[
     Union[
         ListLengthError,
         KernelSizeError,
+        BoundariesError,
     ],
     Field(discriminator="type")
 ]
@@ -86,7 +87,7 @@ FitValidationErrorType = Annotated[
         PatienceStepsError,
         TrainSizeError,
         NotEqualToExpectedError,
-        NotEqualToTargetError,
+        NoDataAfterAlignmentError,
         NotConstantFreqError,
         NotSupportedFreqError,
         NotLastDayOfMonthError,
