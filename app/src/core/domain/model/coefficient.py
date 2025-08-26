@@ -10,6 +10,6 @@ class Coefficient(BaseModel):
     @model_validator(mode="after")
     def validate_value(self):
         self.value = validate_float_param(self.value)
-        self.p_value = validate_float_param(self.value)
+        self.p_value = validate_float_param(self.p_value)
 
         return self

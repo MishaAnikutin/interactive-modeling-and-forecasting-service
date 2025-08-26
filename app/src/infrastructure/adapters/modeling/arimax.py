@@ -63,6 +63,7 @@ class ArimaxAdapter(MlAdapterInterface):
             raise ConstantInExogAndSpecification
 
         results = model.fit(disp=False)
+        print(results.summary())
         self._log.info("Модель обучена", extra={"aic": results.aic, "bic": results.bic})
 
         # 3. Прогнозы ----------------------------------------------------------------
