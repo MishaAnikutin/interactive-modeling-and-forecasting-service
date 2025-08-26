@@ -2,18 +2,52 @@ from typing import Optional, List
 from pydantic import BaseModel, Field, model_validator
 
 from src.core.application.model_diagnosis.errors.ljung_box import InvalidLagsError
-from src.core.application.model_diagnosis.schemas.common import ResidAnalysisData
+from src.core.domain import Timeseries, Forecasts
+from src.core.domain.timeseries.timeseries import gen_values, gen_dates
 from src.shared.utils import validate_float_param
 
 
+class LjungBoxData(BaseModel):
+    forecasts: Forecasts = Field(
+        default=Forecasts(
+            train_predict=Timeseries(
+                values=gen_values(110)[:70],
+                dates=gen_dates(110)[:70],
+                name="Прогноз на обучающей выборке"
+            ),
+            validation_predict=Timeseries(
+                values=gen_values(110)[70:90],
+                dates=gen_dates(110)[70:90],
+                name="Прогноз на валидационной выборке"
+            ),
+            test_predict=Timeseries(
+                values=gen_values(110)[90:100],
+                dates=gen_dates(110)[90:100],
+                name="Прогноз на тестовой выборке"
+            ),
+            forecast=Timeseries(
+                values=gen_values(110)[100:],
+                dates=gen_dates(110)[100:],
+                name="Прогноз на вне выборки"
+            ),
+        ),
+        title="Прогнозы",
+        description="Даты объединенного прогноза должны совпадать с датами исторических данных."
+    )
+
+    target: Timeseries = Field(
+        title="Исходные данные",
+        default=Timeseries(name="Исходные данные")
+    )
+
+
 class LjungBoxRequest(BaseModel):
-    data: ResidAnalysisData = Field(
+    data: LjungBoxData = Field(
         title="Прогнозы и исходные данные"
     )
 
     lags: List[int] | int | None = Field(
         default=None,
-        ge=1,
         description="Если `lags` — целое число, оно считается максимальным лагом, включенным в тест, "
                     "и результаты теста сообщаются для всех меньших длин лагов. "
                     "Если `lags` — список или массив, включаются все лаги до наибольшего в списке, "

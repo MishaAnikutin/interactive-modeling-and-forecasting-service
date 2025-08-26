@@ -2,7 +2,7 @@ from typing import Literal, Union, Annotated
 
 from pydantic import BaseModel, Field
 from src.core.application.building_model.errors.alignment import NotLastDayOfMonthError, NotSupportedFreqError, \
-    NotConstantFreqError, EmptyError, NotEqualToTargetError, NotEqualToExpectedError
+    NotConstantFreqError, EmptyError, NotEqualToExpectedError
 
 class NotEqualFreqError(BaseModel):
     type: Literal["not equal freq"] = "not equal freq"
@@ -32,7 +32,6 @@ ResidAnalysisValidationErrorType = Annotated[
         NotEqualLenError,
         NotEqualDatesError,
         NotEqualToExpectedError,
-        NotEqualToTargetError,
         NotConstantFreqError,
         NotSupportedFreqError,
         NotLastDayOfMonthError,

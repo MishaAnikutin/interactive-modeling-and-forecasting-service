@@ -3,7 +3,7 @@ from typing import List, Optional
 import pandas as pd
 from fastapi import HTTPException
 
-from src.core.application.building_model.errors.alignment import NotEqualToTargetError, NotEqualToExpectedError
+from src.core.application.building_model.errors.alignment import NotEqualToExpectedError
 from src.core.domain import Timeseries, DataFrequency
 from src.core.domain.model.model_data import ModelData
 from . import PandasTimeseriesAdapter
@@ -52,7 +52,8 @@ class TimeseriesAlignment:
             freq_type = self.is_ts_freq_equal_to_expected(ts_obj)
             if freq_type != target.data_frequency:
                 raise HTTPException(
-                    detail=NotEqualToTargetError().detail,
+                    # detail=NotEqualToTargetError().detail,  FIXME
+                    detail=NotEqualToExpectedError().detail,
                     status_code=400
                 )
             # Создаем временной ряд

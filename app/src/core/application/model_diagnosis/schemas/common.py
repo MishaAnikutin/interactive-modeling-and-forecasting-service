@@ -41,11 +41,6 @@ class ResidAnalysisData(BaseModel):
         default=Timeseries(name="Исходные данные")
     )
 
-    exog: Optional[List[Timeseries]] = Field(
-        default=None,
-        title="Экзогенные переменные (опционально)"
-    )
-
 
 class StatTestResult(BaseModel):
     """Результаты статистического теста"""
@@ -64,6 +59,7 @@ class StatTestResult(BaseModel):
         self.p_value = validate_float_param(self.p_value)
         self.stat_value = validate_float_param(self.stat_value)
         return self
+
 
 class DiagnosticsResult(BaseModel):
     lmval: Optional[float] = Field(
