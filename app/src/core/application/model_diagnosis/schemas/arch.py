@@ -2,12 +2,12 @@ from typing import Optional, Literal
 
 from pydantic import BaseModel, Field
 
-from src.core.application.model_diagnosis.schemas.common import ResidAnalysisData
+from src.core.domain import ForecastAnalysis
 
 
 class ArchOrLmRequest(BaseModel):
     """Данный реквест подходит под ARCH и LM тесты"""
-    data: ResidAnalysisData = Field(
+    data: ForecastAnalysis = Field(
         title="Прогноз и исхдоные данные"
     )
     nlags: Optional[int] = Field(

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from src.core.domain import Forecasts, ModelMetrics
+from .. import Forecasts, ModelMetrics
 
 
 class ForecastResult(BaseModel):

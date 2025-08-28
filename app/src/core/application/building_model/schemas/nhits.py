@@ -4,11 +4,7 @@ from neuralforecast.losses.pytorch import MAE, MSE, RMSE, MAPE
 from pydantic import BaseModel, Field, model_validator
 
 from src.core.application.building_model.errors.nhits import ListLengthError, KernelSizeError
-from src.core.domain import (
-    FitParams,
-    Forecasts,
-    ModelMetrics,
-)
+from src.core.domain import FitParams, ForecastResult
 
 loss_map = {
     "MAE": MAE,
@@ -136,10 +132,5 @@ class NhitsFitRequest(BaseModel):
     )
 
 
-class NhitsFitResult(BaseModel):
-    forecasts: Forecasts = Field(title="Прогнозы")
-    model_metrics: ModelMetrics = Field(title="Метрики модели")
-
-class NhitsFitResponse(BaseModel):
-    fit_result: NhitsFitResult
-    serialized_model_weight: str = Field(title='Сериализованные веса модели')
+class NhitsFitResult(ForecastResult):
+    pass

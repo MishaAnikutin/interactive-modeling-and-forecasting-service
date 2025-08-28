@@ -1,8 +1,8 @@
-from typing import List, Optional, Any
+from typing import List
 
 from pydantic import BaseModel, Field, model_validator
 
-from src.core.domain import Timeseries, FitParams, Forecasts, Coefficient, ModelMetrics
+from src.core.domain import FitParams, Coefficient, ForecastResult
 from src.core.domain.model.model_data import ModelData
 
 
@@ -32,8 +32,6 @@ class ArimaxFitRequest(BaseModel):
         return self
 
 
-class ArimaxFitResult(BaseModel):
-    forecasts: Forecasts = Field(title="Прогнозы")
+class ArimaxFitResult(ForecastResult):
     coefficients: List[Coefficient] = Field(title="Список коэффициентов")
-    model_metrics: ModelMetrics = Field(title="Метрики модели")
 

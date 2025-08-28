@@ -1,11 +1,11 @@
 from pydantic import BaseModel, model_validator, Field
 
 from src.core.application.model_diagnosis.errors.omnibus import LowCountObservationsError
-from src.core.application.model_diagnosis.schemas.common import ResidAnalysisData
+from src.core.domain import ForecastAnalysis
 
 
 class OmnibusRequest(BaseModel):
-    data: ResidAnalysisData = Field(
+    data: ForecastAnalysis = Field(
         title="Прогноз и исхдоные данные"
     )
 

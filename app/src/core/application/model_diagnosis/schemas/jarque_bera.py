@@ -1,11 +1,12 @@
 from pydantic import BaseModel, Field, model_validator
 
 from src.core.application.model_diagnosis.errors.jarque_bera import LowCountObservationsError
-from src.core.application.model_diagnosis.schemas.common import ResidAnalysisData, StatTestResult
+from src.core.application.model_diagnosis.schemas.common import StatTestResult
+from src.core.domain import ForecastAnalysis
 
 
 class JarqueBeraRequest(BaseModel):
-    data: ResidAnalysisData = Field(
+    data: ForecastAnalysis = Field(
         title="Прогноз и исхдоные данные"
     )
 

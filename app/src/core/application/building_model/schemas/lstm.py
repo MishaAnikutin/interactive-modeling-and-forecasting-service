@@ -5,7 +5,7 @@ from neuralforecast.losses.pytorch import MAE, MSE, RMSE, MAPE
 
 from src.core.application.building_model.errors.lstm import HiddenSizeError
 from src.core.application.building_model.schemas.nhits import ScalerType, LossEnum
-from src.core.domain import FitParams, Forecasts, ModelMetrics
+from src.core.domain import FitParams, ForecastResult
 from src.core.domain.model.model_data import ModelData
 
 loss_map = {
@@ -147,10 +147,5 @@ class LstmFitRequest(BaseModel):
     )
 
 
-class LstmFitResult(BaseModel):
-    forecasts: Forecasts = Field(title="Прогнозы")
-    model_metrics: ModelMetrics = Field(title="Метрики модели")
-
-class LstmFitResponse(BaseModel):
-    fit_result: LstmFitResult
-    serialized_model_weight: str = Field(title='Сериализованные веса модели')
+class LstmFitResult(ForecastResult):
+    pass
