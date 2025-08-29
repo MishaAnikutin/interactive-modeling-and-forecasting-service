@@ -1,4 +1,7 @@
-from src.core.application.predict_series.schemas.schemas import PredictResponse, PredictRequest
+from datetime import date
+
+from src.core.application.predict_series.schemas.schemas import PredictRequest
+from src.core.domain import ForecastResult, Timeseries
 from src.infrastructure.adapters.predicting.neural_predict.neural_predict import NeuralPredictAdapter
 from src.infrastructure.adapters.timeseries import TimeseriesAlignment, PandasTimeseriesAdapter
 
@@ -13,23 +16,24 @@ class BaseNeuralPredict:
         self._ts_aligner = ts_aligner
         self._predict_adapter: NeuralPredictAdapter = None
 
-    def execute(self, model_bytes: bytes, request: PredictRequest) -> PredictResponse:
-        target, exog_df = self._ts_aligner.align(request.predict_params)
-        freq = request.predict_params.dependent_variables.data_frequency
+    def split_ts(self, ts: Timeseries, boarder: date) -> tuple[Timeseries, Timeseries]:
+        pass
 
-        in_sample, out_of_sample = self._predict_adapter.execute(
+
+    def execute(self, model_bytes: bytes, request: PredictRequest) -> ForecastResult:
+        target, exog_df = self._ts_aligner.align(request.model_data)
+        freq = request.model_data.dependent_variables.data_frequency
+
+        forecasts, model_metrics = self._predict_adapter.execute(
             model_weight=model_bytes,
             target=target,
             exog_df=exog_df,
-            steps=request.forecast_steps,
+            fit_params=request.fit_params,
             data_frequency=freq
         )
 
-        in_sample_predict = self._ts_adapter.from_series(in_sample, freq)
-        out_of_sample_predict = self._ts_adapter.from_series(out_of_sample, freq)
-
-        return PredictResponse(
-            in_sample_predict=in_sample_predict,
-            out_of_sample_predict=out_of_sample_predict
+        return ForecastResult(
+            forecasts=forecasts,
+            model_metrics=model_metrics,
         )
 

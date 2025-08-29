@@ -1,4 +1,3 @@
-from src.core.application.predict_series.schemas.schemas import PredictResponse, PredictRequest
 from src.core.application.predict_series.use_cases.neural_predict import BaseNeuralPredict
 from src.infrastructure.adapters.predicting.arimax import PredictArimaxAdapter
 from src.infrastructure.adapters.timeseries import TimeseriesAlignment, PandasTimeseriesAdapter

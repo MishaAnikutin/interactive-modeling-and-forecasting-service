@@ -3,7 +3,7 @@ from typing import Optional
 
 import pandas as pd
 
-from src.core.domain import DataFrequency
+from src.core.domain import DataFrequency, FitParams
 
 
 class BasePredictor(ABC):
@@ -11,7 +11,7 @@ class BasePredictor(ABC):
     def execute(
             self,
             model_weight: bytes,
-            steps: int,
+            fit_params: FitParams,
             data_frequency: DataFrequency,
             target: pd.Series,
             exog_df: Optional[pd.DataFrame]

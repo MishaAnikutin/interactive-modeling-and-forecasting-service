@@ -2,17 +2,15 @@ import json
 
 from pydantic import BaseModel, Field, model_validator
 
-from src.core.domain import Timeseries
+from src.core.domain import FitParams
 from src.core.domain.model.model_data import ModelData
 
 
 class PredictRequest(BaseModel):
-    predict_params: ModelData = Field(default=ModelData(), title="Новые данные для прогноза")
-    forecast_steps: int = Field(
-        gt=0,
-        le=10000,
-        default=1,
-        title="Число шагов прогноза"
+    model_data: ModelData = Field(default=ModelData(), title="Новые данные для прогноза")
+    fit_params: FitParams = Field(
+        title="Общие параметры обучения",
+        description="train_boundary должна быть раньше val_boundary"
     )
 
     @model_validator(mode='before')
@@ -22,7 +20,3 @@ class PredictRequest(BaseModel):
             return cls(**json.loads(value))
         return value
 
-
-class PredictResponse(BaseModel):
-    in_sample_predict: Timeseries
-    out_of_sample_predict: Timeseries
