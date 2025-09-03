@@ -22,7 +22,7 @@ from src.core.application.preliminary_diagnosis.use_cases.range_uc import RangeU
 from src.core.application.preliminary_diagnosis.use_cases.zivot_andrews import ZivotAndrewsUC
 from src.core.application.preprocessing.preprocessing_uc import PreprocessUC
 from src.core.application.preprocessing.inverse_preprocessing_uc import InversePreprocessUC
-
+from src.core.application.preliminary_diagnosis.use_cases.acf_and_pacf import AcfAndPacfUC
 
 class CoreProvider(Provider):
     scope = Scope.REQUEST
@@ -60,6 +60,9 @@ class CoreProvider(Provider):
     jarque_bera_command = provide(JarqueBeraUC, provides=JarqueBeraUC)
     kstest_command = provide(KolmogorovUC, provides=KolmogorovUC)
     arch_command = provide(ArchUC, provides=ArchUC)
-    breusch_godfrey_command = provide(AcorrBreuschGodfreyUC, provides=AcorrBreuschGodfreyUC)
     lm_command = provide(LmUC, provides=LmUC)
+
+    # Анализ автокорреляции
     ljung_box_command = provide(LjungBoxUC, provides=LjungBoxUC)
+    breusch_godfrey_command = provide(AcorrBreuschGodfreyUC, provides=AcorrBreuschGodfreyUC)
+    acf_pacf_command = provide(AcfAndPacfUC, provides=AcfAndPacfUC)
