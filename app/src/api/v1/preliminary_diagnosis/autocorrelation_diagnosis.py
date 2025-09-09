@@ -23,7 +23,7 @@ autocorrelation_diagnosis_router = APIRouter(prefix="/autocorrelation_diagnosis"
     }
 )
 @inject_sync
-def acf(
+def acf_and_pacf(
     request: AcfAndPacfRequest,
     acf_pacf_uc: FromDishka[AcfAndPacfUC]
 ) -> AcfPacfResult:

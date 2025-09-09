@@ -10,7 +10,7 @@ from .errors.arimax import ConstantInExogAndSpecification
 from src.infrastructure.logs import logger
 from src.infrastructure.adapters.metrics import MetricsFactory
 from src.infrastructure.adapters.modeling.interface import MlAdapterInterface
-from src.infrastructure.adapters.timeseries import TimeseriesTrainTestSplit
+from src.infrastructure.adapters.timeseries import TimeseriesTrainTestSplit, TimeseriesExtender
 
 from src.core.domain import FitParams, Coefficient, DataFrequency
 
@@ -22,10 +22,12 @@ class ArimaxAdapter(MlAdapterInterface):
             self,
             metric_factory: MetricsFactory,
             ts_train_test_split: TimeseriesTrainTestSplit,
+            ts_extender: TimeseriesExtender
     ):
         super().__init__(metric_factory, ts_train_test_split)
         self._log = logger.getChild(self.__class__.__name__)
         self._ts_spliter = ts_train_test_split
+        self._ts_extender = ts_extender
 
     def fit(
             self,
@@ -63,7 +65,7 @@ class ArimaxAdapter(MlAdapterInterface):
             raise ConstantInExogAndSpecification
 
         results = model.fit(disp=False)
-        print(results.summary())
+
         self._log.info("Модель обучена", extra={"aic": results.aic, "bic": results.bic})
 
         # 3. Прогнозы ----------------------------------------------------------------
@@ -109,9 +111,17 @@ class ArimaxAdapter(MlAdapterInterface):
 
         # 3.4 Out-of-sample прогноз (рекурсивный)
         forecast = pd.Series()
-        if exog is None:  # Только если нет экзогенных переменных
-            forecast = results.get_forecast(
+        if exog is None:  # Eсли нет экзогенных переменных
+            forecast = test_model.get_forecast(
                 steps=fit_params.forecast_horizon
+            ).predicted_mean
+        else:
+            extended_exog = self._ts_extender.apply(
+                df=exog, steps=fit_params.forecast_horizon, data_frequency=data_frequency,
+            )
+            forecast = test_model.get_forecast(
+                steps=fit_params.forecast_horizon,
+                exog=extended_exog
             ).predicted_mean
 
         # 4. Формируем объект Forecasts ----------------------------------------------

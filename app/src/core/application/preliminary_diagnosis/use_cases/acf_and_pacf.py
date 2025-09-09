@@ -17,8 +17,6 @@ class AcfAndPacfUC:
         acf_values, acf_confint = acf(ts, nlags=request.nlags, alpha=request.alpha)
         pacf_values, pacf_confint = pacf(ts, method=request.pacf_method.value, nlags=request.nlags, alpha=request.alpha)
 
-        print(f'{[float(el) for el in acf_values] = }')
-
         return AcfPacfResult(
             acf_values=[float(el) for el in acf_values],
             acf_confint=list(acf_confint),

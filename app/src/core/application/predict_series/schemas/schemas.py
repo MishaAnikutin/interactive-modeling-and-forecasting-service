@@ -10,7 +10,6 @@ class PredictRequest(BaseModel):
     model_data: ModelData = Field(default=ModelData(), title="Новые данные для прогноза")
     fit_params: FitParams = Field(
         title="Общие параметры обучения",
-        description="train_boundary должна быть раньше val_boundary"
     )
 
     @model_validator(mode='before')
