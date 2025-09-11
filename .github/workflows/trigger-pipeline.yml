@@ -1,0 +1,30 @@
+name: Trigger External Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+    types: [closed]
+    
+  workflow_dispatch:
+
+jobs:
+  trigger-pipeline:
+    runs-on: ubuntu-latest
+    
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Trigger external pipeline
+      run: |
+        curl -X POST \
+             --fail \
+             -F token=${{ secrets.PIPELINE_TOKEN }} \
+             -F ref=stag \
+             https://cc-gitlab.iep.ru/api/v4/projects/13/trigger/pipeline
+      env:
+        PIPELINE_TOKEN: ${{ secrets.PIPELINE_TOKEN }}
