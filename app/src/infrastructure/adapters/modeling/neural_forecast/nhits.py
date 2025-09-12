@@ -1,3 +1,4 @@
+import pandas as pd
 from fastapi import HTTPException
 from neuralforecast.models import NHITS
 
@@ -20,6 +21,16 @@ class NhitsAdapter(NeuralForecastInterface[NhitsParams]):
             ts_train_test_split: TimeseriesTrainTestSplit,
     ):
         super().__init__(metric_factory, ts_train_test_split)
+
+    def _get_model(self, exog: pd.DataFrame | None, hyperparameters: NhitsParams, h: int):
+        model = self.model(
+            input_size=3 * h,
+            hist_exog_list=[exog_col for exog_col in exog.columns] if exog is not None else None,
+            accelerator='cpu',
+            h=h,
+            **hyperparameters.model_dump()
+        )
+        return model
 
     @staticmethod
     def _validate_params(train_size, val_size, test_size, h, hyperparameters) -> None:
