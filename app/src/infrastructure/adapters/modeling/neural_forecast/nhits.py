@@ -23,12 +23,16 @@ class NhitsAdapter(NeuralForecastInterface[NhitsParams]):
         super().__init__(metric_factory, ts_train_test_split)
 
     def _get_model(self, exog: pd.DataFrame | None, hyperparameters: NhitsParams, h: int):
+        hyperparameters = hyperparameters.model_dump()
+        stack_types = hyperparameters['n_stacks'] * ['identity']
+        del hyperparameters['n_stacks']
         model = self.model(
             input_size=3 * h,
+            stack_types=stack_types,
             hist_exog_list=[exog_col for exog_col in exog.columns] if exog is not None else None,
             accelerator='cpu',
             h=h,
-            **hyperparameters.model_dump()
+            **hyperparameters
         )
         return model
 
