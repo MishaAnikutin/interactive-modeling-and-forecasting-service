@@ -27,6 +27,13 @@ class PreprocessUC:
                 context.step = step + 1
                 contexts.append(context)
 
+        # Уберем пропуски с краев
+        if (first_valid_index := x.first_valid_index()) is not None:
+            x = x.loc[first_valid_index:]
+
+        if (last_valid_index := x.last_valid_index()) is not None:
+            x = x.loc[:last_valid_index]
+
         ts = self._ts_adapter.from_series(x, request.ts.data_frequency)
 
         return PreprocessingResponse(preprocessed_ts=ts, contexts=contexts)
