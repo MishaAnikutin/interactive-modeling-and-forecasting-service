@@ -1,7 +1,7 @@
 from src.core.application.preliminary_diagnosis.schemas.acf_and_pacf import AcfAndPacfRequest, AcfPacfResult
 
 from src.infrastructure.adapters.timeseries import PandasTimeseriesAdapter
-from statsmodels.tsa.stattools import acf, pacf
+import statsmodels.tsa.stattools as tsstats
 
 
 class AcfAndPacfUC:
@@ -14,8 +14,26 @@ class AcfAndPacfUC:
     def execute(self, request: AcfAndPacfRequest) -> AcfPacfResult:
         ts = self._ts_adapter.to_series(ts_obj=request.ts)
 
-        acf_values, acf_confint = acf(ts, nlags=request.nlags, alpha=request.alpha)
-        pacf_values, pacf_confint = pacf(ts, method=request.pacf_method.value, nlags=request.nlags, alpha=request.alpha)
+        acf_values, confint, qstat, pvals = tsstats.acf(
+            ts,
+            nlags=request.nlags,
+            alpha=request.alpha,
+            bartlett_confint=False,
+            qstat=True
+        )
+        acf_confint = [(a - c, b - c) for (a, b), c in zip(confint, acf_values)]
+        acf_confint = acf_confint[1:]
+        acf_values = acf_values[1:]
+
+        pacf_values, confint = tsstats.pacf(
+            ts,
+            method=request.pacf_method.value,
+            nlags=request.nlags,
+            alpha=request.alpha
+        )
+        pacf_confint = [(a - c, b - c) for (a, b), c in zip(confint, pacf_values)]
+        pacf_confint = pacf_confint[1:]
+        pacf_values = pacf_values[1:]
 
         return AcfPacfResult(
             acf_values=[float(el) for el in acf_values],
