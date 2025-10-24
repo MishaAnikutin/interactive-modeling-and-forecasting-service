@@ -19,6 +19,7 @@ from src.core.application.preliminary_diagnosis.use_cases.dicker_fuller import D
 from src.core.application.preliminary_diagnosis.use_cases.kpss import KpssUC
 from src.core.application.preliminary_diagnosis.use_cases.mean_value import MeanUC
 from src.core.application.preliminary_diagnosis.use_cases.phillips_perron import PhillipsPerronUC
+from src.core.application.preliminary_diagnosis.use_cases.qq import QQplotUC
 from src.core.application.preliminary_diagnosis.use_cases.range_uc import RangeUnitRootUC
 from src.core.application.preliminary_diagnosis.use_cases.zivot_andrews import ZivotAndrewsUC
 from src.core.application.preprocessing.preprocessing_uc import PreprocessUC
@@ -72,3 +73,4 @@ class CoreProvider(Provider):
 
     # Команды для описательной статистики
     mean_command = provide(MeanUC, provides=MeanUC)
+    qq_plot_command = provide(QQplotUC, provides=QQplotUC)

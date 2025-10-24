@@ -3,7 +3,7 @@ from dishka import FromDishka
 from dishka.integrations.fastapi import inject_sync
 
 from src.core.application.preliminary_diagnosis.schemas.qq import QQResult, QQParams
-from src.core.application.preliminary_diagnosis.use_cases.mean_value import MeanUC
+from src.core.application.preliminary_diagnosis.use_cases.qq import QQplotUC
 
 data_representations_router = APIRouter(prefix="/data_representations", tags=["Представление данных"])
 
@@ -12,7 +12,7 @@ data_representations_router = APIRouter(prefix="/data_representations", tags=["�
 @inject_sync
 def get_qq_values(
     request: QQParams,
-    kde_uc: FromDishka[MeanUC]
+    kde_uc: FromDishka[QQplotUC]
 ) -> QQResult:
     return kde_uc.execute(request=request)
 
