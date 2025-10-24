@@ -17,6 +17,7 @@ from src.core.application.predict_series.use_cases.predict_nhits import PredictN
 from src.core.application.preliminary_diagnosis.use_cases.df_gls import DfGlsUC
 from src.core.application.preliminary_diagnosis.use_cases.dicker_fuller import DickeuFullerUC
 from src.core.application.preliminary_diagnosis.use_cases.kpss import KpssUC
+from src.core.application.preliminary_diagnosis.use_cases.mean_value import MeanUC
 from src.core.application.preliminary_diagnosis.use_cases.phillips_perron import PhillipsPerronUC
 from src.core.application.preliminary_diagnosis.use_cases.range_uc import RangeUnitRootUC
 from src.core.application.preliminary_diagnosis.use_cases.zivot_andrews import ZivotAndrewsUC
@@ -24,6 +25,8 @@ from src.core.application.preprocessing.preprocessing_uc import PreprocessUC
 from src.core.application.preprocessing.inverse_preprocessing_uc import InversePreprocessUC
 from src.core.application.preliminary_diagnosis.use_cases.acf_and_pacf import AcfAndPacfUC
 
+
+# TODO: возмонжо стоит разделить провайдеров на каждый use case ...
 class CoreProvider(Provider):
     scope = Scope.REQUEST
 
@@ -66,3 +69,6 @@ class CoreProvider(Provider):
     ljung_box_command = provide(LjungBoxUC, provides=LjungBoxUC)
     breusch_godfrey_command = provide(AcorrBreuschGodfreyUC, provides=AcorrBreuschGodfreyUC)
     acf_pacf_command = provide(AcfAndPacfUC, provides=AcfAndPacfUC)
+
+    # Команды для описательной статистики
+    mean_command = provide(MeanUC, provides=MeanUC)
