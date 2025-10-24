@@ -2,10 +2,12 @@ from fastapi import APIRouter
 from dishka import FromDishka
 from dishka.integrations.fastapi import inject_sync
 
+from src.core.application.preliminary_diagnosis.schemas.cv_value import VariationCoeffParams, VariationCoeffResult
 from src.core.application.preliminary_diagnosis.schemas.mean_value import MeanResult, MeanParams
 from src.core.application.preliminary_diagnosis.schemas.median_value import MedianParams, MedianResult
 from src.core.application.preliminary_diagnosis.schemas.mode_value import ModeParams, ModeResult
 from src.core.application.preliminary_diagnosis.schemas.var_value import VarianceParams, VarianceResult
+from src.core.application.preliminary_diagnosis.use_cases.cv_value import VariationCoeffUC
 from src.core.application.preliminary_diagnosis.use_cases.mean_value import MeanUC
 from src.core.application.preliminary_diagnosis.use_cases.median_value import MedianUC
 from src.core.application.preliminary_diagnosis.use_cases.mode_value import ModeUC
@@ -45,3 +47,11 @@ def variance_value(
     var_uc: FromDishka[VarianceUC]
 ) -> VarianceResult:
     return var_uc.execute(request=request)
+
+@descriptive_statistics_router.post(path="/coff_of_variation")
+@inject_sync
+def cv_value(
+    request: VariationCoeffParams,
+    cv_uc: FromDishka[VariationCoeffUC]
+) -> VariationCoeffResult:
+    return cv_uc.execute(request=request)

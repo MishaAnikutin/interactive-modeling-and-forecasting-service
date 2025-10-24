@@ -10,5 +10,5 @@ class VarianceUC:
         self._ts_adapter = ts_adapter
 
     def execute(self, request: VarianceParams) -> VarianceResult:
-        var = np.var(request.timeseries.values)
+        var = np.var(request.timeseries.values, ddof=1)
         return VarianceResult(value=round(var, 4))

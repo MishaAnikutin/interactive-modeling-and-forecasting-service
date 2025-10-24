@@ -14,6 +14,7 @@ from src.core.application.model_diagnosis.use_cases.omnibus import OmnibusUC
 from src.core.application.predict_series.use_cases.predict_gru import PredictGruUC
 from src.core.application.predict_series.use_cases.predict_lstm import PredictLstmUC
 from src.core.application.predict_series.use_cases.predict_nhits import PredictNhitsUC
+from src.core.application.preliminary_diagnosis.use_cases.cv_value import VariationCoeffUC
 from src.core.application.preliminary_diagnosis.use_cases.df_gls import DfGlsUC
 from src.core.application.preliminary_diagnosis.use_cases.dicker_fuller import DickeuFullerUC
 from src.core.application.preliminary_diagnosis.use_cases.kpss import KpssUC
@@ -79,6 +80,7 @@ class CoreProvider(Provider):
     median_command = provide(MedianUC, provides=MedianUC)
     mode_command = provide(ModeUC, provides=ModeUC)
     variance_command = provide(VarianceUC, provides=VarianceUC)
+    cv_command = provide(VariationCoeffUC, provides=VariationCoeffUC)
 
     # Распределения
     qq_plot_command = provide(QQplotUC, provides=QQplotUC)
