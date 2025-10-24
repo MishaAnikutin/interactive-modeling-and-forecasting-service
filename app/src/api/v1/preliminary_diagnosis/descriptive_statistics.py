@@ -4,8 +4,10 @@ from dishka.integrations.fastapi import inject_sync
 
 from src.core.application.preliminary_diagnosis.schemas.mean_value import MeanResult, MeanParams
 from src.core.application.preliminary_diagnosis.schemas.median_value import MedianParams, MedianResult
+from src.core.application.preliminary_diagnosis.schemas.mode_value import ModeParams, ModeResult
 from src.core.application.preliminary_diagnosis.use_cases.mean_value import MeanUC
 from src.core.application.preliminary_diagnosis.use_cases.median_value import MedianUC
+from src.core.application.preliminary_diagnosis.use_cases.mode_value import ModeUC
 
 descriptive_statistics_router = APIRouter(prefix="/descriptive_statistics", tags=["Описательная статистика"])
 
@@ -25,3 +27,11 @@ def median_value(
     median_uc: FromDishka[MedianUC]
 ) -> MedianResult:
     return median_uc.execute(request=request)
+
+@descriptive_statistics_router.post(path="/mode")
+@inject_sync
+def mode_value(
+    request: ModeParams,
+    mode_uc: FromDishka[ModeUC]
+) -> ModeResult:
+    return mode_uc.execute(request=request)

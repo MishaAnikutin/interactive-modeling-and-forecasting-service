@@ -19,6 +19,7 @@ from src.core.application.preliminary_diagnosis.use_cases.dicker_fuller import D
 from src.core.application.preliminary_diagnosis.use_cases.kpss import KpssUC
 from src.core.application.preliminary_diagnosis.use_cases.mean_value import MeanUC
 from src.core.application.preliminary_diagnosis.use_cases.median_value import MedianUC
+from src.core.application.preliminary_diagnosis.use_cases.mode_value import ModeUC
 from src.core.application.preliminary_diagnosis.use_cases.phillips_perron import PhillipsPerronUC
 from src.core.application.preliminary_diagnosis.use_cases.qq import QQplotUC
 from src.core.application.preliminary_diagnosis.use_cases.range_uc import RangeUnitRootUC
@@ -75,6 +76,7 @@ class CoreProvider(Provider):
     # Команды для описательной статистики
     mean_command = provide(MeanUC, provides=MeanUC)
     median_command = provide(MedianUC, provides=MedianUC)
+    mode_command = provide(ModeUC, provides=ModeUC)
 
     # Распределения
     qq_plot_command = provide(QQplotUC, provides=QQplotUC)
