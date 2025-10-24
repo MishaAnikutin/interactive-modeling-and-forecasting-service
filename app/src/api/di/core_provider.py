@@ -23,6 +23,7 @@ from src.core.application.preliminary_diagnosis.use_cases.mode_value import Mode
 from src.core.application.preliminary_diagnosis.use_cases.phillips_perron import PhillipsPerronUC
 from src.core.application.preliminary_diagnosis.use_cases.qq import QQplotUC
 from src.core.application.preliminary_diagnosis.use_cases.range_uc import RangeUnitRootUC
+from src.core.application.preliminary_diagnosis.use_cases.var_value import VarianceUC
 from src.core.application.preliminary_diagnosis.use_cases.zivot_andrews import ZivotAndrewsUC
 from src.core.application.preprocessing.preprocessing_uc import PreprocessUC
 from src.core.application.preprocessing.inverse_preprocessing_uc import InversePreprocessUC
@@ -77,6 +78,7 @@ class CoreProvider(Provider):
     mean_command = provide(MeanUC, provides=MeanUC)
     median_command = provide(MedianUC, provides=MedianUC)
     mode_command = provide(ModeUC, provides=ModeUC)
+    variance_command = provide(VarianceUC, provides=VarianceUC)
 
     # Распределения
     qq_plot_command = provide(QQplotUC, provides=QQplotUC)
