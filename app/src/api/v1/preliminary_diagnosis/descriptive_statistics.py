@@ -6,11 +6,13 @@ from src.core.application.preliminary_diagnosis.schemas.cv_value import Variatio
 from src.core.application.preliminary_diagnosis.schemas.mean_value import MeanResult, MeanParams
 from src.core.application.preliminary_diagnosis.schemas.median_value import MedianParams, MedianResult
 from src.core.application.preliminary_diagnosis.schemas.mode_value import ModeParams, ModeResult
+from src.core.application.preliminary_diagnosis.schemas.quantiles import QuantilesResult, QuantilesParams
 from src.core.application.preliminary_diagnosis.schemas.var_value import VarianceParams, VarianceResult
 from src.core.application.preliminary_diagnosis.use_cases.cv_value import VariationCoeffUC
 from src.core.application.preliminary_diagnosis.use_cases.mean_value import MeanUC
 from src.core.application.preliminary_diagnosis.use_cases.median_value import MedianUC
 from src.core.application.preliminary_diagnosis.use_cases.mode_value import ModeUC
+from src.core.application.preliminary_diagnosis.use_cases.quantiles import QuantilesUC
 from src.core.application.preliminary_diagnosis.use_cases.var_value import VarianceUC
 
 descriptive_statistics_router = APIRouter(prefix="/descriptive_statistics", tags=["Описательная статистика"])
@@ -55,3 +57,12 @@ def cv_value(
     cv_uc: FromDishka[VariationCoeffUC]
 ) -> VariationCoeffResult:
     return cv_uc.execute(request=request)
+
+
+@descriptive_statistics_router.post(path="/quantiles")
+@inject_sync
+def quantiles(
+    request: QuantilesParams,
+    quant_uc: FromDishka[QuantilesUC]
+) -> QuantilesResult:
+    return quant_uc.execute(request=request)
