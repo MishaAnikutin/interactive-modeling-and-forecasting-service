@@ -3,6 +3,7 @@ from dishka import FromDishka
 from dishka.integrations.fastapi import inject_sync
 
 from src.core.application.preliminary_diagnosis.schemas.cv_value import VariationCoeffParams, VariationCoeffResult
+from src.core.application.preliminary_diagnosis.schemas.kurtosis import KurtosisParams, KurtosisResult
 from src.core.application.preliminary_diagnosis.schemas.mean_value import MeanResult, MeanParams
 from src.core.application.preliminary_diagnosis.schemas.median_value import MedianParams, MedianResult
 from src.core.application.preliminary_diagnosis.schemas.mode_value import ModeParams, ModeResult
@@ -10,6 +11,7 @@ from src.core.application.preliminary_diagnosis.schemas.quantiles import Quantil
 from src.core.application.preliminary_diagnosis.schemas.skewness import SkewnessParams, SkewnessResult
 from src.core.application.preliminary_diagnosis.schemas.var_value import VarianceParams, VarianceResult
 from src.core.application.preliminary_diagnosis.use_cases.cv_value import VariationCoeffUC
+from src.core.application.preliminary_diagnosis.use_cases.kurtosis import KurtosisUC
 from src.core.application.preliminary_diagnosis.use_cases.mean_value import MeanUC
 from src.core.application.preliminary_diagnosis.use_cases.median_value import MedianUC
 from src.core.application.preliminary_diagnosis.use_cases.mode_value import ModeUC
@@ -76,3 +78,11 @@ def skewness(
     skewness_uc: FromDishka[SkewnessUC]
 ) -> SkewnessResult:
     return skewness_uc.execute(request=request)
+
+@descriptive_statistics_router.post(path="/kurtosis")
+@inject_sync
+def kurtosis(
+    request: KurtosisParams,
+    kurtosis_uc: FromDishka[KurtosisUC]
+) -> KurtosisResult:
+    return kurtosis_uc.execute(request=request)

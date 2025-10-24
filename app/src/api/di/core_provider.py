@@ -18,6 +18,7 @@ from src.core.application.preliminary_diagnosis.use_cases.cv_value import Variat
 from src.core.application.preliminary_diagnosis.use_cases.df_gls import DfGlsUC
 from src.core.application.preliminary_diagnosis.use_cases.dicker_fuller import DickeuFullerUC
 from src.core.application.preliminary_diagnosis.use_cases.kpss import KpssUC
+from src.core.application.preliminary_diagnosis.use_cases.kurtosis import KurtosisUC
 from src.core.application.preliminary_diagnosis.use_cases.mean_value import MeanUC
 from src.core.application.preliminary_diagnosis.use_cases.median_value import MedianUC
 from src.core.application.preliminary_diagnosis.use_cases.mode_value import ModeUC
@@ -85,6 +86,7 @@ class CoreProvider(Provider):
     cv_command = provide(VariationCoeffUC, provides=VariationCoeffUC)
     quantiles_command = provide(QuantilesUC, provides=QuantilesUC)
     skewness_command = provide(SkewnessUC, provides=SkewnessUC)
+    kurtosis_command = provide(KurtosisUC, provides=KurtosisUC)
 
     # Распределения
     qq_plot_command = provide(QQplotUC, provides=QQplotUC)
