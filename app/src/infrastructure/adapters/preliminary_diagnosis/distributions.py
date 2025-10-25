@@ -1,6 +1,6 @@
 import numpy as np
 import scipy.stats as stats
-from src.core.domain.preliminary_diagnosis.service import DistributionServiceI
+from src.core.domain.preliminary_diagnosis.distribution_service import DistributionServiceI
 from src.infrastructure.adapters.preliminary_diagnosis.pp_plot_factory import (
     PPplotFactory,
 )

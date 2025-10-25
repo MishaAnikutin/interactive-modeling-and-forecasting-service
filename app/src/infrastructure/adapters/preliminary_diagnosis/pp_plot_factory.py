@@ -1,7 +1,7 @@
 import numpy as np
 
 from src.core.application.preliminary_diagnosis.schemas.pp_plot import DistributionEnum
-from src.core.domain.preliminary_diagnosis.service import DistributionServiceI
+from src.core.domain.preliminary_diagnosis.distribution_service import DistributionServiceI
 
 
 class PPplotFactory:
@@ -17,4 +17,4 @@ class PPplotFactory:
 
     @classmethod
     def get_theoretical_probs(cls, ts: np.array, distribution: DistributionEnum) -> list[float]:
-        return cls.registry[distribution.name]().get_theoretical_probs(ts=ts)
+        return cls.registry[distribution]().get_theoretical_probs(ts)

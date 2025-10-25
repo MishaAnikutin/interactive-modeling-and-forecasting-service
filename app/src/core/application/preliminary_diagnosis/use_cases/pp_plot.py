@@ -19,7 +19,7 @@ class PPplotUC:
         n = len(x)
         theoretical_probs = self._plot_factory.get_theoretical_probs(
             ts=x,
-            distribution=request.distribution
+            distribution=request.distribution.name
         )
         empirical_probs = np.arange(1, n + 1) / (n + 1)
 

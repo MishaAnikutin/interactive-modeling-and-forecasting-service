@@ -11,7 +11,7 @@ from src.infrastructure.adapters.modeling import (
 
 from src.infrastructure.adapters.predicting.arimax import PredictArimaxAdapter
 from src.infrastructure.adapters.predicting.neural_predict.models import PredictGruAdapter, PredictNhitsAdapter, PredictLstmAdapter
-from src.infrastructure.adapters.preliminary_diagnosis import PPplotFactory
+from src.infrastructure.adapters.preliminary_diagnosis import PPplotFactory, KdeFactory
 from src.infrastructure.adapters.preprocessing.preprocess_factory import PreprocessFactory
 from src.infrastructure.adapters.serializer import PickleSerializer, ModelSerializer
 from src.infrastructure.adapters.archiver import ModelArchiver, ZipArchiver
@@ -54,3 +54,4 @@ class InfraProvider(Provider):
     preprocess_factory = provide(PreprocessFactory, provides=PreprocessFactory)
 
     pp_plot_factory = provide(PPplotFactory, provides=PPplotFactory)
+    kde_factory = provide(KdeFactory, provides=KdeFactory)

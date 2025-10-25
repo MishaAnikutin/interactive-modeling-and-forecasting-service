@@ -17,6 +17,7 @@ from src.core.application.predict_series.use_cases.predict_nhits import PredictN
 from src.core.application.preliminary_diagnosis.use_cases.cv_value import VariationCoeffUC
 from src.core.application.preliminary_diagnosis.use_cases.df_gls import DfGlsUC
 from src.core.application.preliminary_diagnosis.use_cases.dicker_fuller import DickeuFullerUC
+from src.core.application.preliminary_diagnosis.use_cases.kde import KdeUC
 from src.core.application.preliminary_diagnosis.use_cases.kpss import KpssUC
 from src.core.application.preliminary_diagnosis.use_cases.kurtosis import KurtosisUC
 from src.core.application.preliminary_diagnosis.use_cases.mean_value import MeanUC
@@ -92,3 +93,4 @@ class CoreProvider(Provider):
     # Распределения
     qq_plot_command = provide(QQplotUC, provides=QQplotUC)
     pp_plot_command = provide(PPplotUC, provides=PPplotUC)
+    kde_command = provide(KdeUC, provides=KdeUC)
