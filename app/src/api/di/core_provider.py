@@ -23,6 +23,7 @@ from src.core.application.preliminary_diagnosis.use_cases.mean_value import Mean
 from src.core.application.preliminary_diagnosis.use_cases.median_value import MedianUC
 from src.core.application.preliminary_diagnosis.use_cases.mode_value import ModeUC
 from src.core.application.preliminary_diagnosis.use_cases.phillips_perron import PhillipsPerronUC
+from src.core.application.preliminary_diagnosis.use_cases.pp_plot import PPplotUC
 from src.core.application.preliminary_diagnosis.use_cases.qq import QQplotUC
 from src.core.application.preliminary_diagnosis.use_cases.quantiles import QuantilesUC
 from src.core.application.preliminary_diagnosis.use_cases.range_uc import RangeUnitRootUC
@@ -90,3 +91,4 @@ class CoreProvider(Provider):
 
     # Распределения
     qq_plot_command = provide(QQplotUC, provides=QQplotUC)
+    pp_plot_command = provide(PPplotUC, provides=PPplotUC)
