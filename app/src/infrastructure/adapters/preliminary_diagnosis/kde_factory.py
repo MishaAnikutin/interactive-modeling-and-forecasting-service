@@ -17,5 +17,5 @@ class KdeFactory:
         return wrapper
 
     @classmethod
-    def calculate_kde(cls, ts: np.array, kde_method: KdeEnum):
+    def calculate_kde(cls, ts: np.array, kde_method: KdeEnum) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         return cls.registry[kde_method](ts).calculate_kde()

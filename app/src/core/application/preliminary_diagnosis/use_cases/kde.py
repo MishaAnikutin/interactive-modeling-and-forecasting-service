@@ -19,13 +19,12 @@ class KdeUC:
 
         return KdeResult(
             kde=KDE(
-                x_grid=x_grid,
-                density=density,
+                x_grid=x_grid.tolist(),
                 bandwidth=bandwidth,
             ),
             histogram=Histogram(
-                bin_edges=bin_edges,
-                density=density,
-                bin_centers=(bin_edges[:-1] + bin_edges[1:]) / 2,
+                bin_edges=bin_edges.tolist(),
+                density=density.tolist(),
+                bin_centers=((bin_edges[:-1] + bin_edges[1:]) / 2).tolist(),
             )
         )

@@ -7,7 +7,7 @@ from src.infrastructure.adapters.preliminary_diagnosis.kde_factory import KdeFac
 
 @KdeFactory.register(name="silverman")
 class Silverman(KdeServiceI):
-    def calculate_kde(self):
+    def calculate_kde(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         x_grid = self.get_x_grid()
         kde = stats.gaussian_kde(self.ts_)
         kde.set_bandwidth(bw_method='silverman')
@@ -19,7 +19,7 @@ class Silverman(KdeServiceI):
 
 @KdeFactory.register(name="scott")
 class Scott(KdeServiceI):
-    def calculate_kde(self):
+    def calculate_kde(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         x_grid = self.get_x_grid()
         kde = stats.gaussian_kde(self.ts_)
         kde.set_bandwidth(bw_method='scott')

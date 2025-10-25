@@ -19,8 +19,7 @@ class KdeParams(BaseModel):
 
 class KDE(BaseModel):
     x_grid: list[float]
-    density: list[float]
-    bandwidth: list[float]
+    bandwidth: float
 
 class Histogram(BaseModel):
     bin_edges: list[float]
