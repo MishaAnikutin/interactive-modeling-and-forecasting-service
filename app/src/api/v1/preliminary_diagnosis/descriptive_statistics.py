@@ -9,6 +9,7 @@ from src.core.application.preliminary_diagnosis.schemas.median_value import Medi
 from src.core.application.preliminary_diagnosis.schemas.mode_value import ModeParams, ModeResult
 from src.core.application.preliminary_diagnosis.schemas.quantiles import QuantilesResult, QuantilesParams
 from src.core.application.preliminary_diagnosis.schemas.skewness import SkewnessParams, SkewnessResult
+from src.core.application.preliminary_diagnosis.schemas.statistics import StatisticResult, StatisticsEnum
 from src.core.application.preliminary_diagnosis.schemas.var_value import VarianceParams, VarianceResult
 from src.core.application.preliminary_diagnosis.use_cases.cv_value import VariationCoeffUC
 from src.core.application.preliminary_diagnosis.use_cases.kurtosis import KurtosisUC
@@ -17,7 +18,9 @@ from src.core.application.preliminary_diagnosis.use_cases.median_value import Me
 from src.core.application.preliminary_diagnosis.use_cases.mode_value import ModeUC
 from src.core.application.preliminary_diagnosis.use_cases.quantiles import QuantilesUC
 from src.core.application.preliminary_diagnosis.use_cases.skewness import SkewnessUC
+from src.core.application.preliminary_diagnosis.use_cases.statistics import StatisticsUC
 from src.core.application.preliminary_diagnosis.use_cases.var_value import VarianceUC
+from src.core.domain import Timeseries
 
 descriptive_statistics_router = APIRouter(prefix="/descriptive_statistics", tags=["Описательная статистика"])
 
@@ -86,3 +89,12 @@ def kurtosis(
     kurtosis_uc: FromDishka[KurtosisUC]
 ) -> KurtosisResult:
     return kurtosis_uc.execute(request=request)
+
+@descriptive_statistics_router.post(path="/{statistic}/")
+@inject_sync
+def statistic_value(
+    statistic: StatisticsEnum,
+    request: Timeseries,
+    statistics_uc: FromDishka[StatisticsUC],
+) -> StatisticResult:
+    return statistics_uc.execute(request=request, statistic=statistic)

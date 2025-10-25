@@ -29,6 +29,7 @@ from src.core.application.preliminary_diagnosis.use_cases.qq import QQplotUC
 from src.core.application.preliminary_diagnosis.use_cases.quantiles import QuantilesUC
 from src.core.application.preliminary_diagnosis.use_cases.range_uc import RangeUnitRootUC
 from src.core.application.preliminary_diagnosis.use_cases.skewness import SkewnessUC
+from src.core.application.preliminary_diagnosis.use_cases.statistics import StatisticsUC
 from src.core.application.preliminary_diagnosis.use_cases.var_value import VarianceUC
 from src.core.application.preliminary_diagnosis.use_cases.zivot_andrews import ZivotAndrewsUC
 from src.core.application.preprocessing.preprocessing_uc import PreprocessUC
@@ -89,6 +90,7 @@ class CoreProvider(Provider):
     quantiles_command = provide(QuantilesUC, provides=QuantilesUC)
     skewness_command = provide(SkewnessUC, provides=SkewnessUC)
     kurtosis_command = provide(KurtosisUC, provides=KurtosisUC)
+    statistics_command = provide(StatisticsUC, provides=StatisticsUC)
 
     # Распределения
     qq_plot_command = provide(QQplotUC, provides=QQplotUC)
