@@ -40,7 +40,7 @@ class KdeUC:
         bandwidth = self._kde_factory.calculate_bandwidth(x, method)
 
         kde = KernelDensity(bandwidth=bandwidth)
-        kde.fit(x)
+        kde.fit(x.reshape(-1, 1))
         logdens = kde.score_samples(grid.reshape(-1, 1))
         dens = np.exp(logdens)
         return KDE(
