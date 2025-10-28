@@ -54,16 +54,22 @@ class KdeParams(BaseModel):
 
 
 class KDE(BaseModel):
-    density: list[float]
-    name: str
-    bandwidth: float
+    """Данные для построения KDE"""
+    density: list[float] = Field(..., title="Значения плотности")
+    name: str = Field(..., title="Название метода")
+    bandwidth: float = Field(..., title="Оптимальная ширина ядра")
+
 
 class Histogram(BaseModel):
-    centers: list[float]
-    counts: list[float]
-    width: list[float]
+    """Данные для построения гистограммы"""
+    centers: list[float] = Field(..., title="Центры столбцов")
+    counts: list[float] = Field(..., title="Высоты столбцов / плотность")
+    width: list[float] = Field(..., title="Ширина столбцов")
+
 
 class KdeResult(BaseModel):
-    grid: list[float]
-    kde_list: list[KDE]
-    histogram: Histogram
+    """Данные для отрисовки KDE и гистограммы"""
+    grid: list[float] = Field(..., title="Сетка X-координат")
+    kde_list: list[KDE] = Field(..., title="Список результатов KDE")
+    histogram: Histogram = Field(..., title="Данные гистограммы")
+
