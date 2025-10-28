@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.core.application.preliminary_diagnosis.schemas.kde import KdeEnum
+from src.core.application.preliminary_diagnosis.schemas.kde import KdeMethodUnion
 from src.core.domain.preliminary_diagnosis.kde_service import KdeServiceI
 
 
@@ -17,5 +17,5 @@ class KdeFactory:
         return wrapper
 
     @classmethod
-    def calculate_kde(cls, ts: np.array, kde_method: KdeEnum) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        return cls.registry[kde_method](ts).calculate_kde()
+    def calculate_bandwidth(cls, ts: np.array, method: KdeMethodUnion) -> float:
+        return cls.registry[method.name](ts).calculate_bandwidth(method=method)
