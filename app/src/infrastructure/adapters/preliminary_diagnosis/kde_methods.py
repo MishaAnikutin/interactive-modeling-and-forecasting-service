@@ -13,7 +13,7 @@ class Silverman(KdeServiceI):
         sigma = np.std(self.ts_, ddof=1)
         iqr = np.subtract(*np.percentile(self.ts_, [75, 25]))
         sigma_r = min(sigma, iqr / 1.34) if iqr > 0 else sigma
-        return 0.9 * sigma_r * self.ts_ ** (-1 / 5)
+        return 0.9 * sigma_r * self.ts_.size ** (-1 / 5)
 
 
 @KdeFactory.register(name="scott")
