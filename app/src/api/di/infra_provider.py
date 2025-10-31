@@ -23,6 +23,7 @@ from src.infrastructure.adapters.timeseries import (
     TimeseriesTrainTestSplit,
     TimeseriesExtender
 )
+from src.infrastructure.adapters.dist_fit.dist_fit import DistFit
 
 
 class InfraProvider(Provider):
@@ -58,3 +59,5 @@ class InfraProvider(Provider):
 
     pp_plot_factory = provide(PPplotFactory, provides=PPplotFactory)
     kde_factory = provide(KdeFactory, provides=KdeFactory)
+
+    dist_fit = provide(DistFit, provides=DistFit)

@@ -15,6 +15,7 @@ from src.core.application.preprocessing.preprocess_scheme import (
     BoxCoxTransformation,
     FillMissingTransformation,
     MovingAverageTransformation,
+    InterpolateTransformation,
     InverseMinMaxTransformation,
     InverseStandardTransformation,
     InverseDiffTransformation,
@@ -27,7 +28,7 @@ from src.core.application.preprocessing.preprocess_scheme import (
     InverseMovingAverageTransformation,
     DiffContext,
     MinMaxContext,
-    StandardContext,
+    StandardContext, InverseInterpolateTransformation,
 )
 from src.core.domain.preprocessing.service import PreprocessingServiceI
 from src.infrastructure.adapters.preprocessing.preprocess_factory import (
@@ -184,4 +185,21 @@ class MovingAverage(PreprocessingServiceI):
         self, ts: pd.Series, transformation: InverseMovingAverageTransformation
     ) -> pd.Series:
         # Для алгоритмов н аскользящем окне возвращаем ряд без изменений
+        return ts
+
+
+@PreprocessFactory.register(transform_type="interpolate")
+class Interpolate(PreprocessingServiceI):
+    def apply(
+            self, ts: pd.Series, transformation: InterpolateTransformation
+    ) -> Tuple[pd.Series, None]:
+        if transformation.new_freq:
+            ts = ts.resample(transformation.new_freq.value)
+
+        ts = ts.interpolate(method=transformation.interpolate_method, order=transformation.order)
+
+        return ts, None
+
+    def inverse(self, ts: pd.Series, transformation: InverseInterpolateTransformation) -> pd.Series:
+        # ну тут тоже хз прост
         return ts

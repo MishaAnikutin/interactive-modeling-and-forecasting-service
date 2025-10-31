@@ -28,6 +28,7 @@ from src.core.application.preliminary_diagnosis.use_cases.zivot_andrews import Z
 from src.core.application.preprocessing.preprocessing_uc import PreprocessUC
 from src.core.application.preprocessing.inverse_preprocessing_uc import InversePreprocessUC
 from src.core.application.preliminary_diagnosis.use_cases.acf_and_pacf import AcfAndPacfUC
+from src.core.application.preliminary_diagnosis.use_cases.select_distribution import SelectDistUC
 
 
 # TODO: возмонжо стоит разделить провайдеров на каждый use case ...
@@ -82,3 +83,4 @@ class CoreProvider(Provider):
     qq_plot_command = provide(QQplotUC, provides=QQplotUC)
     pp_plot_command = provide(PPplotUC, provides=PPplotUC)
     kde_command = provide(KdeUC, provides=KdeUC)
+    select_dist = provide(SelectDistUC, provides=SelectDistUC)

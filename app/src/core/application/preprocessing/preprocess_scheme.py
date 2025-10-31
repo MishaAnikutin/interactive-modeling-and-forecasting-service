@@ -1,7 +1,7 @@
-from typing import List, Literal, Union, Annotated
+from typing import List, Literal, Union, Annotated, Optional
 from pydantic import BaseModel, Field, ConfigDict, model_validator
 
-from src.core.domain import Timeseries
+from src.core.domain import Timeseries, DataFrequency
 from src.shared.utils import validate_float_param
 
 
@@ -68,6 +68,36 @@ class FillMissingTransformation(Transformation):
     )
 
 
+class InterpolateTransformation(Transformation):
+    type: Literal["interpolate"] = 'interpolate'
+    new_freq: Optional[DataFrequency] = Field(title='К какой частотности нужно привести', default=None)
+    interpolate_method: Literal[
+        'nearest',
+        'zero',
+        'quadratic',
+        'cubic',
+        'barycentric',
+        'linear',
+        'polynomial',
+        'spline',
+        'krogh',
+        'piecewise_polynomial',
+        'spline',
+        'pchip',
+        'akima',
+        'cubicspline'
+    ] = Field(title='Метод интерполяции', default='spline')
+
+    order: Optional[int] = Field(title='Порядок', default=2, ge=0)
+
+    @model_validator(mode='after')
+    def validate_order(self):
+
+        if self.interpolate_method in ('polynomial', 'spline') and self.order is None:
+            raise ValueError(f'Для метода интерполяции {self.interpolate_method} нужно указать order')
+
+        return self
+
 # 9. Скользящее среднее
 class MovingAverageTransformation(Transformation):
     type: Literal["moving_avg"] = "moving_avg"
@@ -89,7 +119,8 @@ TransformationUnion = Annotated[
         StandardTransformation,
         ExpSmoothTransformation,
         FillMissingTransformation,
-        MovingAverageTransformation
+        MovingAverageTransformation,
+        InterpolateTransformation
     ],
     Field(discriminator="type")
 ]
@@ -188,6 +219,7 @@ InverseExpSmoothTransformation = ExpSmoothTransformation
 InverseBoxCoxTransformation = BoxCoxTransformation
 InverseFillMissingTransformation = FillMissingTransformation
 InverseMovingAverageTransformation = MovingAverageTransformation
+InverseInterpolateTransformation = InterpolateTransformation
 
 InverseTransformationUnion = Annotated[
     Union[
