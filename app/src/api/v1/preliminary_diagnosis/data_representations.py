@@ -2,10 +2,10 @@ from fastapi import APIRouter
 from dishka import FromDishka
 from dishka.integrations.fastapi import inject_sync
 
-from src.core.application.preliminary_diagnosis.schemas.kde import KdeParams, KdeResult
+from src.core.application.preliminary_diagnosis.schemas.kde import DistributionsRequest, DistributionsResult
 from src.core.application.preliminary_diagnosis.schemas.pp_plot import PPplotParams, PPResult
 from src.core.application.preliminary_diagnosis.schemas.qq import QQResult, QQParams
-from src.core.application.preliminary_diagnosis.use_cases.kde import KdeUC
+from src.core.application.preliminary_diagnosis.use_cases.kde import EstimateDistributionsUC
 from src.core.application.preliminary_diagnosis.use_cases.pp_plot import PPplotUC
 from src.core.application.preliminary_diagnosis.use_cases.qq import QQplotUC
 
@@ -20,6 +20,7 @@ def get_qq_values(
 ) -> QQResult:
     return qq_uc.execute(request=request)
 
+
 @data_representations_router.post(path="/pp")
 @inject_sync
 def get_pp_values(
@@ -28,10 +29,11 @@ def get_pp_values(
 ) -> PPResult:
     return pp_uc.execute(request=request)
 
-@data_representations_router.post(path="/kde")
+
+@data_representations_router.post(path="/distributions")
 @inject_sync
 def get_kde_values(
-    request: KdeParams,
-    kde_uc: FromDishka[KdeUC]
-) -> KdeResult:
-    return kde_uc.execute(request=request)
+    request: DistributionsRequest,
+    dist_uc: FromDishka[EstimateDistributionsUC]
+) -> DistributionsResult:
+    return dist_uc.execute(request=request)

@@ -1,6 +1,8 @@
 from dishka import Provider, Scope, provide
 
-from src.infrastructure.adapters.metrics import MetricsFactory
+from src.infrastructure.adapters.distributions import HistogramEstimator, DensityEstimator
+from src.infrastructure.factories.distributions import DistributionFactory
+from src.infrastructure.factories.metrics import MetricsFactory
 
 from src.infrastructure.adapters.modeling import (
     ArimaxAdapter,
@@ -11,8 +13,7 @@ from src.infrastructure.adapters.modeling import (
 
 from src.infrastructure.adapters.predicting.arimax import PredictArimaxAdapter
 from src.infrastructure.adapters.predicting.neural_predict.models import PredictGruAdapter, PredictNhitsAdapter, PredictLstmAdapter
-from src.infrastructure.adapters.preliminary_diagnosis import PPplotFactory, KdeFactory
-from src.infrastructure.adapters.preliminary_diagnosis.statistics_factory import StatisticsFactory
+from src.infrastructure.factories.statistics import StatisticsFactory
 from src.infrastructure.adapters.preprocessing.preprocess_factory import PreprocessFactory
 from src.infrastructure.adapters.serializer import PickleSerializer, ModelSerializer
 from src.infrastructure.adapters.archiver import ModelArchiver, ZipArchiver
@@ -57,7 +58,9 @@ class InfraProvider(Provider):
 
     statistics_fabric = provide(StatisticsFactory, provides=StatisticsFactory)
 
-    pp_plot_factory = provide(PPplotFactory, provides=PPplotFactory)
-    kde_factory = provide(KdeFactory, provides=KdeFactory)
-
     dist_fit = provide(DistFit, provides=DistFit)
+
+    histogram_estimator = provide(HistogramEstimator, provides=HistogramEstimator)
+    density_estimator = provide(DensityEstimator, provides=DensityEstimator)
+    distribution_factory = provide(DistributionFactory, provides=DistributionFactory)
+

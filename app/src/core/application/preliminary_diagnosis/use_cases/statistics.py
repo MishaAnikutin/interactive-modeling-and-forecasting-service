@@ -1,6 +1,6 @@
 from src.core.application.preliminary_diagnosis.schemas.statistics import StatisticResult, StatisticsEnum
 from src.core.domain import Timeseries
-from src.infrastructure.adapters.preliminary_diagnosis.statistics_factory import StatisticsFactory
+from src.infrastructure.factories.statistics.factory import StatisticsFactory
 import numpy as np
 
 class StatisticsUC:

@@ -5,7 +5,7 @@ from neuralforecast.models import NHITS
 from src.core.application.building_model.errors.nhits import HorizonValidationError, ValSizeError, PatienceStepsError, \
     TrainSizeError
 from src.core.application.building_model.schemas.nhits import NhitsParams, NhitsFitResult
-from src.infrastructure.adapters.metrics import MetricsFactory
+from src.infrastructure.factories.metrics import MetricsFactory
 from src.infrastructure.adapters.modeling.neural_forecast.base import NeuralForecastInterface
 from src.infrastructure.adapters.timeseries import TimeseriesTrainTestSplit
 

@@ -4,7 +4,7 @@ from neuralforecast.models import GRU
 from src.core.application.building_model.errors.lstm import LstmTrainSizeError2, LstmTrainSizeError
 from src.core.application.building_model.errors.nhits import HorizonValidationError, ValSizeError, PatienceStepsError
 from src.core.application.building_model.schemas.gru import GruParams, GruFitResult
-from src.infrastructure.adapters.metrics import MetricsFactory
+from src.infrastructure.factories.metrics import MetricsFactory
 from src.infrastructure.adapters.modeling.neural_forecast.base import NeuralForecastInterface
 from src.infrastructure.adapters.timeseries import TimeseriesTrainTestSplit
 

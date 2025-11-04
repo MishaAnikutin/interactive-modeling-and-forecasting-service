@@ -6,7 +6,7 @@ from src.core.domain import Timeseries, DataFrequency
 # ---------- Зависимости ----------
 @pytest.fixture
 def metrics_factory():
-    from src.infrastructure.adapters.metrics import MetricsFactory
+    from src.infrastructure.factories.metrics import MetricsFactory
     return MetricsFactory
 
 @pytest.fixture

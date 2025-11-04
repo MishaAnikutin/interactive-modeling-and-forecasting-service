@@ -1,7 +1,9 @@
+import time
+
 import numpy as np
 
 from src.core.application.preliminary_diagnosis.schemas.statistics import StatisticsEnum
-from src.core.domain.preliminary_diagnosis.statistics_service import StatisticsServiceI
+from src.core.domain.statistics import StatisticsServiceI
 
 
 class StatisticsFactory:
@@ -17,4 +19,6 @@ class StatisticsFactory:
 
     @classmethod
     def get_value(cls, ts: np.ndarray, statistic: StatisticsEnum) -> float:
+        print(cls.registry)
+        time.sleep(5)
         return cls.registry[statistic]().get_value(ts)

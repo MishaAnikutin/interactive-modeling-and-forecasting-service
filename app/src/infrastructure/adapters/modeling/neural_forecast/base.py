@@ -6,7 +6,7 @@ from neuralforecast import NeuralForecast
 from pydantic import BaseModel
 
 from src.core.domain import DataFrequency, FitParams
-from src.infrastructure.adapters.metrics import MetricsFactory
+from src.infrastructure.factories.metrics import MetricsFactory
 from src.infrastructure.adapters.modeling.interface import MlAdapterInterface
 from src.infrastructure.adapters.modeling.neural_forecast.utils import form_train_df, form_future_df, \
     full_train_predict, full_predict

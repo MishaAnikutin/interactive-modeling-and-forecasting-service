@@ -16,7 +16,7 @@ class SelectDistUC:
         best_dists, best_dist, best_params = self._select_dist.calculate(request)
 
         best_dists: list[SelectDistResult]
-        print('-' * 100)
+
         qq_result = self.qqplot_generic(x=request.timeseries.values, best_dist=best_dist, best_params=best_params)
 
         return SelectDistResponse(best_dists=best_dists, qq_result=qq_result)

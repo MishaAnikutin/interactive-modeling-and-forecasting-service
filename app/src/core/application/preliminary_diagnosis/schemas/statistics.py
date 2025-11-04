@@ -12,5 +12,6 @@ class StatisticsEnum(str, Enum):
     skewness = "skewness"
     coefficient_of_variation = "coefficient_of_variation"
 
+
 class StatisticResult(BaseModel):
     value: float

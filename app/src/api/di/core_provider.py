@@ -16,7 +16,7 @@ from src.core.application.predict_series.use_cases.predict_lstm import PredictLs
 from src.core.application.predict_series.use_cases.predict_nhits import PredictNhitsUC
 from src.core.application.preliminary_diagnosis.use_cases.df_gls import DfGlsUC
 from src.core.application.preliminary_diagnosis.use_cases.dicker_fuller import DickeuFullerUC
-from src.core.application.preliminary_diagnosis.use_cases.kde import KdeUC
+from src.core.application.preliminary_diagnosis.use_cases.kde import EstimateDistributionsUC
 from src.core.application.preliminary_diagnosis.use_cases.kpss import KpssUC
 from src.core.application.preliminary_diagnosis.use_cases.phillips_perron import PhillipsPerronUC
 from src.core.application.preliminary_diagnosis.use_cases.pp_plot import PPplotUC
@@ -82,5 +82,5 @@ class CoreProvider(Provider):
     # Распределения
     qq_plot_command = provide(QQplotUC, provides=QQplotUC)
     pp_plot_command = provide(PPplotUC, provides=PPplotUC)
-    kde_command = provide(KdeUC, provides=KdeUC)
+    kde_command = provide(EstimateDistributionsUC, provides=EstimateDistributionsUC)
     select_dist = provide(SelectDistUC, provides=SelectDistUC)

@@ -6,7 +6,7 @@ from src.core.domain import DataFrequency, ModelMetrics, Forecasts, FitParams, T
 from src.infrastructure.adapters.predicting.interface import BasePredictor
 from src.infrastructure.adapters.serializer import ModelSerializer
 from src.infrastructure.adapters.timeseries import PandasTimeseriesAdapter, TimeseriesTrainTestSplit, TimeseriesExtender
-from src.infrastructure.adapters.metrics import MetricsFactory
+from src.infrastructure.factories.metrics import MetricsFactory
 
 
 class PredictArimaxAdapter(BasePredictor):

@@ -8,7 +8,7 @@ from src.core.domain import DataFrequency, ModelMetrics, Forecasts, FitParams, T
 from src.infrastructure.adapters.predicting.interface import BasePredictor
 from src.infrastructure.adapters.serializer import ModelSerializer
 from src.infrastructure.adapters.timeseries import PandasTimeseriesAdapter, TimeseriesTrainTestSplit
-from src.infrastructure.adapters.metrics import MetricsFactory
+from src.infrastructure.factories.metrics import MetricsFactory
 from src.shared.future_dates import future_dates
 from src.shared.to_panel import to_panel
 

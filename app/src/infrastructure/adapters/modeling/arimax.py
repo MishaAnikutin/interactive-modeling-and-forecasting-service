@@ -8,7 +8,7 @@ from src.core.application.building_model.schemas.arimax import ArimaxParams, Ari
 
 from .errors.arimax import ConstantInExogAndSpecification
 from src.infrastructure.logs import logger
-from src.infrastructure.adapters.metrics import MetricsFactory
+from src.infrastructure.factories.metrics import MetricsFactory
 from src.infrastructure.adapters.modeling.interface import MlAdapterInterface
 from src.infrastructure.adapters.timeseries import TimeseriesTrainTestSplit, TimeseriesExtender
 

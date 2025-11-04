@@ -4,7 +4,7 @@ from typing import TypeVar
 import pandas as pd
 
 from src.core.domain import ModelMetrics, Forecasts, Timeseries, FitParams, DataFrequency
-from src.infrastructure.adapters.metrics import MetricsFactory
+from src.infrastructure.factories.metrics import MetricsFactory
 from src.infrastructure.adapters.timeseries import TimeseriesTrainTestSplit
 
 ModelParams = TypeVar("ModelParams")

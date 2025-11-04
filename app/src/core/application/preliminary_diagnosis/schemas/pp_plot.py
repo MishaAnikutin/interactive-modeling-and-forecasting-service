@@ -2,12 +2,7 @@ from pydantic import BaseModel, Field
 from src.core.domain import Timeseries
 from enum import Enum
 
-
-class DistributionEnum(str, Enum):
-    normal = "normal"
-    uniform = "uniform"
-    exponential = "exponential"
-    chi2 = "chi2"
+from src.core.domain.distributions import Distribution
 
 
 class PPplotParams(BaseModel):
@@ -16,7 +11,7 @@ class PPplotParams(BaseModel):
         title="Временной ряд",
         description="Временной ряд, для которого строится PP-plot.",
     )
-    distribution: DistributionEnum = Field(
+    distribution: Distribution = Field(
         ...,
         title="Тип распределения",
         description="Теоретическое распределение, используемое для PP-plot.",

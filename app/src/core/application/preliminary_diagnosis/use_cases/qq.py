@@ -1,28 +1,26 @@
 from src.core.application.preliminary_diagnosis.schemas.qq import QQResult, QQParams
-from src.infrastructure.adapters.timeseries import PandasTimeseriesAdapter
 import numpy as np
-from scipy import stats
+
+from src.infrastructure.factories.distributions import DistributionFactory
 
 
 class QQplotUC:
     def __init__(
         self,
-        ts_adapter: PandasTimeseriesAdapter,
+        dist_factory: DistributionFactory,
     ):
-        self._ts_adapter = ts_adapter
+        self._dist_factory = dist_factory
 
     def execute(self, request: QQParams) -> QQResult:
-        sample = np.array(request.timeseries.values)
-        sample = sample[~np.isnan(sample)]
-
-        sample_sorted = np.sort(sample)
-        theoretical_quantiles = stats.norm.ppf(
-            np.linspace(0.01, 0.99, len(sample_sorted)),
-            loc=np.mean(sample_sorted),
-            scale=np.std(sample_sorted, ddof=1)
+        theoretical_quantiles = self._dist_factory.get_pdf(
+            x=request.timeseries.values,
+            distribution=request.theoretical_dist,
+            must_sort=True
         )
 
+        sample_sorted = sorted(request.timeseries.values)
+
         return QQResult(
-            normal_values=theoretical_quantiles.tolist(),
-            data_values=sample_sorted.tolist()
+            normal_values=theoretical_quantiles,
+            data_values=sample_sorted
         )

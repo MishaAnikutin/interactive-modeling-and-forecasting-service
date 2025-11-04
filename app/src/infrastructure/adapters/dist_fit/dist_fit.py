@@ -16,7 +16,7 @@ class DistFit:
     def calculate(self, request: SelectDistRequest) -> tuple[SelectDistResult, Any, Any]:
         dmodel = distfit(
             method=request.method.value,
-            distr=request.distribution.value,
+            distr=[dist.value for dist in request.distribution],
             stats=request.statistics.value,
             bins=request.bins,
             todf=True
