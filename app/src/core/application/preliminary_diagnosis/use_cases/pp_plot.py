@@ -15,11 +15,13 @@ class PPplotUC:
     def execute(self, request: PPplotParams) -> PPResult:
         n = len(request.timeseries.values)
 
-        theoretical_probs = self._dist_factory.get_cdf(
+        cdf = self._dist_factory.get_cdf(
             x=request.timeseries.values,
             distribution=request.distribution,
             must_sort=True
         )
+
+        theoretical_probs = cdf.y
 
         # FIXME
         empirical_probs = np.arange(1, n + 1) / (n + 1)

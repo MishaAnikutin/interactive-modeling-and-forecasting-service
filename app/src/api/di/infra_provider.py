@@ -1,6 +1,6 @@
 from dishka import Provider, Scope, provide
 
-from src.infrastructure.adapters.distributions import HistogramEstimator, DensityEstimator
+from src.infrastructure.adapters.distributions import HistogramEstimator, DensityEstimator, EmpiricalDistribution
 from src.infrastructure.factories.distributions import DistributionFactory
 from src.infrastructure.factories.metrics import MetricsFactory
 
@@ -64,3 +64,4 @@ class InfraProvider(Provider):
     density_estimator = provide(DensityEstimator, provides=DensityEstimator)
     distribution_factory = provide(DistributionFactory, provides=DistributionFactory)
 
+    empirical_dist = provide(EmpiricalDistribution, provides=EmpiricalDistribution)

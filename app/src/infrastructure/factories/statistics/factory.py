@@ -19,6 +19,4 @@ class StatisticsFactory:
 
     @classmethod
     def get_value(cls, ts: np.ndarray, statistic: StatisticsEnum) -> float:
-        print(cls.registry)
-        time.sleep(5)
         return cls.registry[statistic]().get_value(ts)

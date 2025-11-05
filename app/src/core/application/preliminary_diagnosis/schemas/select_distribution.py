@@ -20,5 +20,8 @@ class SelectDistResult(BaseModel):
 
 class SelectDistResponse(BaseModel):
     best_dists: list[SelectDistResult]
-    best_dist_pdf: PDF
-    best_dist_cdf: CDF
+    best_dist_theoretical_pdf: PDF
+    best_dist_theoretical_cdf: CDF
+
+    empirical_pdf: PDF
+    empirical_cdf: CDF

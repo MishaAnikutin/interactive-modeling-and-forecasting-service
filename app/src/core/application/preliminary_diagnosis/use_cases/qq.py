@@ -1,7 +1,5 @@
-from src.core.application.preliminary_diagnosis.schemas.qq import QQResult, QQParams
-import numpy as np
-
 from src.infrastructure.factories.distributions import DistributionFactory
+from src.core.application.preliminary_diagnosis.schemas.qq import QQResult, QQParams
 
 
 class QQplotUC:
@@ -12,11 +10,13 @@ class QQplotUC:
         self._dist_factory = dist_factory
 
     def execute(self, request: QQParams) -> QQResult:
-        theoretical_quantiles = self._dist_factory.get_pdf(
+        pdf = self._dist_factory.get_pdf(
             x=request.timeseries.values,
             distribution=request.theoretical_dist,
             must_sort=True
         )
+
+        theoretical_quantiles = pdf.y
 
         sample_sorted = sorted(request.timeseries.values)
 

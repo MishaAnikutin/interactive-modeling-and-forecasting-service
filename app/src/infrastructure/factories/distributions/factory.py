@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.core.domain.distributions import Distribution, DistributionServiceI
+from src.core.domain.distributions import Distribution, DistributionServiceI, PDF, CDF
 
 
 class DistributionFactory:
@@ -15,7 +15,7 @@ class DistributionFactory:
         return wrapper
 
     @classmethod
-    def get_cdf(cls, x: list[float], distribution: Distribution, must_sort: bool) -> list[float]:
+    def get_cdf(cls, x: list[float], distribution: Distribution, must_sort: bool) -> CDF:
         x = np.array(x)
         x = x[~np.isnan(x)]
 
@@ -25,7 +25,7 @@ class DistributionFactory:
             raise NotImplementedError(f"Распределение {distribution.name} пока не реализовано")
 
     @classmethod
-    def get_pdf(cls, x: list[float], distribution: Distribution, must_sort: bool) -> list[float]:
+    def get_pdf(cls, x: list[float], distribution: Distribution, must_sort: bool) -> PDF:
         x = np.array(x)
         x = x[~np.isnan(x)]
 
