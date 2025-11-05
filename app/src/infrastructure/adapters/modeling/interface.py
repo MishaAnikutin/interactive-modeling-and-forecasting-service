@@ -62,6 +62,15 @@ class MlAdapterInterface(ABC):
         forecast: pd.Series,
         data_frequency: DataFrequency
     ) -> Forecasts:
+        # у train_predict первая точка почему то заметно ниже остальных. Вова сказал просто убирать её
+        # train_predict.head(3)
+        # ds
+        # 2023-01-31      -0.128045
+        # 2023-02-28    3448.322510
+        # 2023-03-31    3910.034424
+
+        train_predict = train_predict.tail(-1)
+
         return Forecasts(
             train_predict=Timeseries(
                 dates=train_predict.index.tolist(),

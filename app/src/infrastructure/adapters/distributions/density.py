@@ -1,5 +1,3 @@
-import time
-
 import numpy as np
 from sklearn.model_selection import KFold, GridSearchCV
 from sklearn.neighbors import KernelDensity
