@@ -5,17 +5,17 @@ from src.core.domain.distributions import Distribution
 
 class QQParams(BaseModel):
     timeseries: Timeseries
-    theoretical_dist: Distribution
+    distribution: Distribution
 
 
 class QQResult(BaseModel):
-    data_values: list[float] = Field(
+    theoretical_probs: list[float] = Field(
         ...,
-        title="Значения данных",
-        description="Эмпирические значения выборки."
+        title="Теоретические вероятности",
+        description="Вероятности, вычисленные из выбранного теоретического распределения.",
     )
-    normal_values: list[float] = Field(
+    empirical_probs: list[float] = Field(
         ...,
-        title="Нормальные значения",
-        description="Теоретические значения нормального распределения."
+        title="Эмпирические вероятности",
+        description="Эмпирические вероятности, рассчитанные по данным временного ряда.",
     )

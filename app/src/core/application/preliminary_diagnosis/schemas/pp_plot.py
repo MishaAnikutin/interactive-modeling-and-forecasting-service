@@ -29,13 +29,3 @@ class PPResult(BaseModel):
         title="Эмпирические вероятности",
         description="Эмпирические вероятности, рассчитанные по данным временного ряда.",
     )
-    perfect_line_x: list[float] = Field(
-        ...,
-        title="Идеальная линия X",
-        description="Координаты X идеальной линии y = x.",
-    )
-    perfect_line_y: list[float] = Field(
-        ...,
-        title="Идеальная линия Y",
-        description="Координаты Y идеальной линии y = x.",
-    )

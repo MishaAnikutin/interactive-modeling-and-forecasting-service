@@ -26,12 +26,7 @@ class PPplotUC:
         # FIXME
         empirical_probs = np.arange(1, n + 1) / (n + 1)
 
-        perfect_line_x = [0, 1]
-        perfect_line_y = perfect_line_x
-
         return PPResult(
             theoretical_probs=theoretical_probs,
             empirical_probs=empirical_probs.tolist(),
-            perfect_line_x=perfect_line_x,
-            perfect_line_y=perfect_line_y,
         )
