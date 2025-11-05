@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field
-from src.core.application.preliminary_diagnosis.schemas.qq import QQResult
 from src.core.domain import Timeseries
-from src.core.domain.distributions import SelectDistributionMethod, Distribution, SelectDistributionStatistics
+from src.core.domain.distributions import SelectDistributionMethod, Distribution, SelectDistributionStatistics, PDF, CDF
 
 
 class SelectDistRequest(BaseModel):
@@ -21,4 +20,5 @@ class SelectDistResult(BaseModel):
 
 class SelectDistResponse(BaseModel):
     best_dists: list[SelectDistResult]
-    qq_result: QQResult
+    best_dist_pdf: PDF
+    best_dist_cdf: CDF

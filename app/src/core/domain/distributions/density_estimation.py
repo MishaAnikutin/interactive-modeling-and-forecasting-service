@@ -32,3 +32,13 @@ class Density(BaseModel):
     # FIXME
     metadata: dict = Field(..., title="Метаданные функции оценки плотности распределения. "
                                       "Если подбор параметров автоматический, то схема может поменяться")
+
+
+class PDF(BaseModel):
+    x: list[float] = Field(..., description="Сетка значений X")
+    y: list[float] = Field(..., title="Список значений плотности вероятности")
+
+
+class CDF(BaseModel):
+    x: list[float] = Field(..., description="Сетка значений X")
+    y: list[float] = Field(..., title="Список значений плотности вероятности")

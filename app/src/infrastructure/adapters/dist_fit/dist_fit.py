@@ -13,7 +13,7 @@ from src.core.application.preliminary_diagnosis.schemas.select_distribution impo
 class DistFit:
 
     # FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME
-    def calculate(self, request: SelectDistRequest) -> tuple[SelectDistResult, Any, Any]:
+    def calculate(self, request: SelectDistRequest) -> SelectDistResult:
         dmodel = distfit(
             method=request.method.value,
             distr=[dist.value for dist in request.distribution],
@@ -36,9 +36,9 @@ class DistFit:
                 score=score, loc=loc, scale=scale
             ))
 
-        best_dist, best_params = extract_dist_and_params(top5.iloc[0])
+        # best_dist, best_params = extract_dist_and_params(top5.iloc[0])
 
-        return results, best_dist, best_params
+        return results
 
 
 # FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME
