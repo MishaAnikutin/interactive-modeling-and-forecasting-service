@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -8,7 +10,7 @@ class Histogram(BaseModel):
 
 
 class EstimateHistogramParams(BaseModel):
-    bins: int = Field(description='Число интервалов', default=32, gt=0, lt=1000)
+    bins: Optional[int] = Field(description='Число интервалов', default=40, gt=0, lt=1000)
     is_density: bool = Field(
         description="Если True то возвращает относительные частоты, иначе частоты",
         default=True

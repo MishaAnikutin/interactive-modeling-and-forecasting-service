@@ -1,11 +1,16 @@
+from typing import Optional
+
 import numpy as np
 
 from src.core.domain.distributions import Histogram
 
 
 class HistogramEstimator:
-    def eval(self, values: list[float], bins: int, is_density: bool) -> Histogram:
+    def eval(self, values: list[float], bins: Optional[int], is_density: bool) -> Histogram:
         x = values
+
+        if bins is None:
+            bins = int(np.sqrt(len(x)))
 
         counts, edges = np.histogram(x, bins=bins, density=is_density)
         centers = (edges[:-1] + edges[1:]) / 2
