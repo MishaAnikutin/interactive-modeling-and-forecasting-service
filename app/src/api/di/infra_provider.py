@@ -17,6 +17,7 @@ from src.infrastructure.factories.statistics import StatisticsFactory
 from src.infrastructure.factories.preprocessing import PreprocessFactory
 from src.infrastructure.adapters.serializer import PickleSerializer, ModelSerializer
 from src.infrastructure.adapters.archiver import ModelArchiver, ZipArchiver
+from src.infrastructure.factories.validation import ValidationVisitor
 from src.infrastructure.adapters.timeseries import (
     PandasTimeseriesAdapter,
     TimeseriesAlignment,
@@ -65,3 +66,5 @@ class InfraProvider(Provider):
     distribution_factory = provide(DistributionFactory, provides=DistributionFactory)
 
     empirical_dist = provide(EmpiricalDistribution, provides=EmpiricalDistribution)
+
+    validation_factory = provide(ValidationVisitor, provides=ValidationVisitor)

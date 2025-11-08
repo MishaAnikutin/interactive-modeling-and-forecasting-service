@@ -30,6 +30,7 @@ from src.core.application.preprocessing.preprocessing_uc import PreprocessUC
 from src.core.application.preprocessing.inverse_preprocessing_uc import InversePreprocessUC
 from src.core.application.preliminary_diagnosis.use_cases.acf_and_pacf import AcfAndPacfUC
 from src.core.application.preliminary_diagnosis.use_cases.select_distribution import SelectDistUC
+from src.core.application.validate_series.validate_series_uc import ValidateSeriesUC
 
 
 # TODO: возмонжо стоит разделить провайдеров на каждый use case ...
@@ -86,3 +87,6 @@ class CoreProvider(Provider):
     kde_command = provide(EstimateDistributionsUC, provides=EstimateDistributionsUC)
     select_dist = provide(SelectDistUC, provides=SelectDistUC)
     histogram_command = provide(HistogramUC, provides=HistogramUC)
+
+    # валидация
+    validation_command = provide(ValidateSeriesUC, provides=ValidateSeriesUC)
