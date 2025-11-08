@@ -92,11 +92,28 @@ class InterpolateTransformation(Transformation):
 
     @model_validator(mode='after')
     def validate_order(self):
-
         if self.interpolate_method in ('polynomial', 'spline') and self.order is None:
             raise ValueError(f'Для метода интерполяции {self.interpolate_method} нужно указать order')
 
         return self
+
+
+class AggregateTransformation(Transformation):
+    type: Literal["aggregate"] = 'aggregate'
+    target_freq: Optional[DataFrequency] = Field(title='К какой частотности нужно привести', default=None)
+    aggregate_method: Literal[
+        'sum',
+        'mean',
+        'median',
+        'min',
+        'max',
+        'first',
+        'last',
+        'std',
+        'var',
+        'count'
+    ] = Field(title='Метод агрегации', default='mean')
+
 
 # 9. Скользящее среднее
 class MovingAverageTransformation(Transformation):
@@ -120,7 +137,8 @@ TransformationUnion = Annotated[
         ExpSmoothTransformation,
         FillMissingTransformation,
         MovingAverageTransformation,
-        InterpolateTransformation
+        InterpolateTransformation,
+        AggregateTransformation
     ],
     Field(discriminator="type")
 ]
@@ -220,6 +238,7 @@ InverseBoxCoxTransformation = BoxCoxTransformation
 InverseFillMissingTransformation = FillMissingTransformation
 InverseMovingAverageTransformation = MovingAverageTransformation
 InverseInterpolateTransformation = InterpolateTransformation
+InverseAggregateTransformation = AggregateTransformation
 
 InverseTransformationUnion = Annotated[
     Union[

@@ -2,7 +2,7 @@ from src.core.domain import Timeseries
 from src.core.application.preprocessing.preprocess_scheme import InversePreprocessingRequest
 
 from src.infrastructure.adapters.timeseries import PandasTimeseriesAdapter
-from src.infrastructure.adapters.preprocessing.preprocess_factory import PreprocessFactory
+from src.infrastructure.factories.preprocessing import PreprocessFactory
 
 
 class InversePreprocessUC:

@@ -40,7 +40,7 @@ def ts_adapter():
 
 @pytest.fixture
 def preprocess_factory():
-    from src.infrastructure.adapters.preprocessing.preprocess_factory import PreprocessFactory
+    from src.infrastructure.factories.preprocessing.preprocess_factory import PreprocessFactory
     return PreprocessFactory
 
 @pytest.fixture

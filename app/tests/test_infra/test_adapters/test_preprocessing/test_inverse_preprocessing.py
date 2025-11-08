@@ -14,7 +14,7 @@ from src.core.application.preprocessing.preprocess_scheme import (
     InverseMinMaxTransformation,
     InverseLogTransformation,
 )
-from src.infrastructure.adapters.preprocessing.preprocess_factory import (
+from src.infrastructure.factories.preprocessing.preprocess_factory import (
     PreprocessFactory,
 )
 

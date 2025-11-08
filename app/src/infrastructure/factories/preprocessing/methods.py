@@ -1,4 +1,4 @@
-from typing import Tuple, Optional
+from typing import Tuple
 
 import numpy as np
 import pandas as pd
@@ -28,10 +28,10 @@ from src.core.application.preprocessing.preprocess_scheme import (
     InverseMovingAverageTransformation,
     DiffContext,
     MinMaxContext,
-    StandardContext, InverseInterpolateTransformation,
+    StandardContext, InverseInterpolateTransformation, AggregateTransformation, InverseAggregateTransformation,
 )
 from src.core.domain.preprocessing.service import PreprocessingServiceI
-from src.infrastructure.adapters.preprocessing.preprocess_factory import (
+from .factory import (
     PreprocessFactory,
 )
 
@@ -188,6 +188,7 @@ class MovingAverage(PreprocessingServiceI):
         return ts
 
 
+# FIXME: Если новая частотность ряда меньше текущей то все равно отработает
 @PreprocessFactory.register(transform_type="interpolate")
 class Interpolate(PreprocessingServiceI):
     def apply(
@@ -202,4 +203,22 @@ class Interpolate(PreprocessingServiceI):
 
     def inverse(self, ts: pd.Series, transformation: InverseInterpolateTransformation) -> pd.Series:
         # ну тут тоже хз прост
+        return ts
+
+
+# FIXME: Если новая частотность ряда больше текущей то все равно отработает
+@PreprocessFactory.register(transform_type="aggregate")
+class Aggregate(PreprocessingServiceI):
+    def apply(
+            self, ts: pd.Series, transformation: AggregateTransformation
+    ) -> Tuple[pd.Series, None]:
+        if transformation.target_freq:
+            ts = ts.resample(transformation.target_freq.value)
+
+        ts = ts.aggregate(transformation.aggregate_method)
+
+        return ts, None
+
+    def inverse(self, ts: pd.Series, transformation: InverseAggregateTransformation) -> pd.Series:
+        # Для агрегации обратное преобразование невозможно
         return ts
