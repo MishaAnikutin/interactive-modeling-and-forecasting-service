@@ -1,6 +1,8 @@
 from typing import List, Literal, Union, Annotated, Optional
 from pydantic import BaseModel, Field, ConfigDict, model_validator
 
+from src.core.application.generating_series.schemas.naive_decomposition import NaiveDecompositionParams
+from src.core.application.generating_series.schemas.stl_decomposition import STLParams
 from src.core.domain import Timeseries, DataFrequency
 from src.shared.utils import validate_float_param
 
@@ -28,8 +30,8 @@ class LagTransformation(Transformation):
         default=1
     )
 
-# 3. Логарифмирование
 
+# 3. Логарифмирование
 class LogTransformation(Transformation):
     type: Literal["log"] = "log"
 
@@ -125,6 +127,16 @@ class MovingAverageTransformation(Transformation):
     )
 
 
+class NaiveTrendComponentTransformation(Transformation):
+    type: Literal["naive_trend_component"] = "naive_trend_component"
+    params: NaiveDecompositionParams = Field(..., description="Параметры декомпозиции")
+
+
+class STLTrendComponentTransformation(Transformation):
+    type: Literal["stl_trend_component"] = "stl_trend_component"
+    params: STLParams = Field(..., description="Параметры декомпозиции")
+
+
 TransformationUnion = Annotated[
     Union[
         BoxCoxTransformation,
@@ -138,7 +150,9 @@ TransformationUnion = Annotated[
         FillMissingTransformation,
         MovingAverageTransformation,
         InterpolateTransformation,
-        AggregateTransformation
+        AggregateTransformation,
+        NaiveTrendComponentTransformation,
+        STLTrendComponentTransformation
     ],
     Field(discriminator="type")
 ]
@@ -239,6 +253,8 @@ InverseFillMissingTransformation = FillMissingTransformation
 InverseMovingAverageTransformation = MovingAverageTransformation
 InverseInterpolateTransformation = InterpolateTransformation
 InverseAggregateTransformation = AggregateTransformation
+InverseSTLTrendComponentTransformation = STLTrendComponentTransformation
+InverseNaiveTrendComponentTransformation = NaiveTrendComponentTransformation
 
 InverseTransformationUnion = Annotated[
     Union[
@@ -251,7 +267,10 @@ InverseTransformationUnion = Annotated[
         InverseExpSmoothTransformation,
         InverseBoxCoxTransformation,
         InverseFillMissingTransformation,
-        InverseMovingAverageTransformation
+        InverseMovingAverageTransformation,
+        InverseAggregateTransformation,
+        InverseSTLTrendComponentTransformation,
+        InverseNaiveTrendComponentTransformation
     ],
     Field(discriminator="type")
 ]

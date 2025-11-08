@@ -103,6 +103,7 @@ class STLParams(BaseModel):
             raise ValueError(InvalidLowPassError().detail)
         return self
 
+
 class STLDecompositionRequest(BaseModel):
     ts: Timeseries = Field(title="Временной ряд для разложения")
     params: STLParams = Field(title="Параметры разложения")

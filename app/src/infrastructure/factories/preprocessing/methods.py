@@ -3,6 +3,8 @@ from typing import Tuple
 import numpy as np
 import pandas as pd
 from scipy.stats import boxcox
+from statsmodels.tsa.seasonal import seasonal_decompose
+from statsmodels.tsa.stl._stl import STL
 
 from src.core.application.preprocessing.preprocess_scheme import (
     DiffTransformation,
@@ -29,6 +31,7 @@ from src.core.application.preprocessing.preprocess_scheme import (
     DiffContext,
     MinMaxContext,
     StandardContext, InverseInterpolateTransformation, AggregateTransformation, InverseAggregateTransformation,
+    NaiveTrendComponentTransformation, STLTrendComponentTransformation
 )
 from src.core.domain.preprocessing.service import PreprocessingServiceI
 from .factory import (
@@ -221,4 +224,56 @@ class Aggregate(PreprocessingServiceI):
 
     def inverse(self, ts: pd.Series, transformation: InverseAggregateTransformation) -> pd.Series:
         # Для агрегации обратное преобразование невозможно
+        return ts
+
+
+@PreprocessFactory.register(transform_type="naive_trend_component")
+class NaiveTrendComponent(PreprocessingServiceI):
+    def apply(
+            self, ts: pd.Series, transformation: NaiveTrendComponentTransformation
+    ) -> Tuple[pd.Series, None]:
+        trend = transformation.params.extrapolate_trend if transformation.params.extrapolate_trend is not None else "freq"
+
+        result = seasonal_decompose(
+            x=ts,
+            model=transformation.params.model,
+            filt=transformation.params.filt,
+            period=transformation.params.period,
+            two_sided=transformation.params.two_sided,
+            extrapolate_trend=trend,
+        )
+
+        return result.trend, None
+
+    def inverse(self, ts: pd.Series, transformation: InverseAggregateTransformation) -> pd.Series:
+        # Для получения тренда обратное преобразование это исходный ряд, а ссылка на него есть в БД
+        return ts
+
+
+@PreprocessFactory.register(transform_type="stl_trend_component")
+class STLTrendComponent(PreprocessingServiceI):
+    def apply(
+            self, ts: pd.Series, transformation: STLTrendComponentTransformation
+    ) -> Tuple[pd.Series, None]:
+        stl = STL(
+            ts,
+            period=transformation.params.period,
+            seasonal=transformation.params.seasonal,
+            trend=transformation.params.trend,
+            low_pass=transformation.params.low_pass,
+            seasonal_deg=int(transformation.params.seasonal_deg),
+            trend_deg=int(transformation.params.trend_deg),
+            low_pass_deg=int(transformation.params.low_pass_deg),
+            robust=transformation.params.robust,
+            seasonal_jump=transformation.params.seasonal_jump,
+            trend_jump=transformation.params.trend_jump,
+            low_pass_jump=transformation.params.low_pass_jump,
+        )
+
+        result = stl.fit()
+
+        return result.trend, None
+
+    def inverse(self, ts: pd.Series, transformation: InverseAggregateTransformation) -> pd.Series:
+        # Для получения тренда обратное преобразование это исходный ряд, а ссылка на него есть в БД
         return ts
