@@ -2,10 +2,15 @@ from fastapi import APIRouter
 from dishka import FromDishka
 from dishka.integrations.fastapi import inject_sync
 
+from src.core.application.preliminary_diagnosis.schemas.auto_pp import AutoPPRequest
+from src.core.application.preliminary_diagnosis.schemas.auto_qq import AutoQQRequest
 from src.core.application.preliminary_diagnosis.schemas.histogram import HistogramRequest
 from src.core.application.preliminary_diagnosis.schemas.kde import DistributionsRequest, DistributionsResult
 from src.core.application.preliminary_diagnosis.schemas.pp_plot import PPplotParams, PPResult
 from src.core.application.preliminary_diagnosis.schemas.qq import QQResult, QQParams
+
+from src.core.application.preliminary_diagnosis.use_cases.auto_pp import AutoPPplotUC
+from src.core.application.preliminary_diagnosis.use_cases.auto_qq import AutoQQplotUC
 from src.core.application.preliminary_diagnosis.use_cases.histogram import HistogramUC
 from src.core.application.preliminary_diagnosis.use_cases.kde import EstimateDistributionsUC
 from src.core.application.preliminary_diagnosis.use_cases.pp_plot import PPplotUC
@@ -49,3 +54,20 @@ def get_histogram_values(
     histogram_uc: FromDishka[HistogramUC]
 ) -> Histogram:
     return histogram_uc.execute(request=request)
+
+
+@data_representations_router.post(path="/auto_qq")
+@inject_sync
+def get_auto_qq_values(
+    request: AutoQQRequest,
+    auto_qq_uc: FromDishka[AutoQQplotUC]
+) -> QQResult:
+    return auto_qq_uc.execute(request=request)
+
+@data_representations_router.post(path="/auto_pp")
+@inject_sync
+def get_auto_pp_values(
+    request: AutoPPRequest,
+    auto_pp_uc: FromDishka[AutoPPplotUC]
+) -> PPResult:
+    return auto_pp_uc.execute(request=request)

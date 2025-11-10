@@ -14,6 +14,8 @@ from src.core.application.model_diagnosis.use_cases.omnibus import OmnibusUC
 from src.core.application.predict_series.use_cases.predict_gru import PredictGruUC
 from src.core.application.predict_series.use_cases.predict_lstm import PredictLstmUC
 from src.core.application.predict_series.use_cases.predict_nhits import PredictNhitsUC
+from src.core.application.preliminary_diagnosis.use_cases.auto_pp import AutoPPplotUC
+from src.core.application.preliminary_diagnosis.use_cases.auto_qq import AutoQQplotUC
 from src.core.application.preliminary_diagnosis.use_cases.df_gls import DfGlsUC
 from src.core.application.preliminary_diagnosis.use_cases.dicker_fuller import DickeuFullerUC
 from src.core.application.preliminary_diagnosis.use_cases.histogram import HistogramUC
@@ -87,6 +89,9 @@ class CoreProvider(Provider):
     kde_command = provide(EstimateDistributionsUC, provides=EstimateDistributionsUC)
     select_dist = provide(SelectDistUC, provides=SelectDistUC)
     histogram_command = provide(HistogramUC, provides=HistogramUC)
+
+    auto_qq_command = provide(AutoQQplotUC, provides=AutoQQplotUC)
+    auto_pp_command = provide(AutoPPplotUC, provides=AutoPPplotUC)
 
     # валидация
     validation_command = provide(ValidateSeriesUC, provides=ValidateSeriesUC)
