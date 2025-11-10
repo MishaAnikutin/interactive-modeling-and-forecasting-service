@@ -16,6 +16,7 @@ from src.core.application.predict_series.use_cases.predict_lstm import PredictLs
 from src.core.application.predict_series.use_cases.predict_nhits import PredictNhitsUC
 from src.core.application.preliminary_diagnosis.use_cases.auto_pp import AutoPPplotUC
 from src.core.application.preliminary_diagnosis.use_cases.auto_qq import AutoQQplotUC
+from src.core.application.preliminary_diagnosis.use_cases.corr import CorrelationMatrixUC
 from src.core.application.preliminary_diagnosis.use_cases.df_gls import DfGlsUC
 from src.core.application.preliminary_diagnosis.use_cases.dicker_fuller import DickeuFullerUC
 from src.core.application.preliminary_diagnosis.use_cases.histogram import HistogramUC
@@ -95,3 +96,6 @@ class CoreProvider(Provider):
 
     # валидация
     validation_command = provide(ValidateSeriesUC, provides=ValidateSeriesUC)
+
+    # Корреляция
+    corr_command = provide(CorrelationMatrixUC, provides=CorrelationMatrixUC)

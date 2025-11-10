@@ -26,7 +26,7 @@ from src.infrastructure.adapters.timeseries import (
     TimeseriesExtender
 )
 from src.infrastructure.adapters.dist_fit.dist_fit import DistFit
-
+from src.infrastructure.interactors.correlation import CorrelationInteractor
 
 class InfraProvider(Provider):
     scope = Scope.REQUEST
@@ -68,3 +68,5 @@ class InfraProvider(Provider):
     empirical_dist = provide(EmpiricalDistribution, provides=EmpiricalDistribution)
 
     validation_factory = provide(ValidationVisitor, provides=ValidationVisitor)
+
+    correlation_interactor = provide(CorrelationInteractor, provides=CorrelationInteractor)
