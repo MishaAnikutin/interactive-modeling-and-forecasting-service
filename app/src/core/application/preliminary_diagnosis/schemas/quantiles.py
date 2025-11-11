@@ -12,5 +12,6 @@ class QuantilesResult(BaseModel):
     q_25: float
     q_50: float
     q_75: float
+    q_95: float
     q_99: float
     q_100: float
