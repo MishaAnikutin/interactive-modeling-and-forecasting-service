@@ -22,9 +22,7 @@ class PPplotUC:
         )
 
         theoretical_probs = cdf.y
-
-        # FIXME
-        empirical_probs = np.arange(1, n + 1) / (n + 1)
+        empirical_probs = (np.arange(1, n + 1) - 0.5) / n
 
         return PPResult(
             theoretical_probs=theoretical_probs,
