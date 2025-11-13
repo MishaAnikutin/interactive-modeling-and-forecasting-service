@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from src.core.domain import Timeseries
-from src.core.domain.distributions import SelectDistributionMethod, Distribution, SelectDistributionStatistics, PDF, CDF
+from src.core.domain.distributions import SelectDistributionMethod, Distribution, SelectDistributionStatistics, PDF, \
+    CDF, Histogram
 
 
 class SelectDistRequest(BaseModel):
@@ -20,8 +21,9 @@ class SelectDistResult(BaseModel):
 
 class SelectDistResponse(BaseModel):
     best_dists: list[SelectDistResult]
+
     best_dist_theoretical_pdf: PDF
     best_dist_theoretical_cdf: CDF
 
-    empirical_pdf: PDF
+    empirical_pdf: Histogram
     empirical_cdf: CDF
