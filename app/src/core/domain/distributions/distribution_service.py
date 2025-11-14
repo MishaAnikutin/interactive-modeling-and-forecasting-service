@@ -1,8 +1,7 @@
 from abc import ABC
 import numpy as np
 
-from src.core.domain.distributions import CDF, PDF
-from src.core.domain.distributions.density_estimation import PPF
+from src.core.domain.distributions import CDF, PDF, PPF
 
 
 # TODO: подумать, есть ли проблема что он не падает на этапе сборки если класс не соответствует контракту
