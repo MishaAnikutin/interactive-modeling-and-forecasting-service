@@ -23,7 +23,7 @@ def process_ts():
     }
 
 
-def test_qq(client):
+def test_pp(client):
     ts = process_ts()
     result = client.post(
         url='/api/v1/preliminary_diagnosis/data_representations/pp',
@@ -52,3 +52,34 @@ def test_qq(client):
     plt.grid(True, ls="--")
     plt.tight_layout()
     plt.savefig("pp_plot.png")
+
+
+def test_auto_pp(client):
+    ts = process_ts()
+    result = client.post(
+        url='/api/v1/preliminary_diagnosis/data_representations/auto_pp',
+        json={
+            "timeseries": ts,
+            "method": "parametric"
+        }
+    )
+    data = result.json()
+    assert result.status_code == 200, data
+
+    theoretical_quantiles = np.array(data["theoretical_probs"])
+    sample_sorted = np.array(data['empirical_probs'])
+
+    plt.figure(figsize=(6, 6))
+    plt.scatter(theoretical_quantiles, sample_sorted, s=12, alpha=0.8)
+    plt.plot(
+        [theoretical_quantiles.min(), theoretical_quantiles.max()],
+        [theoretical_quantiles.min(), theoretical_quantiles.max()],
+        color="red",
+        lw=2,
+    )
+    plt.xlabel("Теоретические квантили")
+    plt.ylabel("Выборочные квантили")
+    plt.title("Автоматический p–p plot")
+    plt.grid(True, ls="--")
+    plt.tight_layout()
+    plt.savefig("auto_pp_plot.png")
