@@ -23,10 +23,9 @@ class SelectDistUC:
 
         x = request.timeseries.values
         best_dist = best_dists[0].name
-        must_sort = True
 
-        best_dist_theoretical_pdf = self._dist_factory.get_pdf(x=x, distribution=best_dist, must_sort=must_sort)
-        best_dist_theoretical_cdf = self._dist_factory.get_cdf(x=x, distribution=best_dist, must_sort=must_sort)
+        best_dist_theoretical_pdf = self._dist_factory.get_pdf(x=x, distribution=best_dist)
+        best_dist_theoretical_cdf = self._dist_factory.get_cdf(x=x, distribution=best_dist)
 
         empirical_pdf = self._histogram_estimator.eval(values=x, bins=request.bins, is_density=True)
         empirical_cdf = self._empirical_dist.get_cdf(x=x)
