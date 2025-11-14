@@ -27,15 +27,9 @@ class AutoQQplotUC:
         best_dist = best_dists[0].name
         x = request.timeseries.values
 
-        best_dist_theoretical_pdf = self._dist_factory.get_pdf(
-            x=x,
-            distribution=best_dist,
-            must_sort=True
-        )
-
-        sample_sorted = sorted(x)
+        ppf = self._dist_factory.get_ppf(x=x, distribution=best_dist)
 
         return QQResult(
-            theoretical_probs=best_dist_theoretical_pdf.y,
-            empirical_probs=sample_sorted,
+            theoretical_probs=ppf.y,
+            empirical_probs=ppf.x,
         )

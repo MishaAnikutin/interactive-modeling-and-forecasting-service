@@ -18,13 +18,9 @@ class PPplotUC:
         cdf = self._dist_factory.get_cdf(
             x=request.timeseries.values,
             distribution=request.distribution,
-            must_sort=True
         )
 
-        theoretical_probs = cdf.y
-        empirical_probs = (np.arange(1, n + 1) - 0.5) / n
-
         return PPResult(
-            theoretical_probs=theoretical_probs,
-            empirical_probs=empirical_probs.tolist(),
+            theoretical_probs=cdf.y,
+            empirical_probs=(np.arange(1, n + 1) - 0.5) / n,
         )

@@ -10,17 +10,12 @@ class QQplotUC:
         self._dist_factory = dist_factory
 
     def execute(self, request: QQParams) -> QQResult:
-        pdf = self._dist_factory.get_pdf(
+        ppf = self._dist_factory.get_ppf(
             x=request.timeseries.values,
-            distribution=request.distribution,
-            must_sort=True
+            distribution=request.distribution
         )
 
-        theoretical_quantiles = pdf.y
-
-        sample_sorted = sorted(request.timeseries.values)
-
         return QQResult(
-            theoretical_probs=theoretical_quantiles,
-            empirical_probs=sample_sorted
+            theoretical_probs=ppf.y,
+            empirical_probs=ppf.x
         )

@@ -27,18 +27,12 @@ class AutoPPplotUC:
         best_dists: list[SelectDistResult] = self._select_dist.calculate(request=dist_fit_request)
         best_dist = best_dists[0].name
 
-        n = len(request.timeseries.values)
+        x = request.timeseries.values
+        n = len(x)
 
-        best_dist_theoretical_cdf = self._dist_factory.get_cdf(
-            x=request.timeseries.values,
-            distribution=best_dist,
-            must_sort=True
-        )
-
-        theoretical_probs = best_dist_theoretical_cdf.y
-        empirical_probs = (np.arange(1, n + 1) - 0.5) / n
+        cdf = self._dist_factory.get_cdf(x=x, distribution=best_dist,)
 
         return PPResult(
-            theoretical_probs=theoretical_probs,
-            empirical_probs=empirical_probs.tolist(),
+            theoretical_probs=cdf.y,
+            empirical_probs=(np.arange(1, n + 1) - 0.5) / n,
         )
