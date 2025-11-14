@@ -41,3 +41,7 @@ class PDF(BaseModel):
 class CDF(BaseModel):
     x: list[float] = Field(..., description="Сетка значений X")
     y: list[float] = Field(..., title="Список значений кумулятивной функции распределения")
+
+class PPF(BaseModel):
+    x: list[float] = Field(..., description="Сетка значений X")
+    y: list[float] = Field(..., title="Список значений поточечной обратной cdf")
