@@ -1,9 +1,12 @@
 from pydantic import Field, BaseModel
 
+from src.core.application.preliminary_diagnosis.schemas.qq import QQResult
 from src.core.domain import Timeseries
-from src.core.domain.distributions import SelectDistributionMethod
 
 
 class AutoQQRequest(BaseModel):
     timeseries: Timeseries
-    method: SelectDistributionMethod = Field(description="Метод нахождения распределения")
+
+
+class AutoQQResult(QQResult):
+    dist_name: str = Field(..., title='Название распределения, которое получено в подборе')

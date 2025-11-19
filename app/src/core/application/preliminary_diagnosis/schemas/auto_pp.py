@@ -1,9 +1,12 @@
 from pydantic import BaseModel, Field
 
+from src.core.application.preliminary_diagnosis.schemas.pp_plot import PPResult
 from src.core.domain import Timeseries
-from src.core.domain.distributions import SelectDistributionMethod
 
 
 class AutoPPRequest(BaseModel):
     timeseries: Timeseries
-    method: SelectDistributionMethod = Field(description="Метод нахождения распределения")
+
+
+class AutoPPResult(PPResult):
+    dist_name: str = Field(..., title='Название распределения, которое получено в подборе')

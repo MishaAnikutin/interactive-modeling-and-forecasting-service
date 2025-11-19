@@ -2,8 +2,8 @@ from fastapi import APIRouter
 from dishka import FromDishka
 from dishka.integrations.fastapi import inject_sync
 
-from src.core.application.preliminary_diagnosis.schemas.auto_pp import AutoPPRequest
-from src.core.application.preliminary_diagnosis.schemas.auto_qq import AutoQQRequest
+from src.core.application.preliminary_diagnosis.schemas.auto_pp import AutoPPRequest, AutoPPResult
+from src.core.application.preliminary_diagnosis.schemas.auto_qq import AutoQQRequest, AutoQQResult
 from src.core.application.preliminary_diagnosis.schemas.histogram import HistogramRequest
 from src.core.application.preliminary_diagnosis.schemas.kde import DistributionsRequest, DistributionsResult
 from src.core.application.preliminary_diagnosis.schemas.pp_plot import PPplotParams, PPResult
@@ -61,7 +61,7 @@ def get_histogram_values(
 def get_auto_qq_values(
     request: AutoQQRequest,
     auto_qq_uc: FromDishka[AutoQQplotUC]
-) -> QQResult:
+) -> AutoQQResult:
     return auto_qq_uc.execute(request=request)
 
 @data_representations_router.post(path="/auto_pp")
@@ -69,5 +69,5 @@ def get_auto_qq_values(
 def get_auto_pp_values(
     request: AutoPPRequest,
     auto_pp_uc: FromDishka[AutoPPplotUC]
-) -> PPResult:
+) -> AutoPPResult:
     return auto_pp_uc.execute(request=request)

@@ -1,5 +1,4 @@
-from src.core.application.preliminary_diagnosis.schemas.auto_qq import AutoQQRequest
-from src.core.application.preliminary_diagnosis.schemas.qq import QQResult
+from src.core.application.preliminary_diagnosis.schemas.auto_qq import AutoQQRequest, AutoQQResult
 from src.core.application.preliminary_diagnosis.schemas.select_distribution import SelectDistResult, SelectDistRequest
 from src.infrastructure.adapters.dist_fit.dist_fit import DistFit
 from src.infrastructure.factories.distributions import DistributionFactory
@@ -10,10 +9,10 @@ class AutoQQplotUC:
         self._dist_factory = dist_factory
         self._select_dist = select_dist
 
-    def execute(self, request: AutoQQRequest) -> QQResult:
+    def execute(self, request: AutoQQRequest) -> AutoQQResult:
         dist_fit_request = SelectDistRequest(
             timeseries=request.timeseries,
-            method=request.method,
+            method='parametric',
             distribution=[
                 "norm", "expon", "pareto",
                 "dweibull", "t",
@@ -29,7 +28,8 @@ class AutoQQplotUC:
 
         ppf = self._dist_factory.get_ppf(x=x, distribution=best_dist)
 
-        return QQResult(
+        return AutoQQResult(
             theoretical_probs=ppf.y,
             empirical_probs=ppf.x,
+            dist_name=best_dist,
         )

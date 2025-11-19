@@ -1,5 +1,4 @@
-from src.core.application.preliminary_diagnosis.schemas.auto_pp import AutoPPRequest
-from src.core.application.preliminary_diagnosis.schemas.pp_plot import PPResult
+from src.core.application.preliminary_diagnosis.schemas.auto_pp import AutoPPRequest, AutoPPResult
 from src.core.application.preliminary_diagnosis.schemas.select_distribution import SelectDistResult, SelectDistRequest
 from src.infrastructure.adapters.dist_fit.dist_fit import DistFit
 from src.infrastructure.factories.distributions import DistributionFactory
@@ -11,10 +10,10 @@ class AutoPPplotUC:
         self._dist_factory = dist_factory
         self._select_dist = select_dist
 
-    def execute(self, request: AutoPPRequest) -> PPResult:
+    def execute(self, request: AutoPPRequest) -> AutoPPResult:
         dist_fit_request = SelectDistRequest(
             timeseries=request.timeseries,
-            method=request.method,
+            method='parametric',
             distribution=[
                 "norm", "expon", "pareto",
                 "dweibull", "t",
@@ -32,7 +31,8 @@ class AutoPPplotUC:
 
         cdf = self._dist_factory.get_cdf(x=x, distribution=best_dist,)
 
-        return PPResult(
+        return AutoPPResult(
             theoretical_probs=cdf.y,
             empirical_probs=(np.arange(1, n + 1) - 0.5) / n,
+            dist_name=best_dist,
         )
