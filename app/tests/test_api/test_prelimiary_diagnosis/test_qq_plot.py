@@ -91,7 +91,6 @@ def test_auto_qq(client):
         url='/api/v1/preliminary_diagnosis/data_representations/auto_qq',
         json={
             "timeseries": ts,
-            "method": "parametric"
         }
     )
     data = result.json()
