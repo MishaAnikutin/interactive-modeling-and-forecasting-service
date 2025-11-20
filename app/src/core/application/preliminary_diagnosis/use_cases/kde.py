@@ -4,7 +4,7 @@ from src.core.application.preliminary_diagnosis.schemas.kde import (
     AutoEstimateDensityParams,
     DistributionsResult
 )
-from src.core.domain.distributions import Density, Histogram
+from src.core.domain.distributions import EstimateDensityResult, Histogram
 
 from src.infrastructure.adapters.distributions import DensityEstimator, HistogramEstimator
 
@@ -27,7 +27,7 @@ class EstimateDistributionsUC:
             is_density=request.histogram_params.is_density
         )
 
-        kde_results: list[Density] = []
+        estimate_density_results: list[EstimateDensityResult] = []
         for params in request.density_params:
             match params:
                 # Если автоматически получаем параметры, то оцениваем их на кросс-валидации
@@ -43,9 +43,9 @@ class EstimateDistributionsUC:
                         bandwidth=params.bandwidth
                     )
 
-            kde_results.append(density)
+            estimate_density_results.append(density)
 
         return DistributionsResult(
             histogram=histogram,
-            density=kde_results,
+            density=estimate_density_results,
         )

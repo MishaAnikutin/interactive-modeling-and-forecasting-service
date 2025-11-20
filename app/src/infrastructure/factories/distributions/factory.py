@@ -46,3 +46,16 @@ class DistributionFactory:
             return cls.registry[distribution]().get_ppf(x)
         except KeyError:
             raise NotImplementedError(f"Распределение {distribution.name} пока не реализовано")
+
+
+    @classmethod
+    def get_quantile(cls, x: list[float], q: float, distribution: Distribution) -> float:
+        x = np.array(x)
+        x = x[~np.isnan(x)]
+        x = np.sort(x)
+
+        try:
+            return cls.registry[distribution]().get_quantile(x, q)
+        except KeyError:
+            raise NotImplementedError(f"Распределение {distribution.name} пока не реализовано")
+

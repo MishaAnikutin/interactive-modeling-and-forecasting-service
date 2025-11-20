@@ -26,13 +26,6 @@ class EstimateDensity:
         cosine: str = 'cosine'
 
 
-class Density(BaseModel):
-    x: list[float] = Field(..., description="Сетка значений X")
-    y: list[float] = Field(..., title="Список значений плотности вероятности")
-    metadata: dict = Field(..., title="Метаданные функции оценки плотности распределения. "
-                                      "Если подбор параметров автоматический, то схема может поменяться")
-
-
 class PDF(BaseModel):
     x: list[float] = Field(..., description="Сетка значений X")
     y: list[float] = Field(..., title="Список значений плотности распределения вероятности")
@@ -42,6 +35,19 @@ class CDF(BaseModel):
     x: list[float] = Field(..., description="Сетка значений X")
     y: list[float] = Field(..., title="Список значений кумулятивной функции распределения")
 
+
 class PPF(BaseModel):
     x: list[float] = Field(..., description="Сетка значений X")
     y: list[float] = Field(..., title="Список значений поточечной обратной cdf")
+
+
+class DensityKernelResult(BaseModel):
+    score: float
+    bandwidth: float
+    kernel: EstimateDensity.Kernel
+    algorithm: EstimateDensity.Algorithm
+
+
+class EstimateDensityResult(BaseModel):
+    density: PDF
+    result:  DensityKernelResult

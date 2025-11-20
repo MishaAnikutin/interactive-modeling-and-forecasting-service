@@ -27,3 +27,6 @@ class SelectDistResponse(BaseModel):
 
     empirical_pdf: Histogram
     empirical_cdf: CDF
+
+    p_05: float = Field(..., title="5 персентиль")
+    p_95: float = Field(..., title="95 персентиль")

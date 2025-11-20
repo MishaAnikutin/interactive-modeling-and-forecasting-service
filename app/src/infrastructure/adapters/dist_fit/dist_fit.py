@@ -20,9 +20,13 @@ class DistFit:
             todf=True
         )
 
+        print(dmodel)
+
         dmodel.fit_transform(np.array(request.timeseries.values))
 
+        print(dmodel.summary)
         df = dmodel.summary.copy()
+
         df_ranked = df.sort_values('score', ascending=True)
         top5 = df_ranked[['name', 'score', 'loc', 'scale']].head(5)
 
