@@ -1,5 +1,7 @@
 from enum import StrEnum
 
+from pydantic import BaseModel
+
 
 class SelectDistributionStatistics(StrEnum):
     RSS: str = 'RSS'
@@ -14,3 +16,6 @@ class SelectDistributionMethod(StrEnum):
     quantile: str = 'quantile'
     percentile: str = 'percentile'
     discrete: str = 'discrete'
+
+
+

@@ -1,8 +1,8 @@
-from typing import Literal, Union, List
+from typing import Union, List
 from pydantic import BaseModel, Field
 
 from src.core.domain import Timeseries
-from src.core.domain.distributions import EstimateDensity, Histogram, Density, EstimateHistogramParams
+from src.core.domain.distributions import EstimateDensity, Histogram, EstimateHistogramParams, EstimateDensityResult
 
 
 class EstimateDensityParams(BaseModel):
@@ -44,4 +44,4 @@ class DistributionsRequest(BaseModel):
 
 class DistributionsResult(BaseModel):
     histogram: Histogram = Field(..., title="Данные гистограммы")
-    density: list[Density] = Field(..., title="Данные оценки плотности распределения")
+    density: list[EstimateDensityResult] = Field(..., title="Данные оценки плотности распределения")

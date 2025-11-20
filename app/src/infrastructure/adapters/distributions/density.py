@@ -3,11 +3,12 @@ from sklearn.model_selection import KFold, GridSearchCV
 from sklearn.neighbors import KernelDensity
 from sklearn.pipeline import Pipeline
 
-from src.core.domain.distributions import EstimateDensity, Density
+from src.core.domain.distributions import EstimateDensity
+from src.core.domain.distributions.density_estimation import EstimateDensityResult, PDF, DensityKernelResult
 
 
 class DensityEstimator:
-    def auto_eval(self, values: list[float], n_splits: int) -> Density:
+    def auto_eval(self, values: list[float], n_splits: int) -> EstimateDensityResult:
         x = np.array(values).reshape(-1, 1)
 
         estimator = Pipeline([('kde', KernelDensity())])
@@ -38,15 +39,16 @@ class DensityEstimator:
         log_densities = best_kde.score_samples(grid_points.reshape(-1, 1))
         densities = np.exp(log_densities)
 
-        return Density(
-            x=grid_points.tolist(),
-            y=densities.tolist(),
-            metadata={
-                'best_score': grid.best_score_,
-                'bandwidth': best_kde.bandwidth,
-                'kernel': best_kde.kernel,
-                'algorithm': best_kde.algorithm
-            }
+        density = PDF(x=grid_points.tolist(), y=densities.tolist())
+
+        return EstimateDensityResult(
+            density=density,
+            result=DensityKernelResult(
+                score=grid.best_score_,
+                bandwidth=best_kde.bandwidth,
+                kernel=EstimateDensity.Kernel(best_kde.kernel),
+                algorithm=EstimateDensity.Algorithm(best_kde.algorithm)
+            )
         )
 
     def eval(
@@ -55,7 +57,7 @@ class DensityEstimator:
             kernel: EstimateDensity.Kernel = EstimateDensity.Kernel.gaussian,
             algorithm: EstimateDensity.Algorithm = EstimateDensity.Algorithm.kd_tree,
             bandwidth: float | EstimateDensity.BandwidthMethods = 1.0
-    ) -> Density:
+    ) -> EstimateDensityResult:
         x = np.array(values)
         grid = self._auto_grid(x)
 
@@ -67,16 +69,20 @@ class DensityEstimator:
 
         logdens = kde.score_samples(grid.reshape(-1, 1))
         densities = np.exp(logdens)
+        score = kde.score(x.reshape(-1, 1))
 
-        return Density(
-            x=grid.tolist(),
-            y=densities.tolist(),
-            metadata={
-                'bandwidth': bandwidth,
-                'kernel': kernel,
-                'algorithm': algorithm
-            }
+        density = PDF(x=grid.tolist(), y=densities.tolist())
+
+        return EstimateDensityResult(
+            density=density,
+            result=DensityKernelResult(
+                score=score,
+                bandwidth=bandwidth,
+                kernel=EstimateDensity.Kernel(kernel),
+                algorithm=EstimateDensity.Algorithm(algorithm)
+            )
         )
+
 
     @staticmethod
     def _auto_grid(x: np.array) -> np.ndarray:

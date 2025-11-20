@@ -26,6 +26,7 @@ class DistributionServiceI(ABC):
 
         n = len(x)
         probs = (np.arange(1, n + 1) - 0.5) / n
+
         theoretical_probs = self.impl.ppf(probs, *params)
         y = theoretical_probs.tolist()
 
@@ -38,3 +39,10 @@ class DistributionServiceI(ABC):
         y = theoretical_probs.tolist()
 
         return PDF(x=x, y=y)
+
+    def get_quantile(self, x: np.array, q: float) -> float:
+        params = self.impl.fit(x)
+
+        quantile = self.impl.ppf(q, *params)
+
+        return quantile

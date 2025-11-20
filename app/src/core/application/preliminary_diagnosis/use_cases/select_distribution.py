@@ -30,7 +30,11 @@ class SelectDistUC:
         empirical_pdf = self._histogram_estimator.eval(values=x, bins=request.bins, is_density=True)
         empirical_cdf = self._empirical_dist.get_cdf(x=x)
 
+        p_05 = self._dist_factory.get_quantile(x=x, q=0.05, distribution=best_dist)
+        p_95 = self._dist_factory.get_quantile(x=x, q=0.95, distribution=best_dist)
+
         return SelectDistResponse(
+            p_05=p_05, p_95=p_95,
             best_dists=best_dists,
             best_dist_theoretical_pdf=best_dist_theoretical_pdf,
             best_dist_theoretical_cdf=best_dist_theoretical_cdf,
