@@ -32,7 +32,7 @@ class EstimateDistributionsUC:
             match params:
                 # Если автоматически получаем параметры, то оцениваем их на кросс-валидации
                 case AutoEstimateDensityParams():
-                    density = self._density_estimator.auto_eval(values=values, n_splits=params.n_splits)
+                    density = self._density_estimator.auto_eval(values=values, n_splits=params.n_splits, step=params.step)
 
                 # Иначе - по введенным
                 case _:
@@ -40,10 +40,12 @@ class EstimateDistributionsUC:
                         values=values,
                         kernel=params.kernel,
                         algorithm=params.algorithm,
-                        bandwidth=params.bandwidth
+                        bandwidth=params.bandwidth,
+                        step=params.step
                     )
 
             estimate_density_results.append(density)
+
 
         return DistributionsResult(
             histogram=histogram,

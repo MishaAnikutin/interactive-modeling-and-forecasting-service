@@ -1,4 +1,4 @@
-from typing import Union, List
+from typing import Union, List, Literal
 from pydantic import BaseModel, Field
 
 from src.core.domain import Timeseries
@@ -26,6 +26,11 @@ class EstimateDensityParams(BaseModel):
         default=EstimateDensity.Algorithm.kd_tree
     )
 
+    step: Union[Literal['auto'], int] = Field(
+        default='auto',
+        title='Количество шагов по оси X при расчете плотности'
+    )
+
 
 # FIXME: Тут нехватает доменного анализа
 class AutoEstimateDensityParams(BaseModel):
@@ -34,6 +39,10 @@ class AutoEstimateDensityParams(BaseModel):
     # FIXME: например, тут можно было бы выбрать метод кросс-валидации. Не только KFold,
     #  а например ShuffleSplit, RepeatedKFold, RollingWindow, ExplainedWindow ...
     n_splits: int = Field(title='Число делений выборки на кросс-валидации', gt=0, le=1000, default=5)
+    step: Union[Literal['auto'], int] = Field(
+        default='auto',
+        title='Количество шагов по оси X при расчете плотности'
+    )
 
 
 class DistributionsRequest(BaseModel):

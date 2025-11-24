@@ -1,3 +1,5 @@
+from typing import Literal
+
 import numpy as np
 from sklearn.model_selection import KFold, GridSearchCV
 from sklearn.neighbors import KernelDensity
@@ -8,7 +10,12 @@ from src.core.domain.distributions.density_estimation import EstimateDensityResu
 
 
 class DensityEstimator:
-    def auto_eval(self, values: list[float], n_splits: int) -> EstimateDensityResult:
+    def auto_eval(
+            self,
+            values: list[float],
+            n_splits: int,
+            step: Literal['auto'] | int,
+    ) -> EstimateDensityResult:
         x = np.array(values).reshape(-1, 1)
 
         estimator = Pipeline([('kde', KernelDensity())])
@@ -35,7 +42,7 @@ class DensityEstimator:
         grid.fit(x)
 
         best_kde = grid.best_estimator_.named_steps['kde']
-        grid_points = self._auto_grid(values)
+        grid_points = self._auto_grid(x, step)
         log_densities = best_kde.score_samples(grid_points.reshape(-1, 1))
         densities = np.exp(log_densities)
 
@@ -54,12 +61,13 @@ class DensityEstimator:
     def eval(
             self,
             values: list[float],
+            step: Literal['auto'] | int,
             kernel: EstimateDensity.Kernel = EstimateDensity.Kernel.gaussian,
             algorithm: EstimateDensity.Algorithm = EstimateDensity.Algorithm.kd_tree,
-            bandwidth: float | EstimateDensity.BandwidthMethods = 1.0
+            bandwidth: float | EstimateDensity.BandwidthMethods = 1.0,
     ) -> EstimateDensityResult:
         x = np.array(values)
-        grid = self._auto_grid(x)
+        grid = self._auto_grid(x, step)
 
         if not isinstance(bandwidth, float):
             bandwidth = bandwidth.value
@@ -85,7 +93,10 @@ class DensityEstimator:
 
 
     @staticmethod
-    def _auto_grid(x: np.array) -> np.ndarray:
+    def _auto_grid(x: np.array, step: int | Literal['auto']) -> np.ndarray:
+        if step != 'auto':
+            return np.linspace(x.min() - 1.0, x.max() + 1.0, step)
+
         n = max(len(x), 10)
         num_points = int(np.clip(np.sqrt(n) * 50, 200, 2000))
 
