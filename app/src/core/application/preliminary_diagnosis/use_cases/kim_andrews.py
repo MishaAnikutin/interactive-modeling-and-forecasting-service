@@ -13,5 +13,5 @@ class KimAndrewsUC:
         self._kim_andrews_adapter = kim_andrews_adapter
 
     def execute(self, request: KimAndrewsRequest) -> KimAndrewsResult:
-        result = self._kim_andrews_adapter.run(request.ts, request.n, request.m, request.shift, False, False)
+        result = self._kim_andrews_adapter.run(request.ts, request.n, request.m, request.shift, request.trend, request.const)
         return result

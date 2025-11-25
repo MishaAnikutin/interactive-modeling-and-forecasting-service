@@ -291,23 +291,23 @@ class KimAndrewsAdapter:
         results = andrews_eos_test(formula, df, m)
         return KimAndrewsResult(
             Sa_values=ResultValues(
-                p_value=results.pval["Sa"],
-                stat_value=results.stats["Sa"],
+                p_value=round(results.pval["Sa"], 4),
+                stat_value=round(results.stats["Sa"]),
             ),
             Sb_values=ResultValues(
-                p_value=results.pval["Sb"],
-                stat_value=results.stats["Sb"],
+                p_value=round(results.pval["Sb"], 4),
+                stat_value=round(results.stats["Sb"], 4),
             ),
             Sc_values=ResultValues(
-                p_value=results.pval["Sc"],
-                stat_value=results.stats["Sc"],
+                p_value=round(results.pval["Sc"], 4),
+                stat_value=round(results.stats["Sc"], 4),
             ),
             Sd_values=ResultValues(
-                p_value=results.pval["Sd"],
-                stat_value=results.stats["Sd"],
+                p_value=round(results.pval["Sd"], 4),
+                stat_value=round(results.stats["Sd"], 4),
             ),
             R_values=ResultValues(
-                p_value=results.pval["R"],
-                stat_value=results.stats["R"],
+                p_value=round(results.pval["R"], 4),
+                stat_value=round(results.stats["R"], 4),
             ),
         )

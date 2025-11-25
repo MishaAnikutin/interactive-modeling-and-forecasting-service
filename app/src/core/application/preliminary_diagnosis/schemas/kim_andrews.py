@@ -4,9 +4,9 @@ from src.core.application.preliminary_diagnosis.schemas.common import StatTestPa
 
 
 class KimAndrewsRequest(StatTestParams):
-    n: int = Field(default=1, title="Размер выборки до сдвига", ge=1, le=100000)
-    m: int = Field(default=1, title="Длина хвоста выборки (после сдвига), Разумные значения не превышают 10.", ge=1, le=100)
-    shift: int = Field(default=1, title="Параметр сдвига ряда", ge=1, le=100000)
+    n: int = Field(default=30, title="Размер выборки до сдвига", ge=1, le=100000)
+    m: int = Field(default=10, title="Длина хвоста выборки (после сдвига), Разумные значения не превышают 10.", ge=1, le=100)
+    shift: int = Field(default=1, title="Параметр сдвига ряда", ge=0, le=100000)
     trend: bool = Field(default=False, title="Добавить трендовую компоненту в OLS")
     const: bool = Field(default=True, title="Добавить константу в OLS")
 
