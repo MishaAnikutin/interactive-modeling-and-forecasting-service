@@ -4,6 +4,7 @@ from dishka.integrations.fastapi import inject_sync
 
 from src.core.application.preliminary_diagnosis.schemas.auto_pp import AutoPPRequest, AutoPPResult
 from src.core.application.preliminary_diagnosis.schemas.auto_qq import AutoQQRequest, AutoQQResult
+from src.core.application.preliminary_diagnosis.schemas.fao import FaoResult, FaoRequest
 from src.core.application.preliminary_diagnosis.schemas.histogram import HistogramRequest
 from src.core.application.preliminary_diagnosis.schemas.kde import DistributionsRequest, DistributionsResult
 from src.core.application.preliminary_diagnosis.schemas.pp_plot import PPplotParams, PPResult
@@ -11,6 +12,7 @@ from src.core.application.preliminary_diagnosis.schemas.qq import QQResult, QQPa
 
 from src.core.application.preliminary_diagnosis.use_cases.auto_pp import AutoPPplotUC
 from src.core.application.preliminary_diagnosis.use_cases.auto_qq import AutoQQplotUC
+from src.core.application.preliminary_diagnosis.use_cases.fao import FaoUC
 from src.core.application.preliminary_diagnosis.use_cases.histogram import HistogramUC
 from src.core.application.preliminary_diagnosis.use_cases.kde import EstimateDistributionsUC
 from src.core.application.preliminary_diagnosis.use_cases.pp_plot import PPplotUC
@@ -71,3 +73,11 @@ def get_auto_pp_values(
     auto_pp_uc: FromDishka[AutoPPplotUC]
 ) -> AutoPPResult:
     return auto_pp_uc.execute(request=request)
+
+# @data_representations_router.post(path="/fao")
+# @inject_sync
+# def get_fao_values(
+#     request: FaoRequest,
+#     fao_uc: FromDishka[FaoUC]
+# ) -> FaoResult:
+#     return fao_uc.execute(request=request)

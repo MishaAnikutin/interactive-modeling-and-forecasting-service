@@ -6,6 +6,7 @@ from .autocorrelation_diagnosis import autocorrelation_diagnosis_router
 from .descriptive_statistics import descriptive_statistics_router
 from .selection_of_distribution import selection_of_distribution_router
 from .correlation_analysis import correlation_analysis_router
+from .structure_shift_diagnosis import structure_shift_diagnosis_router
 
 preliminary_diagnosis_router = APIRouter(prefix='/preliminary_diagnosis', tags=['Предварительная диагностика'])
 
@@ -15,3 +16,4 @@ preliminary_diagnosis_router.include_router(descriptive_statistics_router)
 preliminary_diagnosis_router.include_router(data_representations_router)
 preliminary_diagnosis_router.include_router(selection_of_distribution_router)
 preliminary_diagnosis_router.include_router(correlation_analysis_router)
+preliminary_diagnosis_router.include_router(structure_shift_diagnosis_router)

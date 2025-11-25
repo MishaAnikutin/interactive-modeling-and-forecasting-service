@@ -19,8 +19,10 @@ from src.core.application.preliminary_diagnosis.use_cases.auto_qq import AutoQQp
 from src.core.application.preliminary_diagnosis.use_cases.corr import CorrelationMatrixUC
 from src.core.application.preliminary_diagnosis.use_cases.df_gls import DfGlsUC
 from src.core.application.preliminary_diagnosis.use_cases.dicker_fuller import DickeuFullerUC
+from src.core.application.preliminary_diagnosis.use_cases.fao import FaoUC
 from src.core.application.preliminary_diagnosis.use_cases.histogram import HistogramUC
 from src.core.application.preliminary_diagnosis.use_cases.kde import EstimateDistributionsUC
+from src.core.application.preliminary_diagnosis.use_cases.kim_andrews import KimAndrewsUC
 from src.core.application.preliminary_diagnosis.use_cases.kpss import KpssUC
 from src.core.application.preliminary_diagnosis.use_cases.phillips_perron import PhillipsPerronUC
 from src.core.application.preliminary_diagnosis.use_cases.pp_plot import PPplotUC
@@ -80,6 +82,9 @@ class CoreProvider(Provider):
     breusch_godfrey_command = provide(AcorrBreuschGodfreyUC, provides=AcorrBreuschGodfreyUC)
     acf_pacf_command = provide(AcfAndPacfUC, provides=AcfAndPacfUC)
 
+    # Анализ структурного сдвига
+    kim_andrews_command = provide(KimAndrewsUC, provides=KimAndrewsUC)
+
     # Команды для описательной статистики
     quantiles_command = provide(QuantilesUC, provides=QuantilesUC)
     statistics_command = provide(StatisticsUC, provides=StatisticsUC)
@@ -99,3 +104,6 @@ class CoreProvider(Provider):
 
     # Корреляция
     corr_command = provide(CorrelationMatrixUC, provides=CorrelationMatrixUC)
+
+    # fao процедура
+    fao_command = provide(FaoUC, provides=FaoUC)

@@ -1,6 +1,7 @@
 from dishka import Provider, Scope, provide
 
 from src.infrastructure.adapters.distributions import HistogramEstimator, DensityEstimator, EmpiricalDistribution
+from src.infrastructure.adapters.preliminary_diagnosis.kim_andrews import KimAndrewsAdapter
 from src.infrastructure.factories.distributions import DistributionFactory
 from src.infrastructure.factories.metrics import MetricsFactory
 
@@ -70,3 +71,5 @@ class InfraProvider(Provider):
     validation_factory = provide(ValidationVisitor, provides=ValidationVisitor)
 
     correlation_interactor = provide(CorrelationInteractor, provides=CorrelationInteractor)
+
+    kim_andrews_adapter = provide(KimAndrewsAdapter, provides=KimAndrewsAdapter)

@@ -26,7 +26,7 @@ class LagTransformation(Transformation):
     type: Literal["lag"] = "lag"
     lag_order: int = Field(
         title="Периоды сдвига для вычисления лага (допустимы отрицательные значения)",
-        description="- число наблюдений <= diff_order <= число наблюдений",
+        description="- число наблюдений <= lag_order <= число наблюдений",
         default=1
     )
 

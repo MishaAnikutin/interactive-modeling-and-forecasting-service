@@ -25,7 +25,8 @@ class StatTestParams(BaseModel):
         description="Временной ряд для анализа",
     )
 
-class StatTestResult(BaseModel):
+
+class ResultValues(BaseModel):
     p_value: Optional[float] = Field(
         default=0.05,
         title="p-value теста",
@@ -35,6 +36,9 @@ class StatTestResult(BaseModel):
         title="Значение статистики теста",
         description="Значение статистики теста"
     )
+
+
+class StatTestResult(ResultValues):
     critical_values: CriticalValues = Field(
         title="Критические значения для разных уровней значимости",
         description="Критические значения для разных уровней значимости",
