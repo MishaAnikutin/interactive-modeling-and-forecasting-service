@@ -32,6 +32,7 @@ class NhitsAdapter(NeuralForecastInterface[NhitsParams]):
             hist_exog_list=[exog_col for exog_col in exog.columns] if exog is not None else None,
             accelerator='cpu',
             h=h,
+            devices=1,
             **hyperparameters
         )
         return model

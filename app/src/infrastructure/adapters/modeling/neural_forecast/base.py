@@ -54,6 +54,7 @@ class NeuralForecastInterface(Generic[TParams], MlAdapterInterface, ABC):
             hist_exog_list=[exog_col for exog_col in exog.columns] if exog is not None else None,
             accelerator='cpu',
             h=h,
+            devices=1,
             **hyperparameters.model_dump()
         )
         return model
