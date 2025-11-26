@@ -38,7 +38,6 @@ class NhitsPydanticValidationError(BaseModel):
         default=ListLengthError()
     )
 
-# валидация в процессе обучения
 
 class HorizonValidationError(BaseModel):
     type: Literal["horizon"] = "horizon"
@@ -51,12 +50,25 @@ class HorizonValidationError(BaseModel):
 class ValSizeError(BaseModel):
     type: Literal["val_size"] = "val_size"
     detail: str = Field(
-        default=(
-            "Размер валидационной выборки должен быть 0 или "
-            "больше или равен величины горизонт прогнозирования + размер тестовой выборки"
-        ),
-        title="Описание ошибки"
+        default=f"Недостаточный объем валидационной выборки для заданной схемы разбиения временного ряда. "
+                f"При текущих параметрах: val_size=, test_size=, h= (горизонт прогноза). "
+                f"Минимально допустимый размер валидационной выборки должен удовлетворять условию: val_size >= (h + test_size) "
+                f"или val_size = 0",
+        title="Описание ошибки валидационной выборки"
     )
+
+    def __init__(self, val_size: int, test_size: int, h: int, **data):
+        if val_size == 0:
+            detail_msg = "Размер валидационной выборки не может быть равен 0 при данных параметрах"
+        else:
+            detail_msg = (
+                f"Недостаточный объем валидационной выборки для заданной схемы разбиения временного ряда. "
+                f"При текущих параметрах: val_size={val_size}, test_size={test_size}, h={h - test_size} (горизонт прогноза). "
+                f"Минимально допустимый размер валидационной выборки должен удовлетворять условию: val_size >= {h} (h + test_size) "
+                f"или val_size = 0."
+            )
+
+        super().__init__(detail=detail_msg, **data)
 
 
 class PatienceStepsError(BaseModel):

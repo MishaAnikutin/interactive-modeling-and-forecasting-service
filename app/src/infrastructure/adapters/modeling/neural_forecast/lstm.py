@@ -29,29 +29,36 @@ class LstmAdapter(NeuralForecastInterface[LstmParams]):
                 status_code=400,
             )
 
-        if val_size != 0 and val_size < h:
-            raise HTTPException(
-                detail=ValSizeError().detail,
-                status_code=400,
-            )
-
         if val_size == 0 and hyperparameters.early_stop_patience_steps > 0:
             raise HTTPException(
                 detail=PatienceStepsError().detail,
                 status_code=400,
             )
 
+        if val_size != 0 and val_size < h:
+            raise HTTPException(
+                detail=ValSizeError(val_size=val_size, test_size=test_size, h=h).detail,
+                status_code=400,
+            )
+
         if hyperparameters.input_size + h > train_size:
             raise HTTPException(
                 status_code=400,
-                detail=LstmTrainSizeError().detail
+                detail=LstmTrainSizeError(
+                    input_size=hyperparameters.input_size,
+                    train_size=train_size, h=h, test_size=test_size
+                ).detail
             )
 
         if hyperparameters.recurrent and hyperparameters.input_size + hyperparameters.h_train + test_size > \
                 train_size:
             raise HTTPException(
                 status_code=400,
-                detail=LstmTrainSizeError2().detail
+                detail=LstmTrainSizeError2(
+                    input_size=hyperparameters.input_size,
+                    h_train=hyperparameters.h_train,
+                    test_size=test_size, train_size=train_size
+                ).detail
             )
 
         return None

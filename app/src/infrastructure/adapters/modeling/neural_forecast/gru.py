@@ -44,7 +44,10 @@ class GruAdapter(NeuralForecastInterface[GruParams]):
         if hyperparameters.input_size + h > train_size:
             raise HTTPException(
                 status_code=400,
-                detail=LstmTrainSizeError().detail
+                detail=LstmTrainSizeError(
+                    input_size=hyperparameters.input_size,
+                    train_size=train_size, h=h, test_size=test_size
+                ).detail
             )
 
         if hyperparameters.recurrent and hyperparameters.input_size + hyperparameters.h_train + test_size > \

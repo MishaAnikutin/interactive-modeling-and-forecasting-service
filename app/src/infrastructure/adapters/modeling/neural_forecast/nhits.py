@@ -47,7 +47,11 @@ class NhitsAdapter(NeuralForecastInterface[NhitsParams]):
 
         if val_size != 0 and val_size < h:
             raise HTTPException(
-                detail=ValSizeError().detail,
+                detail=ValSizeError(
+                    val_size=val_size,
+                    test_size=test_size,
+                    h=h
+                ).detail,
                 status_code=400,
             )
 

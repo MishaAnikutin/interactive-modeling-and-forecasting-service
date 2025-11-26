@@ -41,18 +41,45 @@ class LstmTrainSizeError(BaseModel):
     type: Literal["train_size"] = "train_size"
     detail: str = Field(
         default=(
-            "input_size + h + размер тестовой выборки должно быть <= размер обучающей выборки"
+            f"Недостаточный размер обучающей выборки для LSTM / GRU модели. "
+            f"Получено: train_size=, input_size=, h=, test_size=. "
+            f"Требуется: train_size >= (input_size + h + test_size)"
         ),
-        title="Описание ошибки"
+        title="Описание ошибки обучающей выборки"
     )
+
+    def __init__(self, input_size: int, h: int, test_size: int, train_size: int, **data):
+        required_min = input_size + h
+
+        detail_msg = (
+            f"Недостаточный размер обучающей выборки для LSTM / GRU модели. "
+            f"Получено: train_size={train_size}, input_size={input_size}, h={h}, test_size={test_size}. "
+            f"Требуется: train_size >= {required_min} (input_size + h + test_size) "
+        )
+
+        super().__init__(detail=detail_msg, **data)
 
 class LstmTrainSizeError2(BaseModel):
     type: Literal["train_size_2"] = "train_size_2"
     detail: str = Field(
         default=(
-            "input_size + h_train + размер тестовой выборки должно быть <= размер обучающей выборки"
-        )
+            f"Недостаточный размер обучающей выборки для LSTM / GRU модели. "
+            f"Получено: train_size=, input_size=, h_train=, test_size=. "
+            f"Требуется: train_size >= (input_size + h_train + test_size)"
+        ),
+        title="Описание ошибки обучающей выборки"
     )
+
+    def __init__(self, input_size: int, h_train: int, test_size: int, train_size: int, **data):
+        required_min = input_size + h_train + test_size
+
+        detail_msg = (
+            f"Недостаточный размер обучающей выборки для LSTM / GRU модели. "
+            f"Получено: train_size={train_size}, input_size={input_size}, h_train={h_train}, test_size={test_size}. "
+            f"Требуется: train_size >= {required_min} (input_size + h_train + test_size) "
+        )
+
+        super().__init__(detail=detail_msg, **data)
 
 FitValidationErrorType = Annotated[
     Union[
