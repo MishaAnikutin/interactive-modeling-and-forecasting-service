@@ -1,6 +1,7 @@
 from dishka import Provider, Scope, provide
 
 from src.infrastructure.adapters.distributions import HistogramEstimator, DensityEstimator, EmpiricalDistribution
+from src.infrastructure.adapters.preliminary_diagnosis.FAO import FaoAdapter
 from src.infrastructure.adapters.preliminary_diagnosis.kim_andrews import KimAndrewsAdapter
 from src.infrastructure.factories.distributions import DistributionFactory
 from src.infrastructure.factories.metrics import MetricsFactory
@@ -73,3 +74,5 @@ class InfraProvider(Provider):
     correlation_interactor = provide(CorrelationInteractor, provides=CorrelationInteractor)
 
     kim_andrews_adapter = provide(KimAndrewsAdapter, provides=KimAndrewsAdapter)
+
+    fao_adapter = provide(FaoAdapter, provides=FaoAdapter)

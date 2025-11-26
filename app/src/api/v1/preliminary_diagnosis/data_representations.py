@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from dishka import FromDishka
 from dishka.integrations.fastapi import inject_sync
 
+from src.core.application.preliminary_diagnosis.errors.fao import FaoValidationError
 from src.core.application.preliminary_diagnosis.schemas.auto_pp import AutoPPRequest, AutoPPResult
 from src.core.application.preliminary_diagnosis.schemas.auto_qq import AutoQQRequest, AutoQQResult
 from src.core.application.preliminary_diagnosis.schemas.fao import FaoResult, FaoRequest
@@ -74,10 +75,22 @@ def get_auto_pp_values(
 ) -> AutoPPResult:
     return auto_pp_uc.execute(request=request)
 
-# @data_representations_router.post(path="/fao")
-# @inject_sync
-# def get_fao_values(
-#     request: FaoRequest,
-#     fao_uc: FromDishka[FaoUC]
-# ) -> FaoResult:
-#     return fao_uc.execute(request=request)
+@data_representations_router.post(
+    path="/fao",
+    responses={
+        200: {
+            "model": FaoResult,
+            "description": "Успешный ответ",
+        },
+        400: {
+            "model": FaoValidationError,
+            "description": "Ошибка валидации параметров"
+        }
+    }
+)
+@inject_sync
+def get_fao_values(
+    request: FaoRequest,
+    fao_uc: FromDishka[FaoUC]
+) -> FaoResult:
+    return fao_uc.execute(request=request)
