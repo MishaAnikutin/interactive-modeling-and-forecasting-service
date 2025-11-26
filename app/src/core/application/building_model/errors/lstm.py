@@ -53,7 +53,7 @@ class LstmTrainSizeError(BaseModel):
 
         detail_msg = (
             f"Недостаточный размер обучающей выборки для LSTM / GRU модели. "
-            f"Получено: train_size={train_size}, input_size={input_size}, h={h}, test_size={test_size}. "
+            f"Получено: train_size={train_size}, input_size={input_size}, h={h} (горизонт прогноза), test_size={test_size}. "
             f"Требуется: train_size >= {required_min} (input_size + h + test_size) "
         )
 

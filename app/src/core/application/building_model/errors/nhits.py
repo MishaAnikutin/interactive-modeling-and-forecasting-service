@@ -42,7 +42,7 @@ class NhitsPydanticValidationError(BaseModel):
 class HorizonValidationError(BaseModel):
     type: Literal["horizon"] = "horizon"
     detail: str = Field(
-        default="Горизонт прогноза + размер тестовой выборки должен быть больше 0",
+        default="Горизонт прогноза (h) + размер тестовой выборки (test_size) должен быть больше 0. ",
         title="Описание ошибки"
     )
 
@@ -64,7 +64,8 @@ class ValSizeError(BaseModel):
             detail_msg = (
                 f"Недостаточный объем валидационной выборки для заданной схемы разбиения временного ряда. "
                 f"При текущих параметрах: val_size={val_size}, test_size={test_size}, h={h - test_size} (горизонт прогноза). "
-                f"Минимально допустимый размер валидационной выборки должен удовлетворять условию: val_size >= {h} (h + test_size) "
+                f"Минимально допустимый размер валидационной выборки должен удовлетворять условию: "
+                f"val_size >= {h} (h + test_size) "
                 f"или val_size = 0."
             )
 
@@ -86,10 +87,25 @@ class TrainSizeError(BaseModel):
     type: Literal["train"] = "train_size"
     detail: str = Field(
         default=(
-            "4 * (h + размер тестовой выборки) должно быть <= размер обучающей выборки"
+            f"Недостаточный объем обучающей выборки для заданной схемы разбиения временного ряда. "
+            f"При текущих параметрах: train_size=, h= (горизонт прогноза), test_size=. "
+            f"Минимально допустимый размер обучающей выборки должен удовлетворять условию: "
+            f"train_size >= (4 × (h + test_size))"
         ),
-        title="Описание ошибки"
+        title="Описание ошибки обучающей выборки"
     )
+
+    def __init__(self, h: int, test_size: int, train_size: int, **data):
+        required_min = 4 * h
+
+        detail_msg = (
+            f"Недостаточный объем обучающей выборки для заданной схемы разбиения временного ряда. "
+            f"При текущих параметрах: train_size={train_size}, h={h - test_size} (горизонт прогноза), test_size={test_size}. "
+            f"Минимально допустимый размер обучающей выборки должен удовлетворять условию: "
+            f"train_size >= {required_min} (4 × (h + test_size))"
+        )
+
+        super().__init__(detail=detail_msg, **data)
 
 
 FitValidationErrorType = Annotated[

@@ -64,7 +64,7 @@ class NhitsAdapter(NeuralForecastInterface[NhitsParams]):
         if 4 * h > train_size:
             raise HTTPException(
                 status_code=400,
-                detail=TrainSizeError().detail
+                detail=TrainSizeError(train_size=train_size, h=h, test_size=test_size).detail
             )
 
         return None
