@@ -25,13 +25,17 @@ class GruAdapter(NeuralForecastInterface[GruParams]):
     def _validate_params(train_size, val_size, test_size, h, hyperparameters) -> None:
         if h == 0:
             raise HTTPException(
-                detail=HorizonValidationError().detail,
+                detail=HorizonValidationError(h=h-test_size, test_size=test_size).detail,
                 status_code=400,
             )
 
         if val_size != 0 and val_size < h:
             raise HTTPException(
-                detail=ValSizeError().detail,
+                detail=ValSizeError(
+                    val_size=val_size,
+                    test_size=test_size,
+                    h=h
+                ).detail,
                 status_code=400,
             )
 
@@ -54,7 +58,11 @@ class GruAdapter(NeuralForecastInterface[GruParams]):
                 train_size:
             raise HTTPException(
                 status_code=400,
-                detail=LstmTrainSizeError2().detail
+                detail=LstmTrainSizeError2(
+                    input_size=hyperparameters.input_size,
+                    h_train=hyperparameters.h_train,
+                    test_size=test_size, train_size=train_size
+                ).detail
             )
 
         return None

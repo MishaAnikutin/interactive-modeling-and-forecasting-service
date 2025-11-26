@@ -42,9 +42,22 @@ class NhitsPydanticValidationError(BaseModel):
 class HorizonValidationError(BaseModel):
     type: Literal["horizon"] = "horizon"
     detail: str = Field(
-        default="Горизонт прогноза (h) + размер тестовой выборки (test_size) должен быть больше 0. ",
-        title="Описание ошибки"
+        default=(
+            f"Некорректные параметры горизонта прогнозирования и тестовой выборки. "
+            f"Получено: h= (горизонт прогноза), test_size=. "
+            f"Требуется: h + test_size > 0 (оба параметра не могут быть равны 0 одновременно)"
+        ),
+        title="Описание ошибки горизонта прогнозирования"
     )
+
+    def __init__(self, h: int, test_size: int, **data):
+        detail_msg = (
+            f"Некорректные параметры горизонта прогнозирования и тестовой выборки. "
+            f"Получено: h={h} (горизонт прогноза), test_size={test_size} (размер тестовой выборки). "
+            f"Требуется: h + test_size > 0 (оба параметра не могут быть равны 0 одновременно)"
+        )
+
+        super().__init__(detail=detail_msg, **data)
 
 
 class ValSizeError(BaseModel):
@@ -127,5 +140,5 @@ FitValidationErrorType = Annotated[
 class NhitsFitValidationError(BaseModel):
     msg: FitValidationErrorType = Field(
         title="Описание ошибки",
-        default=HorizonValidationError()
+        default=PatienceStepsError()
     )

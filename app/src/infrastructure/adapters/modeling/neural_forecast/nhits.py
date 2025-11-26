@@ -41,7 +41,7 @@ class NhitsAdapter(NeuralForecastInterface[NhitsParams]):
     def _validate_params(train_size, val_size, test_size, h, hyperparameters) -> None:
         if h == 0:
             raise HTTPException(
-                detail=HorizonValidationError().detail,
+                detail=HorizonValidationError(h=h-test_size, test_size=test_size).detail,
                 status_code=400,
             )
 

@@ -101,5 +101,5 @@ FitValidationErrorType = Annotated[
 class LstmFitValidationError(BaseModel):
     msg: FitValidationErrorType = Field(
         title="Описание ошибки",
-        default=HorizonValidationError()
+        default=PatienceStepsError()
     )
