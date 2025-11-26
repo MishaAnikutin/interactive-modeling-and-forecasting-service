@@ -6,7 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-from src.infrastructure.adapters.preliminary_diagnosis.FAO import proc_res
+from src.infrastructure.adapters.preliminary_diagnosis.fao import proc_res
 
 
 def gen_dates(num: int) -> list[date]:

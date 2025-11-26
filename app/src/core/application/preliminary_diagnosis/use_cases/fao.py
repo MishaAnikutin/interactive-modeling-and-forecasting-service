@@ -3,7 +3,7 @@ from fastapi import HTTPException
 from src.core.application.preliminary_diagnosis.errors.fao import InvalidFreq, SmallSizeError
 from src.core.application.preliminary_diagnosis.schemas.fao import FaoRequest, FaoResult
 from src.core.domain import DataFrequency
-from src.infrastructure.adapters.preliminary_diagnosis.FAO import FaoAdapter
+from src.infrastructure.adapters.preliminary_diagnosis.fao import FaoAdapter
 from src.infrastructure.adapters.timeseries import PandasTimeseriesAdapter, FrequencyDeterminer
 
 
