@@ -26,8 +26,13 @@ class ArimaxFitRequest(BaseModel):
         start_date = min(self.model_data.dependent_variables.dates)
         end_date = max(self.model_data.dependent_variables.dates)
 
-        if not (end_date > self.fit_params.val_boundary > self.fit_params.train_boundary > start_date):
-            raise ValueError('Границы выборок должны быть внутри датасета')
+        if not (end_date >= self.fit_params.val_boundary >= self.fit_params.train_boundary > start_date):
+            raise ValueError('Границы выборок должны быть внутри датасета, '
+                             f'сейчас: '
+                             f'end_date={end_date}, '
+                             f'val_boundary={self.fit_params.val_boundary}, '
+                             f'train_boundary={self.fit_params.train_boundary}, '
+                             f'start_date={start_date}')
 
         return self
 

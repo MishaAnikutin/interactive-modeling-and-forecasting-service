@@ -73,8 +73,8 @@ class ArimaxAdapter(MlAdapterInterface):
         train_predict = results.get_prediction().predicted_mean
 
         # 3.2 Прогноз для валидации с использованием фактических лагов
-        val_predict = None
-        if val_target is not None:
+        val_predict = pd.Series()
+        if val_target.empty is False:
             # Объединяем train + val
             full_val_target = pd.concat([train_target, val_target])
             full_val_exog = pd.concat([exog_train, exog_val]) if exog is not None else None
@@ -88,8 +88,8 @@ class ArimaxAdapter(MlAdapterInterface):
             ).predicted_mean
 
         # 3.3 Прогноз для теста с использованием фактических лагов
-        test_predict = None
-        if test_target is not None:
+        test_predict = pd.Series()
+        if test_target.empty is False:
             # Объединяем train + val (если есть) + test
             full_test_target = train_target
             full_test_exog = exog_train if exog is not None else None
@@ -110,7 +110,6 @@ class ArimaxAdapter(MlAdapterInterface):
             ).predicted_mean
 
         # 3.4 Out-of-sample прогноз (рекурсивный)
-        forecast = pd.Series()
         if exog is None:  # Eсли нет экзогенных переменных
             forecast = test_model.get_forecast(
                 steps=fit_params.forecast_horizon

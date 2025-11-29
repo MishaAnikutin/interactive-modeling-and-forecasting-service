@@ -11,5 +11,6 @@ class FitParams(BaseModel):
     @model_validator(mode='after')
     def validate_train_val(self):
         if self.val_boundary < self.train_boundary:
-            raise ValueError("train_boundary должна быть раньше val_boundary")
+            raise ValueError("train_boundary должна быть раньше val_boundary. "
+                             "Равенство границ означает пустоту валидационной выборки")
         return self
