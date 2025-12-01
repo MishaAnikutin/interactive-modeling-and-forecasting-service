@@ -3,6 +3,9 @@ from dishka import Provider, Scope, provide
 from src.infrastructure.adapters.distributions import HistogramEstimator, DensityEstimator, EmpiricalDistribution
 from src.infrastructure.adapters.preliminary_diagnosis.fao import FaoAdapter
 from src.infrastructure.adapters.preliminary_diagnosis.kim_andrews import KimAndrewsAdapter
+from src.infrastructure.adapters.stat_tests.fisher import FisherTestAdapter
+from src.infrastructure.adapters.stat_tests.student import StudentTestAdapter
+from src.infrastructure.adapters.stat_tests.two_sigma import TwoSigmaTestAdapter
 from src.infrastructure.factories.distributions import DistributionFactory
 from src.infrastructure.factories.metrics import MetricsFactory
 
@@ -76,3 +79,8 @@ class InfraProvider(Provider):
     kim_andrews_adapter = provide(KimAndrewsAdapter, provides=KimAndrewsAdapter)
 
     fao_adapter = provide(FaoAdapter, provides=FaoAdapter)
+
+    student_adapter = provide(StudentTestAdapter, provides=StudentTestAdapter)
+    fisher_adapter = provide(FisherTestAdapter, provides=FisherTestAdapter)
+    two_sigma_adapter = provide(TwoSigmaTestAdapter, provides=TwoSigmaTestAdapter)
+

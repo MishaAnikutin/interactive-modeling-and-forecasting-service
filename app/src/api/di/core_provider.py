@@ -29,6 +29,9 @@ from src.core.application.preliminary_diagnosis.use_cases.pp_plot import PPplotU
 from src.core.application.preliminary_diagnosis.use_cases.qq import QQplotUC
 from src.core.application.preliminary_diagnosis.use_cases.quantiles import QuantilesUC
 from src.core.application.preliminary_diagnosis.use_cases.range_uc import RangeUnitRootUC
+from src.core.application.preliminary_diagnosis.use_cases.student_test import StudentTestUC
+from src.core.application.preliminary_diagnosis.use_cases.fisher_test import FisherTestUC
+from src.core.application.preliminary_diagnosis.use_cases.two_sigma_test import TwoSigmaTestUC
 from src.core.application.preliminary_diagnosis.use_cases.statistics import StatisticsUC
 from src.core.application.preliminary_diagnosis.use_cases.zivot_andrews import ZivotAndrewsUC
 from src.core.application.preprocessing.preprocessing_uc import PreprocessUC
@@ -107,3 +110,8 @@ class CoreProvider(Provider):
 
     # fao процедура
     fao_command = provide(FaoUC, provides=FaoUC)
+
+    # Тест Стьюдента
+    student_test_command = provide(StudentTestUC, provides=StudentTestUC)
+    fisher_test_command = provide(FisherTestUC, provides=FisherTestUC)
+    two_sigma_test_command = provide(TwoSigmaTestUC, provides=TwoSigmaTestUC)
