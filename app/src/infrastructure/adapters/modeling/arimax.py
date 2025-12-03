@@ -74,7 +74,8 @@ class ArimaxAdapter(MlAdapterInterface):
 
         # 3.2 Прогноз для валидации с использованием фактических лагов
         val_predict = pd.Series()
-        if val_target.empty is False:
+        val_model = None
+        if not val_target.empty:
             # Объединяем train + val
             full_val_target = pd.concat([train_target, val_target])
             full_val_exog = pd.concat([exog_train, exog_val]) if exog is not None else None
@@ -89,12 +90,13 @@ class ArimaxAdapter(MlAdapterInterface):
 
         # 3.3 Прогноз для теста с использованием фактических лагов
         test_predict = pd.Series()
-        if test_target.empty is False:
+        test_model = None
+        if not test_target.empty:
             # Объединяем train + val (если есть) + test
             full_test_target = train_target
             full_test_exog = exog_train if exog is not None else None
 
-            if val_target is not None:
+            if not val_target.empty:
                 full_test_target = pd.concat([full_test_target, val_target])
                 full_test_exog = pd.concat([full_test_exog, exog_val]) if exog is not None else None
 
@@ -109,16 +111,24 @@ class ArimaxAdapter(MlAdapterInterface):
                 end=test_target.index[-1]
             ).predicted_mean
 
+        # Определяем модель для out-of-sample прогноза на основе доступных данных
+        if not test_target.empty:
+            forecast_model = test_model
+        elif not val_target.empty:
+            forecast_model = val_model
+        else:
+            forecast_model = results
+
         # 3.4 Out-of-sample прогноз (рекурсивный)
         if exog is None:  # Eсли нет экзогенных переменных
-            forecast = test_model.get_forecast(
+            forecast = forecast_model.get_forecast(
                 steps=fit_params.forecast_horizon
             ).predicted_mean
         else:
             extended_exog = self._ts_extender.apply(
                 df=exog, steps=fit_params.forecast_horizon, data_frequency=data_frequency,
             )
-            forecast = test_model.get_forecast(
+            forecast = forecast_model.get_forecast(
                 steps=fit_params.forecast_horizon,
                 exog=extended_exog
             ).predicted_mean

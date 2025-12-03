@@ -146,6 +146,21 @@ class LstmFitRequest(BaseModel):
                     "input_size + h_train + размер тестовой выборки должно быть <= размер обучающей выборки. "
     )
 
+    @model_validator(mode='after')
+    def validate_params(self):
+        start_date = min(self.model_data.dependent_variables.dates)
+        end_date = max(self.model_data.dependent_variables.dates)
+
+        if not (end_date >= self.fit_params.val_boundary >= self.fit_params.train_boundary > start_date):
+            raise ValueError('Границы выборок должны быть внутри датасета, '
+                             f'сейчас: '
+                             f'end_date={end_date}, '
+                             f'val_boundary={self.fit_params.val_boundary}, '
+                             f'train_boundary={self.fit_params.train_boundary}, '
+                             f'start_date={start_date}. Возможно, вы забыли указать свое значение параметра val_boundary')
+
+        return self
+
 
 class LstmFitResult(ForecastResult):
     pass

@@ -157,7 +157,7 @@ class GruFitRequest(BaseModel):
                              f'end_date={end_date}, '
                              f'val_boundary={self.fit_params.val_boundary}, '
                              f'train_boundary={self.fit_params.train_boundary}, '
-                             f'start_date={start_date}')
+                             f'start_date={start_date}. Возможно, вы забыли указать свое значение параметра val_boundary')
 
         return self
 
