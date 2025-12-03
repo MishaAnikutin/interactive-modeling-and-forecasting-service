@@ -28,19 +28,23 @@ def form_train_df(
 
 def form_future_df(
         future_size: int,
+        train_target: pd.Series,
+        val_target: pd.Series,
         test_target: pd.Series,
         freq: DataFrequency,
 ):
-    last_known_dt = test_target.index.max()
+    if not test_target.empty:
+        last_known_dt = test_target.index.max()
+    elif not val_target.empty:
+        last_known_dt = val_target.index.max()
+    else:
+        last_known_dt = train_target.index.max()
     futr_index = future_dates(
         last_dt=last_known_dt,
         data_frequency=freq,
         periods=future_size,
     )
-    futr_index_expanded = (
-        pd.concat([test_target, pd.Series(index=futr_index)]).index
-        if test_target.shape[0] != 0 else futr_index
-    )
+    futr_index_expanded = pd.concat([test_target, pd.Series(index=futr_index)]).index
 
     return pd.DataFrame(
         {

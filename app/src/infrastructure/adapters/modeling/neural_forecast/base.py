@@ -118,7 +118,7 @@ class NeuralForecastInterface(Generic[TParams], MlAdapterInterface, ABC):
         h = fit_params.forecast_horizon + test_size
         self._validate_params(train_size, val_size, test_size, h, hyperparameters)
         train_df = form_train_df(exog, train_target, val_target, exog_train, exog_val)
-        future_df = form_future_df(fit_params.forecast_horizon, test_target, data_frequency)
+        future_df = form_future_df(fit_params.forecast_horizon, train_target, val_target, test_target, data_frequency)
         model = self._get_model(exog, hyperparameters, h)
         nf = self._get_nf(model, data_frequency, train_df, val_size)
 
