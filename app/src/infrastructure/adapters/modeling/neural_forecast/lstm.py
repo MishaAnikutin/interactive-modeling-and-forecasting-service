@@ -23,6 +23,11 @@ class LstmAdapter(NeuralForecastInterface[LstmParams]):
 
     @staticmethod
     def _validate_params(train_size, val_size, test_size, h, hyperparameters) -> None:
+        set_automatically = False
+        if hyperparameters.input_size == -1:
+            set_automatically = True
+            hyperparameters.input_size = 3 * h
+
         if h == 0:
             raise HTTPException(
                 detail=HorizonValidationError(h=h-test_size, test_size=test_size).detail,
@@ -47,7 +52,8 @@ class LstmAdapter(NeuralForecastInterface[LstmParams]):
                 detail=LstmTrainSizeError(
                     input_size=hyperparameters.input_size,
                     train_size=train_size, h=h, test_size=test_size
-                ).detail
+                ).detail + f". input_size выставлен автоматически в значение {hyperparameters.input_size} =(3 * h), "
+                           f"так как пользователь указал значение -1." if set_automatically else "",
             )
 
         if hyperparameters.recurrent and hyperparameters.input_size + hyperparameters.h_train + test_size > \
@@ -58,7 +64,8 @@ class LstmAdapter(NeuralForecastInterface[LstmParams]):
                     input_size=hyperparameters.input_size,
                     h_train=hyperparameters.h_train,
                     test_size=test_size, train_size=train_size
-                ).detail
+                ).detail + f". input_size выставлен автоматически в значение {hyperparameters.input_size} =(3 * h), "
+                           f"так как пользователь указал значение -1." if set_automatically else ""
             )
 
         return None
