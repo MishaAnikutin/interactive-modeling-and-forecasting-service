@@ -89,10 +89,10 @@ class NhitsParams(BaseModel):
         default=ActivationType.ReLU,
         title="Название функции активации"
     )
-    max_steps: int = Field(default=100, ge=1, description="Максимум итераций обучения", le=5000)
+    max_steps: int = Field(default=50, ge=1, description="Максимум итераций обучения", le=5000)
     early_stop_patience_steps: int = Field(default=-1, ge=-1, description="Patience для early-stopping", le=5000)
-    val_check_steps: int = Field(default=50, ge=0, description="Проверка валидации каждые n шагов", le=5000)
-    learning_rate: float = Field(default=1e-3, gt=0, description="Шаг обучения", le=1.0)
+    val_check_steps: int = Field(default=10, ge=0, description="Проверка валидации каждые n шагов", le=5000)
+    learning_rate: float = Field(default=0.01, gt=0, description="Шаг обучения", le=1.0)
     scaler_type: ScalerType = Field(default=ScalerType.Identity, description="Тип скейлера")
 
     @model_validator(mode='after')
