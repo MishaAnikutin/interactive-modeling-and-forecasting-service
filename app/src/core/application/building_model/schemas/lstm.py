@@ -25,7 +25,7 @@ class LstmParams(BaseModel):
                     'input_size + h + размер тестовой выборки должно быть <= размер обучающей выборки',
     )
     inference_input_size: Optional[int] = Field(
-        default=None,
+        default=1,
         ge=1,
         le=5000,
         title="Размер входного окна инференса",
@@ -47,7 +47,7 @@ class LstmParams(BaseModel):
         description='Количество слоёв LSTM'
     )
     encoder_hidden_size: int = Field(
-        default=200,
+        default=20,
         gt=1,
         le=5000,
         title="Размер скрытого состояния LSTM",
@@ -66,13 +66,13 @@ class LstmParams(BaseModel):
         description='Dropout'
     )
     decoder_hidden_size: int = Field(
-        default=128,
+        default=2,
         ge=0,
         le=5000,
         title="Размер скрытого слоя декодера",
     )
     decoder_layers: int = Field(
-        default=2,
+        default=1,
         ge=0,
         le=100,
         title="Количество слоёв декодера",
@@ -90,13 +90,13 @@ class LstmParams(BaseModel):
         title="Название функции ошибки, используемой при валидации"
     )
     max_steps: int = Field(
-        default=100,
+        default=50,
         ge=1,
         le=5000,
         title="Максимальное число шагов обучения",
     )
     learning_rate: float = Field(
-        default=1e-3,
+        default=0.01,
         gt=0.0,
         lt=1.0,
         title="Скорость обучения",
@@ -110,7 +110,7 @@ class LstmParams(BaseModel):
               "если ранняя остановка включена (early_stop_patience_steps > 0)",
     )
     val_check_steps: int = Field(
-        default=50,
+        default=10,
         ge=0,
         le=5000,
         title="Число шагов между проверками валидации",
