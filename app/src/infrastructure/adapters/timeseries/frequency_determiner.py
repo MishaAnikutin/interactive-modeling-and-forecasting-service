@@ -41,7 +41,10 @@ class FrequencyDeterminer:
 
     def _check_day_freq(self, deltas: list[int]) -> None:
         for d in deltas:
-            if d != 1:
+            # Для ежедневных данных требование слабее из-за финансовых рынков
+            # более элегантно это сделать сейчас хз. По идее можно добавить
+            # частотность DB - Daily business. Она допускала бы пропуски по выходным и праздникам
+            if d > 4:
                 raise HTTPException(
                     status_code=400,
                     detail="Ряд не постоянной частотности: ожидаются ежедневные данные (шаг 1 день)"
@@ -93,7 +96,7 @@ class FrequencyDeterminer:
         # Определение частотности по первой разнице
         first_delta = deltas_days[0]
 
-        if first_delta == 1:
+        if first_delta <= 4:  # Потому что на бирже в выходные нет данных
             freq = DataFrequency.day
             self._check_day_freq(deltas_days)
         elif 28 <= first_delta <= 31:

@@ -1,6 +1,7 @@
 import pandas as pd
 from typing import List
 import statsmodels.api as sm
+from pandas import DatetimeIndex
 from statsmodels.tsa.statespace.sarimax import SARIMAXResultsWrapper
 
 # FIXME: схемки это конечно ничего, но получается что инфра зависит от слоя приложения
@@ -124,6 +125,16 @@ class ArimaxAdapter(MlAdapterInterface):
             forecast = forecast_model.get_forecast(
                 steps=fit_params.forecast_horizon
             ).predicted_mean
+
+            if not isinstance(forecast.index, DatetimeIndex):
+                # Такое бывает если частотность не постоянная
+                # это не всегда ошибка. Например торги на бирже регулярно проходят с 2 выходными
+                # от этого же частотность не меняется с ежедневной на другую
+                forecast.index = pd.date_range(
+                    start=test_target.index[-1],
+                    periods=fit_params.forecast_horizon,
+                    freq=data_frequency.value
+                )
         else:
             extended_exog = self._ts_extender.apply(
                 df=exog, steps=fit_params.forecast_horizon, data_frequency=data_frequency,
