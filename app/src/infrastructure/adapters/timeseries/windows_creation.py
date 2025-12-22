@@ -11,13 +11,16 @@ class WindowsCreation:
             raise ValueError(f"Input size {input_size} is greater than series length {len(series.dates)}")
 
         windows = []
-        for i in range(0, len(series.dates), input_size):
-            windows.append(Timeseries(
+        for i in range(0, len(series.dates)):
+            ts = Timeseries(
                 data_frequency=series.data_frequency,
                 dates=series.dates[i:i + input_size],
                 values=series.values[i:i + input_size],
                 name=series.name,
-            ))
+            )
+            if len(ts.dates) < input_size:
+                break
+            windows.append(ts)
 
         return windows
 
@@ -66,3 +69,17 @@ class WindowsCreation:
             windows_exog_val, windows_target_val,
             windows_exog_test, windows_target_test,
         )
+
+
+if __name__ == "__main__":
+    windows_creation = WindowsCreation()
+    sample = Timeseries(
+        dates=[date(2025, 10, i) for i in range(1, 6)],
+        values=[1, 2, 3, None, 5],
+    )
+    result = windows_creation.create_windows_for_series(sample, 3)
+    for window in result:
+        print("="*60)
+        print(window.dates)
+        print(window.values)
+        print("="*60)
