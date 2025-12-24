@@ -78,7 +78,7 @@ class NaiveDecompositionRequest(BaseModel):
             period = freq_to_period(self.ts.data_frequency)
         if x.shape[0] < 2 * period:
             raise ValueError(LowCountObservationsError().detail)
-        if x.shape[0] < len(self.params.filt):
+        if self.params.filt is not None and x.shape[0] < len(self.params.filt):
             raise ValueError(LowCountObservationsError2().detail)
         return self
 
