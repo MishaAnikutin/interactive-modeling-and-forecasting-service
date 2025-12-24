@@ -130,6 +130,8 @@ class PredictArimaxAdapter(BasePredictor):
                 exog=exog_df.loc[test_target.index] if exog_df is not None else None
             )
             test_predict = model_test.get_prediction().predicted_mean
+        else:
+            model_test = model
 
         # Получаем out-of-sample прогноз
         if exog_df is not None:
@@ -146,6 +148,16 @@ class PredictArimaxAdapter(BasePredictor):
             forecast = model_test.get_forecast(
                 steps=fit_params.forecast_horizon
             ).predicted_mean
+
+        # -------------------------------------
+        # FIXME: просто смержил даты с готовыми
+        future_dates_list = pd.date_range(
+            start=target.index[-1],
+            periods=fit_params.forecast_horizon + 1,
+            freq=data_frequency.value
+        ).tolist()[1:]
+        forecast.index = future_dates_list
+        # -------------------------------------
 
         # Создаем объекты прогнозов и метрик
         forecasts = self._generate_forecasts(
