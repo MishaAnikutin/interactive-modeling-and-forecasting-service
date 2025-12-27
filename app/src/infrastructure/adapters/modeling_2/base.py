@@ -96,10 +96,9 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
                 extended_series = self._extend_pd_series(self.exog[col], output_size)
                 extended_data[col] = extended_series
             self.exog = pd.DataFrame(extended_data)
-        return None
 
     def _extend_target(self, predictions: pd.Series) -> None:
-        pass
+        self.target = pd.concat([self.target, predictions])
 
     def predict_out_of_sample(self, start_predictions: pd.Series, forecast_horizon: int) -> List[Timeseries]:
         output_size = start_predictions.shape[0]
