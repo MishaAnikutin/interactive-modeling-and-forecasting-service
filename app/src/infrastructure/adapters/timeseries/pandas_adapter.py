@@ -1,3 +1,5 @@
+from typing import List
+
 import pandas as pd
 
 from src.core.domain import Timeseries, DataFrequency
@@ -40,3 +42,16 @@ class PandasTimeseriesAdapter:
             data_frequency=freq
         )
         return res
+
+    def to_dataframe_from_list(self, list_ts: List[Timeseries]) -> pd.DataFrame:
+        res_df = self.to_dataframe(list_ts[0])
+        for ts in list_ts[1:]:
+            res_df = pd.concat([res_df, self.to_dataframe(ts)], axis=1)
+        return res_df
+
+    def from_dataframe_to_list(self, df: pd.DataFrame, freq):
+        res_list = []
+        for col in df.columns:
+            res_list.append(self.from_series(df[col], freq))
+        return res_list
+
