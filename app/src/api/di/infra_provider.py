@@ -1,11 +1,13 @@
 from dishka import Provider, Scope, provide
 
 from src.infrastructure.adapters.distributions import HistogramEstimator, DensityEstimator, EmpiricalDistribution
+from src.infrastructure.adapters.modeling_2.nhits import NhitsAdapter2
 from src.infrastructure.adapters.preliminary_diagnosis.fao import FaoAdapter
 from src.infrastructure.adapters.preliminary_diagnosis.kim_andrews import KimAndrewsAdapter
 from src.infrastructure.adapters.stat_tests.fisher import FisherTestAdapter
 from src.infrastructure.adapters.stat_tests.student import StudentTestAdapter
 from src.infrastructure.adapters.stat_tests.two_sigma import TwoSigmaTestAdapter
+from src.infrastructure.adapters.timeseries.windows_creation import WindowsCreation
 from src.infrastructure.factories.distributions import DistributionFactory
 from src.infrastructure.factories.metrics import MetricsFactory
 
@@ -52,6 +54,8 @@ class InfraProvider(Provider):
     nhits = provide(NhitsAdapter, provides=NhitsAdapter)
     nhits_predictor = provide(PredictNhitsAdapter, provides=PredictNhitsAdapter)
 
+    nhits2 = provide(NhitsAdapter2, provides=NhitsAdapter2)
+
     lstm = provide(LstmAdapter, provides=LstmAdapter)
     lstm_predictor = provide(PredictLstmAdapter, provides=PredictLstmAdapter)
 
@@ -84,3 +88,4 @@ class InfraProvider(Provider):
     fisher_adapter = provide(FisherTestAdapter, provides=FisherTestAdapter)
     two_sigma_adapter = provide(TwoSigmaTestAdapter, provides=TwoSigmaTestAdapter)
 
+    windows_creation = provide(WindowsCreation, provides=WindowsCreation)

@@ -1,6 +1,7 @@
 from dishka import Provider, Scope, provide
 
 from src.core.application.building_model.use_cases.models import FitArimaxUC, FitGruUC, FitLstmUC, FitNhitsUC
+from src.core.application.building_model.use_cases.models2 import FitNhitsUC2
 from src.core.application.predict_series.use_cases.predict_arimax import PredictArimaxUC
 from src.core.application.generating_series.use_cases.naive_decomposition import NaiveDecompositionUC
 from src.core.application.generating_series.use_cases.stl_decomposition import STLDecompositionUC
@@ -44,6 +45,9 @@ from src.core.application.validate_series.validate_series_uc import ValidateSeri
 # TODO: возмонжо стоит разделить провайдеров на каждый use case ...
 class CoreProvider(Provider):
     scope = Scope.REQUEST
+
+    # команды для построения моделей версия 2
+    nhits_fit_command_v2 = provide(FitNhitsUC2, provides=FitNhitsUC2)
 
     # команды для построения моделей
     arimax_fit_command = provide(FitArimaxUC, provides=FitArimaxUC)
