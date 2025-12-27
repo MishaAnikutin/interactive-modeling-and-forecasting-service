@@ -4,6 +4,7 @@ from typing import Type, Optional, List, Dict
 
 import pandas as pd
 from matplotlib import pyplot as plt
+from matplotlib.sphinxext.plot_directive import out_of_date
 from neuralforecast import NeuralForecast
 from pydantic import BaseModel
 
@@ -98,88 +99,59 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
             self.exog = pd.DataFrame(extended_data)
 
     def _extend_target(self, predictions: pd.Series) -> None:
-        self.target = pd.concat([self.target, predictions])
+        first_prediction = predictions.iloc[0]
+        first_prediction_series = pd.Series(
+            [first_prediction],
+            index=[predictions.index[0]]
+        )
+        # Добавляем только одну точку к таргету
+        self.target = pd.concat([self.target, first_prediction_series])
 
-    def predict_out_of_sample(self, start_predictions: pd.Series, forecast_horizon: int) -> List[Timeseries]:
+    def predict_window(self, window: pd.DataFrame) -> pd.Series:
+        prediction = self.nf.predict(df=window)
+        prediction = prediction[self.model_name]
+        return prediction
+
+    def predict_out_of_sample(
+            self,
+            start_predictions: pd.Series,
+            input_size: int,
+            forecast_horizon: int
+    ) -> List[pd.Series]:
         output_size = start_predictions.shape[0]
         if output_size >= forecast_horizon: # если мы уже получили все предсказания, то можно не делать ничего
-            return [start_predictions.iloc[:forecast_horizon]] # TODO: здесь понять какую структуру данных использовать
+            return [start_predictions.iloc[:forecast_horizon]]
 
-        # общее хранилище для предсказаний
-        predictions_list = [start_predictions]
-        # нужно получить все последние точки и продлить их на forecast_horizon значений
+        forecast_list = [start_predictions]
         for i in range(forecast_horizon):
-            self._extend_exog(output_size)
-            self._extend_target(predictions_list[-1])
-            predictions = ... # TODO: логика получения прогноза для окна
-            predictions_list.append(predictions)
+            # нужно продлить exog на 1 точку
+            self._extend_exog(1)
+            # нужно дополнить таргет последним предсказанием
+            self._extend_target(forecast_list[-1])
+            # нужно составить окно из последних input_size точек в target, exog
+            window_exog, window_target = self.windows_creation.create_window_out_for_sample(
+                self.exog, self.target, input_size
+            )
+            nf_panel = to_panel(window_target, window_exog)
+            predictions = self.predict_window(nf_panel)
+            forecast_list.append(predictions)
 
-        return predictions_list
+        return forecast_list
 
-    def predict_sample(self, input_size: int, output_size: int, forecast_horizon: int) -> List[Timeseries]: # TODO: сюда вставить структуру данных для прогнозов
-        # train прогнозы
-        exog_train = self.ts_adapter.from_dataframe_to_list(self.exog_train, freq="ME") if self.exog_train is not None else None
-        train_target = self.ts_adapter.from_series(self.train_target, freq="ME") # TODO: переработать говнокод если найдешь
-        windows_exog, windows_target = self.windows_creation.create_windows(
-            exog_train,
-            train_target,
-            input_size
-        )
+    def predict_insample(self, input_size) -> List[pd.Series]:
         forecast_list = []
-        if windows_exog is None:
-            for window_target in windows_target: # TODO: вынести логику прогноза на окне в отдельный метод
-                target_df = self.ts_adapter.to_dataframe(window_target)
-                nf_panel = to_panel(target_df, None)
-                forecast = self.nf.predict(df=nf_panel)
-                forecast_list.append(forecast)
-        else:
-            for window_exog, window_target in zip(windows_exog, windows_target):
-                target_df = self.ts_adapter.to_dataframe(window_target)
-                exog_df = self.ts_adapter.to_dataframe_from_list(window_exog)
-                nf_panel = to_panel(target_df, exog_df)
-                forecast = self.nf.predict(df=nf_panel)
-                forecast_list.append(forecast)
+        windows_exog, windows_target = self.windows_creation.create_windows(self.exog, self.target, input_size)
+        if self.exog is None:
+            windows_exog = [None] * len(windows_target)
+        for window_target, window_exog in zip(windows_target, windows_exog):
+            nf_panel = to_panel(window_target, window_exog)
+            forecast_list.append(self.predict_window(nf_panel))
+        return forecast_list
 
-        # val прогнозы
-
-
-
-
-
-
-        # через матплотлиб построим график
-        # fig, ax = plt.subplots(figsize=(12, 6))
-        #
-        # colors = ['red', 'blue', 'green', 'orange', 'purple',
-        #           'brown', 'pink', 'gray', 'olive', 'cyan']
-        #
-        # last_date = forecast_list[0]['ds'].iloc[-1]
-        # color = 'red'
-        # ax.plot(forecast_list[0]['ds'], forecast_list[0]['NHITS'],
-        #         color=color, linewidth=2, alpha=0.7,
-        #         label=f'Прогноз {0 + 1}')
-        #
-        # for idx, forecast_df in enumerate(forecast_list[1:]):
-        #     first_date_forecast = forecast_df['ds'].iloc[0]
-        #     last_date_forecast = forecast_df['ds'].iloc[-1]
-        #
-        #
-        #     last_date = last_date_forecast
-        #
-        #     color = 'red'
-        #     ax.plot(forecast_df['ds'], forecast_df['NHITS'],
-        #             color=color, linewidth=2, alpha=0.7,
-        #             label=f'Прогноз {idx + 1}')
-        #
-        # ax.plot(self.train_target, color='blue', label='Настоящий ряд', linewidth=2, alpha=0.7,)
-        # ax.set_xlabel('Дата')
-        # ax.set_ylabel('NHITS')
-        # ax.set_title('Все прогнозы')
-        # ax.legend()
-        # ax.grid(True, alpha=0.3)
-        # plt.xticks(rotation=45)
-        # plt.tight_layout()
-        # plt.show()
+    def _predict(self, input_size: int, forecast_horizon: int):
+        insample_predictions = self.predict_insample(input_size)
+        out_of_sample_predictions = self.predict_out_of_sample(insample_predictions[-1], input_size, forecast_horizon)
+        return insample_predictions + out_of_sample_predictions
 
     def _split_dataset(self, train_boundary: date, val_boundary: date):
         (
@@ -213,22 +185,15 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
         self._split_dataset(fit_params.train_boundary, fit_params.val_boundary)
         self._prepare_train_df()
 
-        # обучить модель на полном наборе данных (train+val)
+        # обучить модель
         self._prepare_model(hyperparameters)
         self._fit_nf(data_frequency)
 
         # сделать прогноз на окнах
-        self.predict(
+        predictions = self._predict(
             input_size=hyperparameters.input_size,
-            output_size=hyperparameters.output_size,
             forecast_horizon=fit_params.forecast_horizon
         )
 
-        # разбить на окна для прогнозов
-
-
-        # получение прогнозов по окнам
-
-
         # получение метрик
-
+        ...
