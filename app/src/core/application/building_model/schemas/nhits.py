@@ -57,6 +57,8 @@ class NhitsParams(BaseModel):
         ge=1,
         description="n_stacks = len(n_blocks) = len(n_pool_kernel_size)"
     )
+    input_size: int
+    output_size: int
     n_blocks: list[int] = Field(
         default=[1, 1, 1],
         title="Число блоков в каждом стеке.",
