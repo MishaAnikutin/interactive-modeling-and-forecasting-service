@@ -1,30 +1,23 @@
 from abc import ABC, abstractmethod
 from datetime import date
-from typing import Type, List, Optional
+from typing import Type, List
 
 import pandas as pd
-from matplotlib import pyplot as plt
 from neuralforecast import NeuralForecast
 from pydantic import BaseModel
 
 from src.core.domain import DataFrequency, FitParams, Timeseries
 from src.infrastructure.adapters.modeling.interface import MlAdapterInterface
-from typing import Generic, Protocol, TypeVar
+from typing import Generic, TypeVar
 
-from src.infrastructure.adapters.modeling.neural_forecast.utils import form_train_df, form_future_df
+from src.infrastructure.adapters.modeling.neural_forecast.utils import form_train_df
 from src.infrastructure.adapters.timeseries import TimeseriesTrainTestSplit, PandasTimeseriesAdapter
 from src.infrastructure.adapters.timeseries.windows_creation import WindowsCreation
 from src.infrastructure.factories.metrics import MetricsFactory
 from src.shared.to_panel import to_panel
 
 
-class ModelProtocol(Protocol):
-    def __init__(self, **kwargs):
-        pass
-
-
 TResult = TypeVar("TResult", bound=BaseModel)
-TModel = TypeVar("TModel", bound=ModelProtocol)
 TParams = TypeVar("TParams", bound=BaseModel)
 
 
@@ -63,10 +56,10 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
         pass
 
     @staticmethod
-    def _validate_params(train_size, val_size, test_size, h, hyperparameters) -> None:
+    def _validate_params(hyperparameters) -> None:
         pass
 
-    def _prepare_model(self, hyperparameters: TParams):
+    def _prepare_model(self, hyperparameters: TParams) -> None:
         self.model = self.model_class(
             hist_exog_list=[exog_col for exog_col in self.exog.columns] if self.exog is not None else None,
             accelerator='cpu',
@@ -75,7 +68,7 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
             **hyperparameters.model_dump()
         )
 
-    def _fit_nf(self, data_frequency) -> NeuralForecast:
+    def _fit_nf(self, data_frequency) -> None:
         self.nf = NeuralForecast(models=[self.model], freq=data_frequency)
         self.nf.fit(df=self.train_df, val_size=self.val_target.shape[0])
 
@@ -160,12 +153,12 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
             forecast_list.append(self._predict_window(nf_panel))
         return forecast_list
 
-    def _predict(self, input_size: int, forecast_horizon: int):
+    def _predict(self, input_size: int, forecast_horizon: int) -> List[pd.Series]:
         insample_predictions = self._predict_insample(input_size)
         out_of_sample_predictions = self._predict_out_of_sample(insample_predictions[-1], input_size, forecast_horizon)
         return insample_predictions + out_of_sample_predictions
 
-    def _split_dataset(self, train_boundary: date, val_boundary: date):
+    def _split_dataset(self, train_boundary: date, val_boundary: date) -> None:
         (
             self.exog_train, self.train_target,
             self.exog_val, self.val_target,
@@ -177,12 +170,20 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
             exog=self.exog,
         )
 
-    def _prepare_train_df(self):
+    def _prepare_train_df(self) -> None:
         self.train_df = form_train_df(
             self.exog,
             self.train_target, self.val_target,
             self.exog_train, self.exog_val
         )
+
+    def _format_forecasts(self, forecasts: List[pd.Series]) -> List[Timeseries]:
+        result_forecasts = []
+        for forecast in forecasts:
+            ts_forecast = self.ts_adapter.from_series(forecast, self.nf.freq)
+            result_forecasts.append(ts_forecast)
+
+        return result_forecasts
 
     def fit(
             self,
@@ -191,21 +192,28 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
             hyperparameters: TParams,
             fit_params: FitParams,
             data_frequency: DataFrequency
-    ) -> tuple[TResult, bytes]:
+    ) -> tuple[TResult, NeuralForecast]:
         self.target = target
         self.exog = exog
         self._split_dataset(fit_params.train_boundary, fit_params.val_boundary)
         self._prepare_train_df()
+        self._validate_params(hyperparameters)
 
         # обучить модель
         self._prepare_model(hyperparameters)
         self._fit_nf(data_frequency)
 
         # сделать прогноз на окнах
-        predictions = self._predict(
+        forecasts = self._predict(
             input_size=hyperparameters.input_size,
             forecast_horizon=fit_params.forecast_horizon
         )
+        forecasts = self._format_forecasts(forecasts)
 
         # получение метрик
-        ...
+        metrics = None
+
+        return (
+            self.result_class(forecasts=forecasts, model_metrics=metrics),
+            self.nf
+        )
