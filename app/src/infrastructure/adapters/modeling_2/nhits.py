@@ -1,13 +1,9 @@
 from typing import Type
 
-import pandas as pd
 from neuralforecast.models import NHITS
 
 from src.core.application.building_model.schemas.nhits import NhitsParams
 from src.infrastructure.adapters.modeling_2.base import BaseNeuralForecast, TResult
-from src.infrastructure.adapters.timeseries import PandasTimeseriesAdapter, TimeseriesTrainTestSplit
-from src.infrastructure.adapters.timeseries.windows_creation import WindowsCreation
-from src.infrastructure.factories.metrics import MetricsFactory
 
 
 class NhitsAdapter2(BaseNeuralForecast[NhitsParams]):

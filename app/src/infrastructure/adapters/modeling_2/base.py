@@ -1,18 +1,17 @@
 from abc import ABC, abstractmethod
 from datetime import date
-from typing import Type, Optional, List, Dict
+from typing import Type, List, Optional
 
 import pandas as pd
 from matplotlib import pyplot as plt
-from matplotlib.sphinxext.plot_directive import out_of_date
 from neuralforecast import NeuralForecast
 from pydantic import BaseModel
 
 from src.core.domain import DataFrequency, FitParams, Timeseries
-from src.infrastructure.adapters.modeling.interface import MlAdapterInterface, ModelParams, ModelFitResult
+from src.infrastructure.adapters.modeling.interface import MlAdapterInterface
 from typing import Generic, Protocol, TypeVar
 
-from src.infrastructure.adapters.modeling.neural_forecast.utils import form_train_df
+from src.infrastructure.adapters.modeling.neural_forecast.utils import form_train_df, form_future_df
 from src.infrastructure.adapters.timeseries import TimeseriesTrainTestSplit, PandasTimeseriesAdapter
 from src.infrastructure.adapters.timeseries.windows_creation import WindowsCreation
 from src.infrastructure.factories.metrics import MetricsFactory
@@ -99,20 +98,34 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
             self.exog = pd.DataFrame(extended_data)
 
     def _extend_target(self, predictions: pd.Series) -> None:
-        first_prediction = predictions.iloc[0]
-        first_prediction_series = pd.Series(
-            [first_prediction],
-            index=[predictions.index[0]]
-        )
-        # Добавляем только одну точку к таргету
-        self.target = pd.concat([self.target, first_prediction_series])
+        last_prediction = predictions.iloc[-1]
 
-    def predict_window(self, window: pd.DataFrame) -> pd.Series:
+        # Создаем следующую временную метку
+        freq = pd.infer_freq(self.target.index)
+        last_target_index = self.target.index[-1]
+        new_index = last_target_index + pd.tseries.frequencies.to_offset(freq)
+
+        # Добавляем предсказание с правильной датой
+        new_prediction_series = pd.Series(
+            [last_prediction],
+            index=[new_index]
+        )
+        self.target = pd.concat([self.target, new_prediction_series])
+
+    def _get_forecast_dates(self, window: pd.DataFrame, output_size: int) -> pd.DatetimeIndex:
+        return pd.date_range(
+            start=window['ds'].iloc[-1],
+            periods=output_size + 1,
+            freq=self.nf.freq
+        )[1:]
+
+    def _predict_window(self, window: pd.DataFrame) -> pd.Series:
         prediction = self.nf.predict(df=window)
         prediction = prediction[self.model_name]
+        prediction.index = self._get_forecast_dates(window=window, output_size=prediction.shape[0])
         return prediction
 
-    def predict_out_of_sample(
+    def _predict_out_of_sample(
             self,
             start_predictions: pd.Series,
             input_size: int,
@@ -133,24 +146,23 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
                 self.exog, self.target, input_size
             )
             nf_panel = to_panel(window_target, window_exog)
-            predictions = self.predict_window(nf_panel)
-            forecast_list.append(predictions)
+            forecast_list.append(self._predict_window(nf_panel))
 
         return forecast_list
 
-    def predict_insample(self, input_size) -> List[pd.Series]:
+    def _predict_insample(self, input_size) -> List[pd.Series]:
         forecast_list = []
         windows_exog, windows_target = self.windows_creation.create_windows(self.exog, self.target, input_size)
         if self.exog is None:
             windows_exog = [None] * len(windows_target)
         for window_target, window_exog in zip(windows_target, windows_exog):
             nf_panel = to_panel(window_target, window_exog)
-            forecast_list.append(self.predict_window(nf_panel))
+            forecast_list.append(self._predict_window(nf_panel))
         return forecast_list
 
     def _predict(self, input_size: int, forecast_horizon: int):
-        insample_predictions = self.predict_insample(input_size)
-        out_of_sample_predictions = self.predict_out_of_sample(insample_predictions[-1], input_size, forecast_horizon)
+        insample_predictions = self._predict_insample(input_size)
+        out_of_sample_predictions = self._predict_out_of_sample(insample_predictions[-1], input_size, forecast_horizon)
         return insample_predictions + out_of_sample_predictions
 
     def _split_dataset(self, train_boundary: date, val_boundary: date):
@@ -197,3 +209,95 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
 
         # получение метрик
         ...
+
+    def _create_prediction_plot(
+            self,
+            target: pd.Series,
+            predictions: List[pd.Series],
+            train_boundary: date,
+            val_boundary: date,
+            forecast_horizon: int,
+            insample_predict_legacy: Optional[pd.Series] = None,
+            out_of_sample_predict_legacy: Optional[pd.Series] = None
+    ) -> None:
+        """
+        Создает визуализацию предсказаний.
+        """
+        fig, ax = plt.subplots(figsize=(14, 7))
+
+        # Оригинальный таргет
+        ax.plot(target.index, target.values,
+                color='blue', linewidth=2.5, label='Original target', alpha=0.8)
+
+        # Предсказания
+        for i, pred_series in enumerate(predictions):
+            if len(pred_series) > 0:
+                # Используем градиент красного для лучшей визуализации
+                alpha = max(0.3, 1.0 - i * 0.1)
+                ax.plot(pred_series.index, pred_series.values,
+                        color='red', linewidth=1.5, alpha=alpha)
+
+        if insample_predict_legacy is not None:
+
+            ax.plot(insample_predict_legacy.index,
+                    insample_predict_legacy.values,
+                    color='darkgreen',
+                    linewidth=1.5,
+                    linestyle='--',
+                    alpha=0.7,
+                    label='Legacy insample prediction')
+        if out_of_sample_predict_legacy is not None:
+            ax.plot(out_of_sample_predict_legacy.index,
+                    out_of_sample_predict_legacy.values,
+                    color='darkviolet',
+                    linewidth=2,
+                    linestyle=':',
+                    marker='o',
+                    markersize=4,
+                    alpha=0.8,
+                    label='Legacy out-of-sample prediction')
+
+        # Добавляем области разных датасетов
+        if train_boundary:
+            train_end = pd.Timestamp(train_boundary)
+            ax.axvline(x=train_end, color='green', linestyle='--',
+                       linewidth=1.5, label='Train/Val boundary')
+
+            # Заливаем области разными цветами
+            ymin, ymax = ax.get_ylim()
+            ax.fill_betweenx([ymin, ymax],
+                             target.index[0], train_end,
+                             alpha=0.1, color='green', label='Train')
+
+        if val_boundary:
+            val_end = pd.Timestamp(val_boundary)
+            ax.axvline(x=val_end, color='orange', linestyle='--',
+                       linewidth=1.5, label='Val/Test boundary')
+
+            if train_boundary:
+                ax.fill_betweenx([ymin, ymax],
+                                 train_end, val_end,
+                                 alpha=0.1, color='orange', label='Validation')
+
+        # Область прогноза
+        if forecast_horizon > 0 and len(target) > 0:
+            forecast_start = target.index[-1]
+            ax.axvline(x=forecast_start, color='purple', linestyle=':',
+                       linewidth=2, label='Forecast start')
+
+            if val_boundary:
+                ax.fill_betweenx([ymin, ymax],
+                                 val_end, forecast_start,
+                                 alpha=0.1, color='blue', label='Test')
+
+        # Настройки
+        ax.set_xlabel('Date', fontsize=12)
+        ax.set_ylabel('Value', fontsize=12)
+        ax.set_title(f'{self.model_name} - Model Predictions', fontsize=14, pad=15)
+        ax.grid(True, alpha=0.3, linestyle=':')
+        ax.legend(loc='upper left', fontsize=9, framealpha=0.9)
+
+        # Форматирование
+        fig.autofmt_xdate()
+        plt.tight_layout()
+        plt.show()

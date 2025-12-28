@@ -5,7 +5,7 @@ import pandas as pd
 class WindowsCreation:
     @staticmethod
     def create_windows_for_series(series: pd.Series, input_size: int) -> List[pd.Series]:
-        if input_size > len(series.dates):
+        if input_size > len(series):
             raise ValueError(f"Input size {input_size} is greater than series length {len(series.dates)}")
 
         windows = []
