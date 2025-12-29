@@ -2,7 +2,7 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
-from .. import Forecasts, ModelMetrics, Metric
+from .. import Forecasts, ModelMetrics, Metric, Timeseries
 
 
 class ForecastResult(BaseModel):
@@ -10,5 +10,5 @@ class ForecastResult(BaseModel):
     model_metrics: ModelMetrics = Field(title="Метрики модели")
 
 class ForecastResult_V2(ForecastResult):
-    forecasts: List[Forecasts] = Field(title="Прогнозы на скользящих окнах")
+    forecasts: List[Timeseries] = Field(title="Прогнозы на скользящих окнах")
     model_metrics: List[List[Metric]] = Field(title="Метрики на скользящих окнах")
