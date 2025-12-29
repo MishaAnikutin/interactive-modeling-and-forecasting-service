@@ -15,7 +15,7 @@ class NhitsParams_V2(NhitsParams):
 
     @model_validator(mode='after')
     def validate_input_size(self):
-        if self.val_size == 0:
+        if self.input_size == 0:
             raise ValueError("input_size должен быть > 0")
         return self
 
