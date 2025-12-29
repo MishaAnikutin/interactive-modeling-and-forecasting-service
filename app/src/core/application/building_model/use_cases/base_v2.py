@@ -51,7 +51,7 @@ class FitUC_V2(Generic[TRequest, TAdapter]):
     def execute(self, request: TRequest) -> bytes:
         target, exog_df = self._ts_aligner.align(request.model_data)
 
-        self._model_adapter.fit(
+        model_result, model_weight = self._model_adapter.fit(
             target=target,
             exog=exog_df,
             hyperparameters=request.hyperparameters,
@@ -59,9 +59,9 @@ class FitUC_V2(Generic[TRequest, TAdapter]):
             data_frequency=request.model_data.dependent_variables.data_frequency,
         )
 
-        # data_dict: dict = model_result.model_dump()
-        # model_bytes: bytes = self._serializer.serialize(model_weight)
+        data_dict: dict = model_result.model_dump()
+        model_bytes: bytes = self._serializer.serialize(model_weight)
 
-        # archive: bytes = self._archiver.execute(data_dict=data_dict, model_bytes=model_bytes)
-        #
-        # return archive
+        archive: bytes = self._archiver.execute(data_dict=data_dict, model_bytes=model_bytes)
+
+        return archive
