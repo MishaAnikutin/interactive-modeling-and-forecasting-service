@@ -10,7 +10,6 @@ from src.core.application.building_model.schemas.gru import GruFitRequest
 from src.core.application.building_model.schemas.lstm import LstmFitRequest
 from src.core.application.building_model.schemas.nhits import NhitsFitRequest
 from src.core.application.building_model.use_cases.models import FitArimaxUC, FitGruUC, FitLstmUC, FitNhitsUC
-from src.core.application.building_model.use_cases.models2 import FitNhitsUC2
 from src.infrastructure.adapters.modeling.errors.arimax import ConstantInExogAndSpecification
 
 fit_model_router = APIRouter(prefix="/building_model", tags=["Построение модели"])
