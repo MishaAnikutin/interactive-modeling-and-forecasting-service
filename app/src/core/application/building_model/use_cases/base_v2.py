@@ -33,7 +33,7 @@ TRequest = TypeVar("TRequest", bound=FitRequestProtocol)
 TAdapter = TypeVar("TAdapter", bound=ModelAdapterProtocol)
 
 
-class FitUC2(Generic[TRequest, TAdapter]):
+class FitUC_V2(Generic[TRequest, TAdapter]):
     def __init__(
         self,
         model_adapter: TAdapter,
