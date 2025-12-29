@@ -4,6 +4,8 @@ from dishka.integrations.fastapi import inject_sync
 
 from src.core.application.building_model.errors.lstm import LstmFitValidationError, LstmPydanticValidationError
 from src.core.application.building_model.errors.nhits import NhitsFitValidationError, NhitsPydanticValidationError
+from src.core.application.building_model.schemas import NhitsFitRequest_V2, LstmFitRequest_V2, GruFitRequest_V2
+from src.core.application.building_model.use_cases.models_v2 import FitNhitsUC_V2, FitLstmUC_V2, FitGruUC_V2
 
 fit_model_router = APIRouter(prefix="/building_model", tags=["Построение модели"])
 
