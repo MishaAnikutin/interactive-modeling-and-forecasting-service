@@ -112,12 +112,15 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
                 )
 
     def _prepare_model(self, hyperparameters: TParams) -> None:
+        hyperparameters = hyperparameters.model_dump()
+        h = hyperparameters['output_size']
+        del hyperparameters['output_size']
         self.model = self.model_class(
             hist_exog_list=[exog_col for exog_col in self.exog.columns] if self.exog is not None else None,
             accelerator='cpu',
-            h=hyperparameters.output_size,
+            h=h,
             devices=1,
-            **hyperparameters.model_dump()
+            **hyperparameters
         )
 
     def _fit_nf(self, data_frequency) -> None:
