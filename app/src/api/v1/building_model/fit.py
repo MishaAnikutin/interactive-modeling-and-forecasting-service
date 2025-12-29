@@ -119,14 +119,3 @@ def fit_gru(
         content=archive_response,
         media_type="application/octet-stream",
     )
-
-@fit_model_router.post(
-    path='/nhits/fit2',
-
-)
-@inject_sync
-def fit_nhits2(
-    request: NhitsFitRequest,
-    fit_nhits_uc: FromDishka[FitNhitsUC2]
-):
-    return fit_nhits_uc.execute(request=request)
