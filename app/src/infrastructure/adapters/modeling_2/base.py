@@ -7,7 +7,7 @@ from fastapi import HTTPException
 from neuralforecast import NeuralForecast
 from pydantic import BaseModel
 
-from src.core.domain import DataFrequency, FitParams, Timeseries
+from src.core.domain import DataFrequency, FitParams, Timeseries, ModelMetrics
 from src.infrastructure.adapters.modeling.interface import MlAdapterInterface
 from typing import Generic, TypeVar
 
@@ -143,7 +143,7 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
             self.exog = pd.DataFrame(extended_data)
 
     def _extend_target(self, predictions: pd.Series) -> None:
-        last_prediction = predictions.iloc[-1]
+        first_prediction = predictions.iloc[0]
 
         # Создаем следующую временную метку
         freq = pd.infer_freq(self.target.index)
@@ -152,7 +152,7 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
 
         # Добавляем предсказание с правильной датой
         new_prediction_series = pd.Series(
-            [last_prediction],
+            [first_prediction],
             index=[new_index]
         )
         self.target = pd.concat([self.target, new_prediction_series])
@@ -170,6 +170,20 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
         prediction.index = self._get_forecast_dates(window=window, output_size=prediction.shape[0])
         return prediction
 
+    def _is_last_prediction(
+            self,
+            prediction: pd.Series,
+            start_prediction_date: date, forecast_horizon: int) -> bool:
+        first_prediction_date = prediction.index[0]
+        last_dt = pd.date_range(
+            start=start_prediction_date,
+            periods=forecast_horizon,
+            freq=self.nf.freq
+        )[-1]
+        if first_prediction_date == last_dt:
+            return True
+        return False
+
     def _predict_out_of_sample(
             self,
             start_predictions: pd.Series,
@@ -181,7 +195,7 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
             return [start_predictions.iloc[:forecast_horizon]]
 
         forecast_list = [start_predictions]
-        for i in range(forecast_horizon):
+        for _ in range(forecast_horizon):
             # нужно продлить exog на 1 точку
             self._extend_exog(1)
             # нужно дополнить таргет последним предсказанием
@@ -191,8 +205,12 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
                 self.exog, self.target, input_size
             )
             nf_panel = to_panel(window_target, window_exog)
-            forecast_list.append(self._predict_window(nf_panel))
+            prediction = self._predict_window(nf_panel)
+            forecast_list.append(prediction)
+            if self._is_last_prediction(prediction, start_predictions.index[0], forecast_horizon):
+                break
 
+        assert len(forecast_list) == forecast_horizon
         return forecast_list
 
     def _predict_insample(self, input_size) -> List[pd.Series]:
@@ -208,7 +226,8 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
     def _predict(self, input_size: int, forecast_horizon: int) -> List[pd.Series]:
         insample_predictions = self._predict_insample(input_size)
         out_of_sample_predictions = self._predict_out_of_sample(insample_predictions[-1], input_size, forecast_horizon)
-        forecasts = insample_predictions + out_of_sample_predictions
+        # срез, так как последний прогноз внутри выборки входит во вневыборочный прогноз
+        forecasts = insample_predictions[:-1] + out_of_sample_predictions
         forecasts_ts = self._format_forecasts(forecasts)
         return forecasts_ts
 
@@ -239,6 +258,58 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
 
         return result_forecasts
 
+    def _build_best_forecast(
+            self,
+            forecasts: List[Timeseries],
+            fit_params: FitParams,
+            input_size: int
+    ) -> Timeseries:
+        dates = []
+        values = []
+        for forecast in forecasts:
+            dates.append(forecast.dates[0])
+            values.append(forecast.values[0])
+        best_forecast = Timeseries(
+            dates=dates,
+            values=values,
+            data_frequency=self.nf.freq,
+            name=f'Лучший прогноз {self.model_name}'
+        )
+
+        # проверки корректной работы кода
+        train_bf = [i for i in best_forecast.dates if i <= fit_params.train_boundary]
+        assert len(train_bf) == len(self.train_target) - input_size
+        val_bf = [i for i in best_forecast.dates if (fit_params.train_boundary < i <= fit_params.val_boundary)]
+        assert len(val_bf) == len(self.val_target)
+        test_bf = [i for i in best_forecast.dates if (i > fit_params.val_boundary)]
+        assert len(test_bf) == len(self.test_target) + fit_params.forecast_horizon
+        return best_forecast
+
+    def _calculate_best_forecast_metrics(self, best_forecast: Timeseries, fit_params: FitParams) -> ModelMetrics:
+        best_forecast = self.ts_adapter.to_series(best_forecast)
+        # добавь сюда визуализацию прогноза best_forecast, self.train_target, self.val_target,
+        (
+            forecast_train,
+            forecast_val,
+            forecast_test,
+        ) = self._ts_spliter.split_ts(
+            ts=best_forecast,
+            train_boundary=fit_params.train_boundary,
+            val_boundary=fit_params.val_boundary,
+        )
+        forecast_test = forecast_test.iloc[:self.test_target.shape[0]]
+        train_target = self.train_target.loc[forecast_train.index]
+
+        metrics = self._calculate_metrics(
+            y_train_true=train_target,
+            y_train_pred=forecast_train,
+            y_val_true=self.val_target,
+            y_val_pred=forecast_val,
+            y_test_true=self.test_target,
+            y_test_pred=forecast_test,
+        )
+        return metrics
+
     def fit(
             self,
             target: pd.Series,
@@ -262,11 +333,17 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
             input_size=hyperparameters.input_size,
             forecast_horizon=fit_params.forecast_horizon
         )
+        # создать прогноз из первых точек
+        best_forecast = self._build_best_forecast(forecasts, fit_params, hyperparameters.input_size)
 
         # получение метрик
-        metrics = []
+        best_forecast_metrics = self._calculate_best_forecast_metrics(best_forecast, fit_params)
 
         return (
-            self.result_class(forecasts=forecasts, model_metrics=metrics),
+            self.result_class(
+                forecasts=forecasts,
+                best_forecast=best_forecast,
+                best_forecast_metrics=best_forecast_metrics
+            ),
             self.nf
         )
