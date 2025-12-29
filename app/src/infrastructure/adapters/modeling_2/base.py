@@ -208,12 +208,12 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
             input_size=hyperparameters.input_size,
             forecast_horizon=fit_params.forecast_horizon
         )
-        forecasts = self._format_forecasts(forecasts)
+        forecasts_ts = self._format_forecasts(forecasts)
 
         # получение метрик
-        metrics = None
+        metrics = []
 
         return (
-            self.result_class(forecasts=forecasts, model_metrics=metrics),
+            self.result_class(forecasts=forecasts_ts, model_metrics=metrics),
             self.nf
         )
