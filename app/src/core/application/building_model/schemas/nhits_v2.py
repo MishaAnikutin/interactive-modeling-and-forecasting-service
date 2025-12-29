@@ -6,8 +6,10 @@ from src.core.domain import ForecastResult_V2
 
 
 class NhitsParams_V2(NhitsParams):
-    input_size: int = Field(default=8, title='Размер входного слоя')
-    output_size: int = Field(default=2, title='Размер выходного слоя')
+    input_size: int = Field(ge=-1, default=8, title='Размер входного слоя')
+    output_size: int = Field(ge=-1, default=2, title='Размер выходного слоя')
+
+    # TODO: добавить валидацию этих новых параметров во все схемы (чтоб нельзя было поставить 0)
 
 
 class NhitsFitRequest_V2(NhitsFitRequest):

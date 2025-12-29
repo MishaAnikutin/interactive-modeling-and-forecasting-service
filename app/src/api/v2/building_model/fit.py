@@ -2,8 +2,9 @@ from fastapi import APIRouter, Response
 from dishka import FromDishka
 from dishka.integrations.fastapi import inject_sync
 
-from src.core.application.building_model.errors.lstm import LstmFitValidationError, LstmPydanticValidationError
-from src.core.application.building_model.errors.nhits import NhitsFitValidationError, NhitsPydanticValidationError
+from src.core.application.building_model.errors.lstm import LstmPydanticValidationError
+from src.core.application.building_model.errors.neural_errors_v2 import NeuralModelsFitValidationError
+from src.core.application.building_model.errors.nhits import NhitsPydanticValidationError
 from src.core.application.building_model.schemas import NhitsFitRequest_V2, LstmFitRequest_V2, GruFitRequest_V2
 from src.core.application.building_model.use_cases.models_v2 import FitNhitsUC_V2, FitLstmUC_V2, FitGruUC_V2
 
@@ -13,7 +14,7 @@ fit_model_router = APIRouter(prefix="/building_model", tags=["Построени
     path="/nhits/fit",
     responses={
         400: {
-            "model": NhitsFitValidationError,
+            "model": NeuralModelsFitValidationError,
             "description": "Ошибка валидации во время обучения",
         },
         422: {
@@ -39,7 +40,7 @@ def fit_nhits(
     path="/lstm/fit",
     responses={
         400: {
-            "model": LstmFitValidationError,
+            "model": NeuralModelsFitValidationError,
             "description": "Ошибка валидации во время обучения",
         },
         422: {
@@ -64,7 +65,7 @@ def fit_lstm(
     path="/gru/fit",
     responses={
         400: {
-            "model": LstmFitValidationError,
+            "model": NeuralModelsFitValidationError,
             "description": "Ошибка валидации во время обучения",
         },
         422: {

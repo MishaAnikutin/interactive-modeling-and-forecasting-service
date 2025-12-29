@@ -3,6 +3,7 @@ from datetime import date
 from typing import Type, List
 
 import pandas as pd
+from fastapi import HTTPException
 from neuralforecast import NeuralForecast
 from pydantic import BaseModel
 
@@ -11,6 +12,8 @@ from src.infrastructure.adapters.modeling.interface import MlAdapterInterface
 from typing import Generic, TypeVar
 
 from src.infrastructure.adapters.modeling.neural_forecast.utils import form_train_df
+from src.infrastructure.adapters.modeling_2.neural_models_errors import TrainSizeError, LSTM_GRU_TrainSizeError, \
+    ValSizeError, PatienceStepsError
 from src.infrastructure.adapters.timeseries import TimeseriesTrainTestSplit, PandasTimeseriesAdapter
 from src.infrastructure.adapters.timeseries.windows_creation import WindowsCreation
 from src.infrastructure.factories.metrics import MetricsFactory
@@ -55,9 +58,58 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
     def result_class(self) -> Type[TResult]:
         pass
 
-    @staticmethod
-    def _validate_params(hyperparameters) -> None:
-        pass
+    def _validate_params(self, hyperparameters) -> None:
+        h = hyperparameters.output_size
+        train_size = self.train_target.shape[0]
+        val_size = self.val_target.shape[0]
+        set_automatically = False
+        if hyperparameters.input_size == -1:
+            set_automatically = True
+            hyperparameters.input_size = 3 * hyperparameters.output_size
+
+        if val_size == 0 and hyperparameters.early_stop_patience_steps > 0:
+            raise HTTPException(status_code=400, detail=PatienceStepsError().detail)
+
+        if val_size != 0 and val_size < h:
+            raise HTTPException(
+                status_code=400,
+                detail=ValSizeError(
+                    val_size=val_size,
+                    output_size=hyperparameters.output_size
+                ).detail,
+            )
+
+        if hyperparameters.input_size + h > train_size:
+            extra_info = (
+                f". input_size выставлен автоматически в значение {hyperparameters.input_size} = (3 * output_size), "
+                f"так как пользователь указал значение -1." if set_automatically else ""
+            )
+            raise HTTPException(
+                status_code=400,
+                detail=TrainSizeError(
+                    input_size=hyperparameters.input_size,
+                    train_size=train_size,
+                    output_size=hyperparameters.output_size,
+                ).detail + extra_info,
+            )
+
+        if hasattr(hyperparameters, "recurrent") and hasattr(hyperparameters, "h_train"):
+            if (
+                    hyperparameters.recurrent and
+                    hyperparameters.input_size + hyperparameters.h_train > train_size
+            ):
+                extra_info = (
+                    f". input_size выставлен автоматически в значение {hyperparameters.input_size} = (3 * output_size), "
+                    f"так как пользователь указал значение -1." if set_automatically else ""
+                )
+                raise HTTPException(
+                    status_code=400,
+                    detail=LSTM_GRU_TrainSizeError(
+                        input_size=hyperparameters.input_size,
+                        train_size=train_size,
+                        h_train=hyperparameters.h_train,
+                    ).detail + extra_info,
+                )
 
     def _prepare_model(self, hyperparameters: TParams) -> None:
         self.model = self.model_class(

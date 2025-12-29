@@ -5,8 +5,8 @@ from src.core.domain import ForecastResult_V2
 
 
 class GruParams_V2(GruParams):
-    input_size: int = Field(default=8, title='Размер входного слоя')
-    output_size: int = Field(default=2, title='Размер выходного слоя')
+    input_size: int = Field(ge=1, default=8, title='Размер входного слоя')
+    output_size: int = Field(ge=1, default=2, title='Размер выходного слоя')
 
 
 class GruFitRequest_V2(GruFitRequest):
