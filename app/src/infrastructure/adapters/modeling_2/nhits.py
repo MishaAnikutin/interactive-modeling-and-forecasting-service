@@ -1,18 +1,13 @@
-from typing import Type
-
 from neuralforecast.models import NHITS
 
-from src.core.application.building_model.schemas.nhits_v2 import NhitsParams_V2
-from src.infrastructure.adapters.modeling_2.base import BaseNeuralForecast, TResult
+from src.core.application.building_model.schemas.nhits_v2 import NhitsParams_V2, NhitsFitResult_V2
+from src.infrastructure.adapters.modeling_2.base import BaseNeuralForecast
 
 
 class NhitsAdapter_V2(BaseNeuralForecast[NhitsParams_V2]):
-    @property
-    def result_class(self) -> Type[TResult]:
-        return None
-
     model_name = "NHITS"
     model_class = NHITS
+    result_class = NhitsFitResult_V2
 
     def _prepare_model(self, hyperparameters: NhitsParams_V2):
         hyperparameters = hyperparameters.model_dump()
