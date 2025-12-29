@@ -2,11 +2,11 @@ from typing import Type
 
 from neuralforecast.models import NHITS
 
-from src.core.application.building_model.schemas.nhits import NhitsParams
+from src.core.application.building_model.schemas.nhits_v2 import NhitsParams_V2
 from src.infrastructure.adapters.modeling_2.base import BaseNeuralForecast, TResult
 
 
-class NhitsAdapter2(BaseNeuralForecast[NhitsParams]):
+class NhitsAdapter_V2(BaseNeuralForecast[NhitsParams_V2]):
     @property
     def result_class(self) -> Type[TResult]:
         return None
@@ -14,7 +14,7 @@ class NhitsAdapter2(BaseNeuralForecast[NhitsParams]):
     model_name = "NHITS"
     model_class = NHITS
 
-    def _prepare_model(self, hyperparameters: NhitsParams):
+    def _prepare_model(self, hyperparameters: NhitsParams_V2):
         hyperparameters = hyperparameters.model_dump()
         stack_types = hyperparameters['n_stacks'] * ['identity']
         del hyperparameters['n_stacks']
