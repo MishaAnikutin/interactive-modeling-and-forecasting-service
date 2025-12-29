@@ -104,7 +104,7 @@ class NeuralPredictAdapter(BasePredictor):
             fit_params: FitParams,
             data_frequency: DataFrequency,
     ) -> tuple[Forecasts, ModelMetrics]:
-        deserialized_nf: NeuralForecast = self._model_serializer.undo_serialize(model_weight)
+        deserialized_nf: NeuralForecast = self._model_serializer.deserialize(model_weight)
         train_df = to_panel(target=target, exog=exog_df)
 
         dataset, uids, _, ds = TimeSeriesDataset.from_df(
