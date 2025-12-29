@@ -156,7 +156,9 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
     def _predict(self, input_size: int, forecast_horizon: int) -> List[pd.Series]:
         insample_predictions = self._predict_insample(input_size)
         out_of_sample_predictions = self._predict_out_of_sample(insample_predictions[-1], input_size, forecast_horizon)
-        return insample_predictions + out_of_sample_predictions
+        forecasts = insample_predictions + out_of_sample_predictions
+        forecasts_ts = self._format_forecasts(forecasts)
+        return forecasts_ts
 
     def _split_dataset(self, train_boundary: date, val_boundary: date) -> None:
         (
@@ -208,12 +210,11 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
             input_size=hyperparameters.input_size,
             forecast_horizon=fit_params.forecast_horizon
         )
-        forecasts_ts = self._format_forecasts(forecasts)
 
         # получение метрик
         metrics = []
 
         return (
-            self.result_class(forecasts=forecasts_ts, model_metrics=metrics),
+            self.result_class(forecasts=forecasts, model_metrics=metrics),
             self.nf
         )
