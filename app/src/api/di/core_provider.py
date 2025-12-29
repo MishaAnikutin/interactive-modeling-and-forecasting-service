@@ -1,7 +1,7 @@
 from dishka import Provider, Scope, provide
 
 from src.core.application.building_model.use_cases.models import FitArimaxUC, FitGruUC, FitLstmUC, FitNhitsUC
-from src.core.application.building_model.use_cases.models2 import FitNhitsUC2
+from src.core.application.building_model.use_cases.models_v2 import FitNhitsUC_V2, FitGruUC_V2, FitLstmUC_V2
 from src.core.application.predict_series.use_cases.predict_arimax import PredictArimaxUC
 from src.core.application.generating_series.use_cases.naive_decomposition import NaiveDecompositionUC
 from src.core.application.generating_series.use_cases.stl_decomposition import STLDecompositionUC
@@ -46,14 +46,16 @@ from src.core.application.validate_series.validate_series_uc import ValidateSeri
 class CoreProvider(Provider):
     scope = Scope.REQUEST
 
-    # команды для построения моделей версия 2
-    nhits_fit_command_v2 = provide(FitNhitsUC2, provides=FitNhitsUC2)
-
     # команды для построения моделей
     arimax_fit_command = provide(FitArimaxUC, provides=FitArimaxUC)
     nhits_fit_command = provide(FitNhitsUC, provides=FitNhitsUC)
     lstm_fit_command = provide(FitLstmUC, provides=FitLstmUC)
     gru_fit_command = provide(FitGruUC, provides=FitGruUC)
+
+    # команды для построения моделей версия 2
+    nhits_fit_command_v2 = provide(FitNhitsUC_V2, provides=FitNhitsUC_V2)
+    lstm_fit_command_v2 = provide(FitLstmUC_V2, provides=FitLstmUC_V2)
+    gru_fit_command_v2 = provide(FitGruUC_V2, provides=FitGruUC_V2)
 
     # команды для прогнозирования моделями
     arimax_predict_command = provide(PredictArimaxUC, provides=PredictArimaxUC)
