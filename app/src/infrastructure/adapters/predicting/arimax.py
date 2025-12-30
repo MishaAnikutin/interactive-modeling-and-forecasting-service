@@ -3,7 +3,7 @@ from typing import Optional
 from statsmodels.tsa.statespace.sarimax import SARIMAXResultsWrapper
 
 from src.core.domain import DataFrequency, ModelMetrics, Forecasts, FitParams, Timeseries
-from src.infrastructure.adapters.predicting.interface import BasePredictor
+from src.core.domain.predicting.interface import BasePredictor
 from src.infrastructure.adapters.serializer import ModelSerializer
 from src.infrastructure.adapters.timeseries import PandasTimeseriesAdapter, TimeseriesTrainTestSplit, TimeseriesExtender
 from src.infrastructure.factories.metrics import MetricsFactory

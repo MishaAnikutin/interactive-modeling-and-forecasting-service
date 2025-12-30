@@ -5,7 +5,7 @@ from neuralforecast import NeuralForecast
 from neuralforecast.tsdataset import TimeSeriesDataset
 
 from src.core.domain import DataFrequency, ModelMetrics, Forecasts, FitParams, Timeseries
-from src.infrastructure.adapters.predicting.interface import BasePredictor
+from src.core.domain.predicting.interface import BasePredictor
 from src.infrastructure.adapters.serializer import ModelSerializer
 from src.infrastructure.adapters.timeseries import PandasTimeseriesAdapter, TimeseriesTrainTestSplit
 from src.infrastructure.factories.metrics import MetricsFactory

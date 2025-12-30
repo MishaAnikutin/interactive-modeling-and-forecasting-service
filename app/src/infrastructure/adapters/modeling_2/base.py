@@ -313,6 +313,12 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
         )
         return metrics
 
+    def _prepare_archive_data(self):
+        return {
+            'nf': self.nf,
+            'model': self.model,
+        }
+
     def fit(
             self,
             target: pd.Series,
@@ -348,5 +354,5 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
                 best_forecast=best_forecast,
                 best_forecast_metrics=best_forecast_metrics
             ),
-            self.nf
+            self._prepare_archive_data()
         )
