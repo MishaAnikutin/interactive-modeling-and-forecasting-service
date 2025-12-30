@@ -12,9 +12,9 @@ from src.core.application.model_diagnosis.use_cases.kstest import KolmogorovUC
 from src.core.application.model_diagnosis.use_cases.ljung_box import LjungBoxUC
 from src.core.application.model_diagnosis.use_cases.lm import LmUC
 from src.core.application.model_diagnosis.use_cases.omnibus import OmnibusUC
-from src.core.application.predict_series.use_cases.predict_gru import PredictGruUC
-from src.core.application.predict_series.use_cases.predict_lstm import PredictLstmUC
-from src.core.application.predict_series.use_cases.predict_nhits import PredictNhitsUC
+from src.core.application.predict_series.use_cases.predict_gru import PredictGruUC, PredictGruUC_V2
+from src.core.application.predict_series.use_cases.predict_lstm import PredictLstmUC, PredictLstmUC_V2
+from src.core.application.predict_series.use_cases.predict_nhits import PredictNhitsUC, PredictNhitsUC_V2
 from src.core.application.preliminary_diagnosis.use_cases.auto_pp import AutoPPplotUC
 from src.core.application.preliminary_diagnosis.use_cases.auto_qq import AutoQQplotUC
 from src.core.application.preliminary_diagnosis.use_cases.corr import CorrelationMatrixUC
@@ -62,6 +62,11 @@ class CoreProvider(Provider):
     gru_predict_command = provide(PredictGruUC, provides=PredictGruUC)
     lstm_predict_command = provide(PredictLstmUC, provides=PredictLstmUC)
     nhits_predict_command = provide(PredictNhitsUC, provides=PredictNhitsUC)
+
+    # команды для прогнозирования моделями 2
+    gru_predict_command_2 = provide(PredictGruUC_V2, provides=PredictGruUC_V2)
+    lstm_predict_command_2 = provide(PredictLstmUC_V2, provides=PredictLstmUC_V2)
+    nhits_predict_command_2 = provide(PredictNhitsUC_V2, provides=PredictNhitsUC_V2)
 
     # тесты на стационарность
     dickey_fuller_command = provide(DickeuFullerUC, provides=DickeuFullerUC)

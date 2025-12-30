@@ -8,9 +8,7 @@ from src.core.domain.model.model_data import ModelData
 
 class PredictRequest(BaseModel):
     model_data: ModelData = Field(default=ModelData(), title="Новые данные для прогноза")
-    fit_params: FitParams = Field(
-        title="Общие параметры обучения",
-    )
+    fit_params: FitParams = Field(title="Общие параметры обучения",)
 
     @model_validator(mode='before')
     @classmethod

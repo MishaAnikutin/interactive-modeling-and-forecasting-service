@@ -4,6 +4,8 @@ from src.infrastructure.adapters.distributions import HistogramEstimator, Densit
 from src.infrastructure.adapters.modeling_2.nhits import NhitsAdapter_V2
 from src.infrastructure.adapters.modeling_2.lstm import LstmAdapter_V2
 from src.infrastructure.adapters.modeling_2.gru import GruAdapter_V2
+from src.infrastructure.adapters.predicting_2.models import PredictNhitsAdapter_V2, PredictLstmAdapter_V2, \
+    PredictGruAdapter_V2
 from src.infrastructure.adapters.preliminary_diagnosis.fao import FaoAdapter
 from src.infrastructure.adapters.preliminary_diagnosis.kim_andrews import KimAndrewsAdapter
 from src.infrastructure.adapters.stat_tests.fisher import FisherTestAdapter
@@ -54,19 +56,19 @@ class InfraProvider(Provider):
     arimax_predictor = provide(PredictArimaxAdapter, provides=PredictArimaxAdapter)
 
     nhits = provide(NhitsAdapter, provides=NhitsAdapter)
-    nhits_predictor = provide(PredictNhitsAdapter, provides=PredictNhitsAdapter)
-
     nhits2 = provide(NhitsAdapter_V2, provides=NhitsAdapter_V2)
+    nhits_predictor = provide(PredictNhitsAdapter, provides=PredictNhitsAdapter)
+    nhits_predictor_2 = provide(PredictNhitsAdapter_V2, provides=PredictNhitsAdapter_V2)
 
     lstm = provide(LstmAdapter, provides=LstmAdapter)
-    lstm_predictor = provide(PredictLstmAdapter, provides=PredictLstmAdapter)
-
     lstm2 = provide(LstmAdapter_V2, provides=LstmAdapter_V2)
+    lstm_predictor = provide(PredictLstmAdapter, provides=PredictLstmAdapter)
+    lstm_predictor_2 = provide(PredictLstmAdapter_V2, provides=PredictLstmAdapter_V2)
 
     gru = provide(GruAdapter, provides=GruAdapter)
-    gru_predictor = provide(PredictGruAdapter, provides=PredictGruAdapter)
-
     gru2 = provide(GruAdapter_V2, provides=GruAdapter_V2)
+    gru_predictor = provide(PredictGruAdapter, provides=PredictGruAdapter)
+    gru_predictor_2 = provide(PredictGruAdapter_V2, provides=PredictGruAdapter_V2)
 
     metrics_factory = provide(MetricsFactory, provides=MetricsFactory)
 
