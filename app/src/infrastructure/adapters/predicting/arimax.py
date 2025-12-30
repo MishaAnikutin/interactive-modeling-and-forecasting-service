@@ -3,7 +3,7 @@ from typing import Optional
 from statsmodels.tsa.statespace.sarimax import SARIMAXResultsWrapper
 
 from src.core.domain import DataFrequency, ModelMetrics, Forecasts, FitParams, Timeseries
-from src.infrastructure.adapters.predicting.interface import BasePredictor
+from src.core.domain.predicting.interface import BasePredictor
 from src.infrastructure.adapters.serializer import ModelSerializer
 from src.infrastructure.adapters.timeseries import PandasTimeseriesAdapter, TimeseriesTrainTestSplit, TimeseriesExtender
 from src.infrastructure.factories.metrics import MetricsFactory
@@ -102,7 +102,7 @@ class PredictArimaxAdapter(BasePredictor):
             data_frequency: DataFrequency,
     ) -> tuple[Forecasts, ModelMetrics]:
 
-        model: SARIMAXResultsWrapper = self._model_serializer.undo_serialize(model_weight)
+        model: SARIMAXResultsWrapper = self._model_serializer.deserialize(model_weight)
 
         # Разделяем данные на train, val, test
         train_target, val_target, test_target = self._ts_spliter.split_ts(

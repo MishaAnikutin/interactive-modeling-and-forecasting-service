@@ -13,5 +13,5 @@ class ModelSerializer(abc.ABC, Generic[T]):
         ...
 
     @abc.abstractmethod
-    def undo_serialize(self, serialized_model: bytes) -> T:
+    def deserialize(self, serialized_model: bytes) -> T:
         ...

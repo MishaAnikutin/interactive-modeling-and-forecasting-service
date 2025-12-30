@@ -1,6 +1,7 @@
 from dishka import Provider, Scope, provide
 
 from src.core.application.building_model.use_cases.models import FitArimaxUC, FitGruUC, FitLstmUC, FitNhitsUC
+from src.core.application.building_model.use_cases.models_v2 import FitNhitsUC_V2, FitGruUC_V2, FitLstmUC_V2
 from src.core.application.predict_series.use_cases.predict_arimax import PredictArimaxUC
 from src.core.application.generating_series.use_cases.naive_decomposition import NaiveDecompositionUC
 from src.core.application.generating_series.use_cases.stl_decomposition import STLDecompositionUC
@@ -11,9 +12,9 @@ from src.core.application.model_diagnosis.use_cases.kstest import KolmogorovUC
 from src.core.application.model_diagnosis.use_cases.ljung_box import LjungBoxUC
 from src.core.application.model_diagnosis.use_cases.lm import LmUC
 from src.core.application.model_diagnosis.use_cases.omnibus import OmnibusUC
-from src.core.application.predict_series.use_cases.predict_gru import PredictGruUC
-from src.core.application.predict_series.use_cases.predict_lstm import PredictLstmUC
-from src.core.application.predict_series.use_cases.predict_nhits import PredictNhitsUC
+from src.core.application.predict_series.use_cases.predict_gru import PredictGruUC, PredictGruUC_V2
+from src.core.application.predict_series.use_cases.predict_lstm import PredictLstmUC, PredictLstmUC_V2
+from src.core.application.predict_series.use_cases.predict_nhits import PredictNhitsUC, PredictNhitsUC_V2
 from src.core.application.preliminary_diagnosis.use_cases.auto_pp import AutoPPplotUC
 from src.core.application.preliminary_diagnosis.use_cases.auto_qq import AutoQQplotUC
 from src.core.application.preliminary_diagnosis.use_cases.corr import CorrelationMatrixUC
@@ -51,11 +52,21 @@ class CoreProvider(Provider):
     lstm_fit_command = provide(FitLstmUC, provides=FitLstmUC)
     gru_fit_command = provide(FitGruUC, provides=FitGruUC)
 
+    # команды для построения моделей версия 2
+    nhits_fit_command_v2 = provide(FitNhitsUC_V2, provides=FitNhitsUC_V2)
+    lstm_fit_command_v2 = provide(FitLstmUC_V2, provides=FitLstmUC_V2)
+    gru_fit_command_v2 = provide(FitGruUC_V2, provides=FitGruUC_V2)
+
     # команды для прогнозирования моделями
     arimax_predict_command = provide(PredictArimaxUC, provides=PredictArimaxUC)
     gru_predict_command = provide(PredictGruUC, provides=PredictGruUC)
     lstm_predict_command = provide(PredictLstmUC, provides=PredictLstmUC)
     nhits_predict_command = provide(PredictNhitsUC, provides=PredictNhitsUC)
+
+    # команды для прогнозирования моделями 2
+    gru_predict_command_2 = provide(PredictGruUC_V2, provides=PredictGruUC_V2)
+    lstm_predict_command_2 = provide(PredictLstmUC_V2, provides=PredictLstmUC_V2)
+    nhits_predict_command_2 = provide(PredictNhitsUC_V2, provides=PredictNhitsUC_V2)
 
     # тесты на стационарность
     dickey_fuller_command = provide(DickeuFullerUC, provides=DickeuFullerUC)

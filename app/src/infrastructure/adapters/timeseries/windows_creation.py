@@ -1,85 +1,59 @@
-from datetime import date
 from typing import Optional, List, Tuple
-
-from src.core.domain import Timeseries
+import pandas as pd
 
 
 class WindowsCreation:
     @staticmethod
-    def create_windows_for_series(series: Timeseries, input_size: int) -> List[Timeseries]:
-        if input_size > len(series.dates):
+    def create_windows_for_series(series: pd.Series, input_size: int) -> List[pd.Series]:
+        if input_size > len(series):
             raise ValueError(f"Input size {input_size} is greater than series length {len(series.dates)}")
 
         windows = []
-        for i in range(0, len(series.dates)):
-            ts = Timeseries(
-                data_frequency=series.data_frequency,
-                dates=series.dates[i:i + input_size],
-                values=series.values[i:i + input_size],
-                name=series.name,
-            )
-            if len(ts.dates) < input_size:
-                break
-            windows.append(ts)
+        for i in range(len(series) - input_size + 1):
+            window = series.iloc[i:i + input_size]
+            windows.append(window)
 
         return windows
 
+    @staticmethod
+    def create_windows_for_df(df: Optional[pd.DataFrame], input_size: int) -> Optional[List[pd.DataFrame]]:
+        if df is None:
+            return None
+
+        if input_size > len(df):
+            raise ValueError(f"Input size {input_size} is greater than dataframe length {len(df)}")
+
+        windows = []
+        for i in range(len(df) - input_size + 1):
+            window = df.iloc[i:i + input_size].copy()
+            windows.append(window)
+
+        return windows
 
     def create_windows(
             self,
-            exog: Optional[List[Timeseries]],
-            target: Timeseries,
+            exog: Optional[pd.DataFrame],
+            target: pd.Series,
             input_size: int
     ) -> Tuple[
-        Optional[List[List[Timeseries]]], # преобразованная матрица exog в список матриц из окон
-        List[Timeseries] # преобразованный таргет в список окон
+        Optional[List[pd.DataFrame]], # преобразованная матрица exog в список матриц из окон
+        List[pd.Series] # преобразованный таргет в список окон
     ]:
-        windows_exog = None
-        if exog:
-            windows_exog = []
-            for variable in exog:
-                windows_exog.append(self.create_windows_for_series(variable, input_size))
+        if exog is not None and not target.index.equals(exog.index):
+            raise ValueError("Индексы target и exog должны совпадать")
+
+        windows_exog = self.create_windows_for_df(exog, input_size)
         windows_target = self.create_windows_for_series(target, input_size)
 
         return windows_exog, windows_target
 
-
-    def create_windows_for_dataset(
+    def create_window_out_for_sample(
             self,
-            exog_train: Optional[List[Timeseries]],
-            train_target: Timeseries,
-            exog_val: Optional[List[Timeseries]],
-            val_target: Timeseries,
-            exog_test: Optional[List[Timeseries]],
-            test_target: Timeseries,
+            exog: Optional[pd.DataFrame],
+            target: pd.Series,
             input_size: int,
-    ) -> Tuple[
-        Optional[List[List[Timeseries]]], # преобразованная матрица exog в список матриц из окон
-        List[Timeseries], # преобразованный таргет в список окон
-        Optional[List[List[Timeseries]]],  # преобразованная матрица exog в список матриц из окон
-        List[Timeseries],  # преобразованный таргет в список окон
-        Optional[List[List[Timeseries]]],  # преобразованная матрица exog в список матриц из окон
-        List[Timeseries]  # преобразованный таргет в список окон
-    ]:
-        windows_exog_train, windows_target_train = self.create_windows(exog_train, train_target, input_size)
-        windows_exog_val, windows_target_val = self.create_windows(exog_val, val_target, input_size)
-        windows_exog_test, windows_target_test = self.create_windows(exog_test, test_target, input_size)
-        return (
-            windows_exog_train, windows_target_train,
-            windows_exog_val, windows_target_val,
-            windows_exog_test, windows_target_test,
-        )
-
-
-if __name__ == "__main__":
-    windows_creation = WindowsCreation()
-    sample = Timeseries(
-        dates=[date(2025, 10, i) for i in range(1, 6)],
-        values=[1, 2, 3, None, 5],
-    )
-    result = windows_creation.create_windows_for_series(sample, 3)
-    for window in result:
-        print("="*60)
-        print(window.dates)
-        print(window.values)
-        print("="*60)
+    ) -> Tuple[Optional[pd.DataFrame], pd.Series]:
+        windows_exog, windows_target = self.create_windows(exog, target, input_size)
+        if windows_exog is None:
+            return None, windows_target[-1]
+        return windows_exog[-1], windows_target[-1]

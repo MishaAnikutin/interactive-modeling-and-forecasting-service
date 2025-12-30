@@ -1,7 +1,6 @@
 import pandas as pd
 
 from src.core.domain import FitParams
-from src.infrastructure.adapters.modeling.neural_forecast import future_index
 from tests.test_api.utils import delete_timestamp, from_pd_stamp_to_datetime
 
 
@@ -12,6 +11,7 @@ def process_fit_params(fit_params: FitParams) -> dict:
         "train_boundary": fit_params.train_boundary.strftime("%Y-%m-%d"),
     }
 
+future_index = None
 
 def validate_no_exog_result(
         received_data: dict,

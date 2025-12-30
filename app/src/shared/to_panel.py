@@ -6,6 +6,8 @@ def to_panel(
         target: pd.Series,
         exog: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
+    if isinstance(target, pd.DataFrame):
+        target = target.iloc[:, 0]
     df = pd.DataFrame(
         {
             "unique_id": 'ts',
