@@ -11,6 +11,7 @@ from src.infrastructure.adapters.preliminary_diagnosis.kim_andrews import KimAnd
 from src.infrastructure.adapters.stat_tests.fisher import FisherTestAdapter
 from src.infrastructure.adapters.stat_tests.student import StudentTestAdapter
 from src.infrastructure.adapters.stat_tests.two_sigma import TwoSigmaTestAdapter
+from src.infrastructure.adapters.timeseries.split_windows import WindowSplitter
 from src.infrastructure.adapters.timeseries.windows_creation import WindowsCreation
 from src.infrastructure.factories.distributions import DistributionFactory
 from src.infrastructure.factories.metrics import MetricsFactory
@@ -97,3 +98,4 @@ class InfraProvider(Provider):
     two_sigma_adapter = provide(TwoSigmaTestAdapter, provides=TwoSigmaTestAdapter)
 
     windows_creation = provide(WindowsCreation, provides=WindowsCreation)
+    windows_splitter = provide(WindowSplitter, provides=WindowSplitter)
