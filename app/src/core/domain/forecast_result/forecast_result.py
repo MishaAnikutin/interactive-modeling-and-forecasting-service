@@ -12,9 +12,9 @@ class ForecastResult(BaseModel):
 
 class WindowsForecast(BaseModel):
     train_forecasts: List[Timeseries] = Field(title="Прогнозы на скользящих окнах внутри обучающей выборки")
-    val_forecasts: Optional[List[Timeseries]] = Field(title="Прогнозы на скользящих окнах внутри валидационной выборки")
-    test_forecasts: Optional[List[Timeseries]] = Field(title="Прогнозы на скользящих окнах внутри тестовой выборки")
-    out_of_sample_forecasts: Optional[List[Timeseries]] = Field(title="Прогнозы на скользящих окнах дальше известных данных")
+    val_forecasts: List[Timeseries] = Field(title="Прогнозы на скользящих окнах внутри валидационной выборки")
+    test_forecasts: List[Timeseries] = Field(title="Прогнозы на скользящих окнах внутри тестовой выборки")
+    out_of_sample_forecasts: List[Timeseries] = Field(title="Прогнозы на скользящих окнах дальше известных данных")
 
 
 class ForecastResult_V2(BaseModel):
