@@ -8,6 +8,7 @@ from src.core.domain import DataFrequency, ModelMetrics, FitParams, Timeseries, 
 from src.core.domain.predicting.interface import BasePredictor
 from src.infrastructure.adapters.serializer import ModelSerializer
 from src.infrastructure.adapters.timeseries import PandasTimeseriesAdapter, TimeseriesTrainTestSplit
+from src.infrastructure.adapters.timeseries.split_windows import WindowSplitter
 from src.infrastructure.adapters.timeseries.windows_creation import WindowsCreation
 from src.infrastructure.factories.metrics import MetricsFactory
 from src.shared.to_panel import to_panel
@@ -24,12 +25,14 @@ class NeuralPredictAdapter_V2(BasePredictor):
             metric_factory: MetricsFactory,
             ts_train_test_split: TimeseriesTrainTestSplit,
             windows_creation: WindowsCreation,
+            windows_splitter: WindowSplitter,
     ):
         self._metric_factory = metric_factory
         self._ts_spliter = ts_train_test_split
         self._ts_adapter = ts_adapter
         self._model_serializer = model_serializer
         self._windows_creation = windows_creation
+        self._windows_splitter = windows_splitter
 
         self.target: pd.Series = None
         self.exog: Optional[pd.DataFrame] = None
@@ -199,7 +202,7 @@ class NeuralPredictAdapter_V2(BasePredictor):
 
         return result_forecasts
 
-    def _predict(self, forecast_horizon: int) -> List[pd.Series]:
+    def _predict(self, forecast_horizon: int) -> List[Timeseries]:
         insample_predictions = self._predict_insample()
         out_of_sample_predictions = self._predict_out_of_sample(insample_predictions[-1], forecast_horizon)
         # срез, так как последний прогноз внутри выборки входит во вневыборочный прогноз
@@ -277,12 +280,20 @@ class NeuralPredictAdapter_V2(BasePredictor):
 
         forecasts = self._predict(fit_params.forecast_horizon)
 
+        # поделить этот прогноз на train/val/test
+        split_forecasts = self._windows_splitter.split(
+            forecasts=forecasts,
+            fit_params=fit_params,
+            last_date=target.index.tolist()[-1],
+            freq=data_frequency
+        )
+
         best_forecast = self._build_best_forecast(forecasts, fit_params)
 
         best_forecast_metrics = self._calculate_best_forecast_metrics(best_forecast, fit_params)
 
         return ForecastResult_V2(
-            forecasts=forecasts,
+            forecasts=split_forecasts,
             best_forecast=best_forecast,
             best_forecast_metrics=best_forecast_metrics,
         )
