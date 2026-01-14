@@ -15,6 +15,7 @@ from src.infrastructure.adapters.modeling.neural_forecast.utils import form_trai
 from src.infrastructure.adapters.modeling_2.neural_models_errors import TrainSizeError, LSTM_GRU_TrainSizeError, \
     ValSizeError, PatienceStepsError
 from src.infrastructure.adapters.timeseries import TimeseriesTrainTestSplit, PandasTimeseriesAdapter
+from src.infrastructure.adapters.timeseries.split_windows import WindowSplitter
 from src.infrastructure.adapters.timeseries.windows_creation import WindowsCreation
 from src.infrastructure.factories.metrics import MetricsFactory
 from src.shared.to_panel import to_panel
@@ -34,8 +35,10 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
             metric_factory: MetricsFactory,
             ts_train_test_split: TimeseriesTrainTestSplit,
             windows_creation: WindowsCreation,
+            windows_splitter: WindowSplitter,
             ts_adapter: PandasTimeseriesAdapter,
     ):
+        self.windows_splitter = windows_splitter
         self.windows_creation = windows_creation
         self.ts_adapter = ts_adapter
         super().__init__(metric_factory, ts_train_test_split)
@@ -226,7 +229,7 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
             forecast_list.append(self._predict_window(nf_panel))
         return forecast_list
 
-    def _predict(self, input_size: int, forecast_horizon: int) -> List[pd.Series]:
+    def _predict(self, input_size: int, forecast_horizon: int) -> List[Timeseries]:
         insample_predictions = self._predict_insample(input_size)
         out_of_sample_predictions = self._predict_out_of_sample(insample_predictions[-1], input_size, forecast_horizon)
         # срез, так как последний прогноз внутри выборки входит во вневыборочный прогноз
@@ -342,6 +345,15 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
             input_size=hyperparameters.input_size,
             forecast_horizon=fit_params.forecast_horizon
         )
+
+        # поделить этот прогноз на train/val/test
+        split_forecasts = self.windows_splitter.split(
+            forecasts=forecasts,
+            fit_params=fit_params,
+            last_date=target.index.tolist()[-1],
+            freq=data_frequency
+        )
+
         # создать прогноз из первых точек
         best_forecast = self._build_best_forecast(forecasts, fit_params, hyperparameters.input_size)
 
@@ -350,7 +362,7 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
 
         return (
             self.result_class(
-                forecasts=forecasts,
+                forecasts=split_forecasts,
                 best_forecast=best_forecast,
                 best_forecast_metrics=best_forecast_metrics
             ),
