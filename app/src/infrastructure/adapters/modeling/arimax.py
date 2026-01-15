@@ -59,7 +59,7 @@ class ArimaxAdapter(MlAdapterInterface):
                 endog=train_target,
                 exog=exog_train,
                 order=(hyperparameters.p, hyperparameters.d, hyperparameters.q),
-                seasonal_order=(0, 0, 0, 0),  # Без сезонности
+                seasonal_order=(hyperparameters.P, hyperparameters.D, hyperparameters.Q, hyperparameters.m),
                 trend='c'  # Константа
             )
         except ValueError:

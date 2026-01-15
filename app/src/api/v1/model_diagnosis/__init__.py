@@ -2,10 +2,13 @@ from fastapi import APIRouter
 
 from .resid_analysis import resid_analysis_router
 from .autocorrelation_analysis import autocorrelation_router
-
+from .equality_of_distributions import equality_of_distributions_router
+from .forecast_accuracy_comparison import forecast_accuracy_comparison_router
 
 model_diagnosis_router = APIRouter(prefix='/model_diagnosis')
 
 
 model_diagnosis_router.include_router(resid_analysis_router)
 model_diagnosis_router.include_router(autocorrelation_router)
+model_diagnosis_router.include_router(equality_of_distributions_router)
+model_diagnosis_router.include_router(forecast_accuracy_comparison_router)

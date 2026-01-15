@@ -1,7 +1,9 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from dishka import FromDishka
 from dishka.integrations.fastapi import inject_sync
 
+from src.core.application.preliminary_diagnosis.schemas.break_finder import BreakFinderRequest, BreakFinderResponse
+from src.core.application.preliminary_diagnosis.use_cases.break_finder import BreakFinderUC
 from src.core.application.preliminary_diagnosis.use_cases.student_test import StudentTestUC
 from src.core.application.preliminary_diagnosis.use_cases.fisher_test import FisherTestUC
 from src.core.application.preliminary_diagnosis.use_cases.two_sigma_test import TwoSigmaTestUC
@@ -43,3 +45,15 @@ def two_sigma_test(
     uc: FromDishka[TwoSigmaTestUC]
 ) -> TwoSigmaTestResponse:
     return uc.execute(request=request)
+
+
+@series_monitoring_router.post("/break_finder")
+@inject_sync
+def break_finder(
+    request: BreakFinderRequest,
+    uc: FromDishka[BreakFinderUC]
+) -> BreakFinderResponse:
+    try:
+        return uc.execute(request=request)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=exc)

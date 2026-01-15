@@ -44,6 +44,8 @@ def fit_arimax(
     )
 
 
+
+
 @fit_model_router.post(
     path="/nhits/fit",
     responses={

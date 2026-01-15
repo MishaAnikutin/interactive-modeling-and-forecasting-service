@@ -1,7 +1,12 @@
 from dishka import Provider, Scope, provide
 
+from src.core.application.building_model.use_cases.autoarima import AutoArimaUC
 from src.core.application.building_model.use_cases.models import FitArimaxUC, FitGruUC, FitLstmUC, FitNhitsUC
 from src.core.application.building_model.use_cases.models_v2 import FitNhitsUC_V2, FitGruUC_V2, FitLstmUC_V2
+from src.core.application.model_diagnosis.use_cases.dm_test import DmTestUC
+from src.core.application.model_diagnosis.use_cases.mann_whitney import MannWhitneyUC
+from src.core.application.model_diagnosis.use_cases.t_test import TtestUC
+from src.core.application.model_diagnosis.use_cases.wilcoxon import WilcoxonUC
 from src.core.application.predict_series.use_cases.predict_arimax import PredictArimaxUC
 from src.core.application.generating_series.use_cases.naive_decomposition import NaiveDecompositionUC
 from src.core.application.generating_series.use_cases.stl_decomposition import STLDecompositionUC
@@ -21,6 +26,7 @@ from src.core.application.preliminary_diagnosis.use_cases.corr import Correlatio
 from src.core.application.preliminary_diagnosis.use_cases.df_gls import DfGlsUC
 from src.core.application.preliminary_diagnosis.use_cases.dicker_fuller import DickeuFullerUC
 from src.core.application.preliminary_diagnosis.use_cases.fao import FaoUC
+from src.core.application.preliminary_diagnosis.use_cases.hegy import HegyUC
 from src.core.application.preliminary_diagnosis.use_cases.histogram import HistogramUC
 from src.core.application.preliminary_diagnosis.use_cases.kde import EstimateDistributionsUC
 from src.core.application.preliminary_diagnosis.use_cases.kim_andrews import KimAndrewsUC
@@ -40,7 +46,8 @@ from src.core.application.preprocessing.inverse_preprocessing_uc import InverseP
 from src.core.application.preliminary_diagnosis.use_cases.acf_and_pacf import AcfAndPacfUC
 from src.core.application.preliminary_diagnosis.use_cases.select_distribution import SelectDistUC
 from src.core.application.validate_series.validate_series_uc import ValidateSeriesUC
-
+from src.core.application.preliminary_diagnosis.use_cases.break_finder import BreakFinderUC
+from src.core.application.preliminary_diagnosis.use_cases.spurious_regression import SpuriousRegressionUC
 
 # TODO: возмонжо стоит разделить провайдеров на каждый use case ...
 class CoreProvider(Provider):
@@ -126,3 +133,23 @@ class CoreProvider(Provider):
     student_test_command = provide(StudentTestUC, provides=StudentTestUC)
     fisher_test_command = provide(FisherTestUC, provides=FisherTestUC)
     two_sigma_test_command = provide(TwoSigmaTestUC, provides=TwoSigmaTestUC)
+
+    # Определение структурных сдвигов
+    break_finder_command = provide(BreakFinderUC, provides=BreakFinderUC)
+
+    # Мнимость регрессии
+    spurious_regression = provide(SpuriousRegressionUC, provides=SpuriousRegressionUC)
+
+    # Тесты на мнимые корни
+    hegy = provide(HegyUC, provides=HegyUC)
+
+    # AutoARIMA
+    autoarima = provide(AutoArimaUC, provides=AutoArimaUC)
+
+    # Анализ равенства распределений прогнозов
+    ttest = provide(TtestUC, provides=TtestUC)
+    mw = provide(MannWhitneyUC, provides=MannWhitneyUC)
+    wilcoxon = provide(WilcoxonUC, provides=WilcoxonUC)
+
+    #
+    dm_test = provide(DmTestUC, provides=DmTestUC)

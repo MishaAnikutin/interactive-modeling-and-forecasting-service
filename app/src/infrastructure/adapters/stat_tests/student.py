@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from scipy.stats import ttest_ind, ttest_1samp
 from typing import List
@@ -18,111 +19,109 @@ class StudentTestAdapter:
             equal_var: bool,
             alpha: float
     ) -> List[StudentTestResult]:
+        df = self._series_to_dataframe(timeseries)
+        boundary_idx = self._find_boundary_index(df, date_boundary)
         series_size = Frequency2SeriesSize.get(frequency)
-        boundary_idx = self._find_boundary_index(timeseries, date_boundary)
 
-        return self._perform_test_series(timeseries, boundary_idx, series_size, equal_var, alpha)
+        return self._perform_test_series(df, boundary_idx, series_size, equal_var, alpha)
 
-    def _find_boundary_index(self, series: pd.Series, date_boundary: datetime) -> int:
+    def _series_to_dataframe(self, series: pd.Series) -> pd.DataFrame:
+        return pd.DataFrame({
+            'date': series.index,
+            'obs': series.astype(float)
+        })
+
+    def _find_boundary_index(self, df: pd.DataFrame, date_boundary: datetime) -> int:
         date_boundary = pd.to_datetime(date_boundary)
 
-        if date_boundary in series.index:
-            return series.index.get_loc(date_boundary)
-
-        nearest_date = series.index[series.index <= date_boundary].max()
-
-        return series.index.get_loc(nearest_date)
+        mask = df['date'].dt.date == date_boundary.date()
+        if not mask.any():
+            dmin, dmax = df['date'].min(), df['date'].max()
+            raise InvalidDateError(
+                f"index_date не найден. Ищем {date_boundary.date()}. "
+                f"Диапазон в данных: {dmin.date()} — {dmax.date()}."
+            )
+        return np.where(mask)[0][0]  # позиция первого True в маске (int)
 
     def _perform_test_series(
             self,
-            series: pd.Series,
+            df: pd.DataFrame,
+            boundary_idx: int,
+            series_size: int,
+            equal_var: bool,
+            alpha: float
+    ) -> List[StudentTestResult]:
+        points_after = len(df) - boundary_idx  # исправлено: int - int
+        if points_after <= series_size + 1:
+            return self._perform_short_series_tests(df, boundary_idx, equal_var, alpha)
+        else:
+            return self._perform_long_series_tests(df, boundary_idx, series_size, equal_var, alpha)
+
+    def _perform_short_series_tests(
+            self,
+            df: pd.DataFrame,
+            boundary_idx: int,
+            equal_var: bool,
+            alpha: float
+    ) -> List[StudentTestResult]:
+        results = []
+
+        # тест для последней точки
+        if boundary_idx < len(df) - 1:
+            test_result = ttest_1samp(df.obs.iloc[boundary_idx:-1], df.obs.iloc[-1])
+            results.append(self._create_test_result(test_result, alpha, df.iloc[-1, 0]))
+
+        # тесты для тела (ttest_ind)
+        for i in range(2, len(df) - boundary_idx - 1):
+            if boundary_idx < len(df) - i:
+                test_result = ttest_ind(df.obs.iloc[boundary_idx:-i], df.obs.iloc[-i:], equal_var=equal_var)
+                results.append(self._create_test_result(test_result, alpha, df.iloc[-2 - (len(results)), 0]))
+
+        # тест для первой точки
+        if boundary_idx < len(df) - 2:
+            test_result = ttest_1samp(df.obs.iloc[boundary_idx + 1:-1], df.obs.iloc[boundary_idx])
+            results.append(self._create_test_result(test_result, alpha, df.iloc[boundary_idx, 0]))
+
+        return self._pad_results(results, series_size)
+
+    def _perform_long_series_tests(
+            self,
+            df: pd.DataFrame,
             boundary_idx: int,
             series_size: int,
             equal_var: bool,
             alpha: float
     ) -> List[StudentTestResult]:
         results = []
-        series = series.astype(float)
-        is_short_series = len(series) - boundary_idx <= series_size + 1
 
-        if is_short_series:
-            results.extend(self._perform_short_series_tests(series, boundary_idx, equal_var, alpha))
-        else:
-            results.extend(self._perform_long_series_tests(series, boundary_idx, series_size, equal_var, alpha))
+        # тест для последней точки
+        if boundary_idx < len(df) - 1:
+            test_result = ttest_1samp(df.obs.iloc[boundary_idx:-1], df.obs.iloc[-1])
+            results.append(self._create_test_result(test_result, alpha, df.iloc[-1, 0]))
 
+        # тесты для тела (ttest_ind)
+        for i in range(2, series_size + 1):
+            if boundary_idx < len(df) - i:
+                test_result = ttest_ind(df.obs.iloc[boundary_idx:-i], df.obs.iloc[-i:], equal_var=equal_var)
+                results.append(self._create_test_result(test_result, alpha, df.iloc[-2 - (len(results)), 0]))
+
+        return self._pad_results(results, series_size)
+
+    def _create_test_result(self, test_result, alpha: float, date: datetime) -> StudentTestResult:
+        conclusion = Conclusion.reject if test_result.pvalue < alpha else Conclusion.fail_to_reject
+        return StudentTestResult(
+            date=pd.to_datetime(date),
+            p_value=float(test_result.pvalue),
+            statistic=float(test_result.statistic),
+            conclusion=conclusion
+        )
+
+    def _pad_results(self, results: List[StudentTestResult], series_size: int) -> List[StudentTestResult]:
         while len(results) < series_size:
             results.append(StudentTestResult(
+                date=pd.NaT,
                 p_value=float('nan'),
                 statistic=float('nan'),
                 conclusion=Conclusion.fail_to_reject
             ))
-
         return results
-
-    def _perform_short_series_tests(
-            self,
-            series: pd.Series,
-            boundary_idx: int,
-            equal_var: bool,
-            alpha: float
-    ) -> List[StudentTestResult]:
-        results = []
-
-        if boundary_idx < len(series) - 1:
-            data_before = series.iloc[boundary_idx:-1]  # от boundary_idx до предпоследнего
-            last_value = series.iloc[-1]
-            last_point_test = ttest_1samp(data_before, last_value)
-            results.append(self._create_test_result(last_point_test, alpha))
-
-        available_tests = len(series) - boundary_idx - 2
-        for i in range(2, min(available_tests + 1, len(series) - boundary_idx - 1)):
-            data1 = series.iloc[boundary_idx:-i]  # от boundary_idx до -i
-            data2 = series.iloc[-i:]  # последние i значений
-            test_result = ttest_ind(data1, data2, equal_var=equal_var)
-            results.append(self._create_test_result(test_result, alpha))
-
-        if boundary_idx < len(series) - 2:
-            data_after = series.iloc[boundary_idx + 1:-1]  # от boundary_idx+1 до предпоследнего
-            boundary_value = series.iloc[boundary_idx]
-            first_point_test = ttest_1samp(data_after, boundary_value)
-            results.append(self._create_test_result(first_point_test, alpha))
-
-        return results
-
-    def _perform_long_series_tests(
-            self,
-            series: pd.Series,
-            boundary_idx: int,
-            series_size: int,
-            equal_var: bool,
-            alpha: float
-    ) -> List[StudentTestResult]:
-        results = []
-
-        if boundary_idx < len(series) - 1:
-            data_before = series.iloc[boundary_idx:-1]
-            last_value = series.iloc[-1]
-            last_point_test = ttest_1samp(data_before, last_value)
-            results.append(self._create_test_result(last_point_test, alpha))
-
-        for i in range(2, series_size + 1):
-            if boundary_idx < len(series) - i:
-                data1 = series.iloc[boundary_idx:-i]
-                data2 = series.iloc[-i:]
-                test_result = ttest_ind(data1, data2, equal_var=equal_var)
-                results.append(self._create_test_result(test_result, alpha))
-
-        return results
-
-    def _create_test_result(self, test_result, alpha: float) -> StudentTestResult:
-        conclusion = (
-            Conclusion.reject
-            if test_result.pvalue < alpha
-            else Conclusion.fail_to_reject
-        )
-
-        return StudentTestResult(
-            p_value=test_result.pvalue,
-            statistic=test_result.statistic,
-            conclusion=conclusion
-        )

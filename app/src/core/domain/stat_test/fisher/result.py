@@ -1,4 +1,5 @@
 from typing import Optional
+from datetime import datetime
 
 from pydantic import BaseModel, Field, model_validator
 from src.core.domain.stat_test.conclusion import Conclusion
@@ -6,6 +7,7 @@ from src.shared.utils import validate_float_param
 
 
 class FisherTestResult(BaseModel):
+    datetime: Optional[datetime]
     p_value: Optional[float] = Field(..., title="P-значение")
     statistic: Optional[float] = Field(..., title="F-статистика")
     conclusion: Conclusion = Field(..., title="Заключение")

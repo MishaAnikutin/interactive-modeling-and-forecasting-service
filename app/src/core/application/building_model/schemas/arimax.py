@@ -7,9 +7,14 @@ from src.core.domain.model.model_data import ModelData
 
 
 class ArimaxParams(BaseModel):
-    p: int = Field(default=0, ge=0, le=10000)
-    d: int = Field(default=0, ge=0, le=10000)
-    q: int = Field(default=0, ge=0, le=10000)
+    p: int = Field(default=0, ge=0, le=10000, description='порядок авторегрессии')
+    d: int = Field(default=0, ge=0, le=10000, description='порядок интегрирования')
+    q: int = Field(default=0, ge=0, le=10000, description='порядок скользящего среднего')
+
+    P: int = Field(default=0, ge=0, le=10000, description='порядок сезонной авторегрессии')
+    D: int = Field(default=0, ge=0, le=10000, description='порядок сезонного интегрирования')
+    Q: int = Field(default=0, ge=0, le=10000, description='порядок сезонного скользящего среднего')
+    m: int = Field(default=0, ge=0, le=10000, description='длина сезонного периода')
 
 
 class ArimaxFitRequest(BaseModel):

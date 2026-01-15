@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, model_validator
 
 from src.core.domain.stat_test.conclusion import Conclusion
@@ -5,6 +7,7 @@ from src.shared.utils import validate_float_param
 
 
 class StudentTestResult(BaseModel):
+    date: datetime
     p_value: float
     statistic: float
     conclusion: Conclusion

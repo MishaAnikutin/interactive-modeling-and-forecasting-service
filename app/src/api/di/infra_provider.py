@@ -1,6 +1,11 @@
 from dishka import Provider, Scope, provide
 
 from src.infrastructure.adapters.distributions import HistogramEstimator, DensityEstimator, EmpiricalDistribution
+from src.infrastructure.adapters.equality_of_distribution.mann_whitney import MannWhitneyAdapter
+from src.infrastructure.adapters.equality_of_distribution.ttest import TtestAdapter
+from src.infrastructure.adapters.equality_of_distribution.wilcoxon import WilcoxonAdapter
+from src.infrastructure.adapters.forecast_accuracy_comparison.dm_test import DmTestAdapter
+from src.infrastructure.adapters.model_parameters_selection.arima_gridsearch import ArimaGridsearch
 from src.infrastructure.adapters.modeling_2.nhits import NhitsAdapter_V2
 from src.infrastructure.adapters.modeling_2.lstm import LstmAdapter_V2
 from src.infrastructure.adapters.modeling_2.gru import GruAdapter_V2
@@ -25,6 +30,7 @@ from src.infrastructure.adapters.modeling import (
 
 from src.infrastructure.adapters.predicting.arimax import PredictArimaxAdapter
 from src.infrastructure.adapters.predicting.neural_predict.models import PredictGruAdapter, PredictNhitsAdapter, PredictLstmAdapter
+from src.infrastructure.factories.stationarity import StationaryTestsFactory
 from src.infrastructure.factories.statistics import StatisticsFactory
 from src.infrastructure.factories.preprocessing import PreprocessFactory
 from src.infrastructure.adapters.serializer import PickleSerializer, ModelSerializer
@@ -39,6 +45,9 @@ from src.infrastructure.adapters.timeseries import (
 )
 from src.infrastructure.adapters.dist_fit.dist_fit import DistFit
 from src.infrastructure.interactors.correlation import CorrelationInteractor
+from src.infrastructure.adapters.structural_shifts.break_finder import BreakFinderAdapter
+from src.infrastructure.interactors.spurious_regression_checker.checker import SpuriousRegressionChecker
+
 
 class InfraProvider(Provider):
     scope = Scope.REQUEST
@@ -98,4 +107,19 @@ class InfraProvider(Provider):
     two_sigma_adapter = provide(TwoSigmaTestAdapter, provides=TwoSigmaTestAdapter)
 
     windows_creation = provide(WindowsCreation, provides=WindowsCreation)
+
     windows_splitter = provide(WindowSplitter, provides=WindowSplitter)
+
+    break_finder_adapter = provide(BreakFinderAdapter, provides=BreakFinderAdapter)
+
+    spurious_regression_checker = provide(SpuriousRegressionChecker, provides=SpuriousRegressionChecker)
+
+    arima_gridsearch = provide(ArimaGridsearch, provides=ArimaGridsearch)
+
+    stat_tests_factory = provide(StationaryTestsFactory, provides=StationaryTestsFactory)
+
+    ttest = provide(TtestAdapter, provides=TtestAdapter)
+    mw = provide(MannWhitneyAdapter, provides=MannWhitneyAdapter)
+    wilcoxon = provide(WilcoxonAdapter, provides=WilcoxonAdapter)
+
+    dm = provide(DmTestAdapter, provides=DmTestAdapter)

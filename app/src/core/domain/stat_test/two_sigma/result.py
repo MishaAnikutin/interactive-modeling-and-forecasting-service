@@ -1,11 +1,14 @@
-from pydantic import BaseModel, Field, model_validator
+from typing import Optional
+from datetime import datetime
 
+from pydantic import BaseModel, Field, model_validator
 from src.shared.utils import validate_float_param
 from .growth_conclusion import GrowthConclusion
 from ..confidence_interval import ConfidenceInterval
 
 
 class TwoSigmaTestResult(BaseModel):
+    datetime: Optional[datetime]
     std: float = Field(..., title="Стандартное отклонение")
     confidence_interval: ConfidenceInterval = Field(..., title="Доверительный интервал")
     conclusion: GrowthConclusion = Field(..., title="Заключение")

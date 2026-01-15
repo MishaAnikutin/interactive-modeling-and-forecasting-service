@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -30,8 +30,14 @@ class TwoSigmaTestAdapter:
         if date_boundary in series.index:
             return series.index.get_loc(date_boundary)
 
-        nearest_date = series.index[series.index <= date_boundary].max()
+        # ближайшая предыдущая дата
+        mask = series.index <= date_boundary
+        if not mask.any():
+            raise InvalidDateError(
+                f"Boundary date {date_boundary} is earlier than all dates in the series."
+            )
 
+        nearest_date = series.index[mask].max()
         return series.index.get_loc(nearest_date)
 
     def _perform_test_series(
@@ -40,8 +46,11 @@ class TwoSigmaTestAdapter:
             boundary_idx: int,
             series_size: int
     ) -> List[TwoSigmaTestResult]:
-        results = []
+        results: List[TwoSigmaTestResult] = []
         series_values = series.astype(float).values
+
+        # счётчик реальных тестов (для вычисления дат, как в коде коллеги)
+        test_index = 0
 
         for j in range(1, series_size + 1):
             growth_rates = []
@@ -51,22 +60,15 @@ class TwoSigmaTestAdapter:
                     growth_rates.append(growth_rate)
 
             if len(growth_rates) < 2:
-                results.append(TwoSigmaTestResult(
-                    std=float('nan'),
-                    confidence_interval=(float('nan'), float('nan')),
-                    conclusion=GrowthConclusion.normal
-                ))
+                # для NaN результата используем None дату
+                results.append(self._create_nan_result())
                 continue
 
             growth_series = pd.Series(growth_rates)
             diff_series = growth_series.diff(1).dropna()
 
             if len(diff_series) == 0:
-                results.append(TwoSigmaTestResult(
-                    std=float('nan'),
-                    confidence_interval=(float('nan'), float('nan')),
-                    conclusion=GrowthConclusion.normal
-                ))
+                results.append(self._create_nan_result())
                 continue
 
             current_std = np.std(diff_series)
@@ -76,11 +78,54 @@ class TwoSigmaTestAdapter:
 
             is_anomalous = current_std < ci_lower or current_std > ci_upper
 
-            results.append(self._create_test_result(current_std, (ci_lower, ci_upper), is_anomalous))
+            # дата по логике коллеги: df.iloc[-1 - test_index, 0]
+            dt = self._get_result_datetime(series.index, test_index)
+            results.append(self._create_test_result(current_std, (ci_lower, ci_upper), is_anomalous, dt))
+
+            test_index += 1  # увеличиваем только для успешных тестов
+
+        # добиваем список NaN'ами до series_size, если нужно
+        while len(results) < series_size:
+            results.append(self._create_nan_result())
 
         return results
 
-    def _create_test_result(self, std: float, confidence_interval: tuple, is_anomalous: bool) -> TwoSigmaTestResult:
+    def _get_result_datetime(
+            self,
+            index: pd.DatetimeIndex,
+            test_index: int
+    ) -> Optional[datetime]:
+        """
+        Восстановление даты теста по логике коллеги:
+
+        date = [df.iloc[-1 - i, 0] for i in range(len(result_std))]
+        где i = 0, 1, 2, ...
+
+        Здесь:
+        - index — DatetimeIndex временного ряда,
+        - test_index — порядковый номер теста (0, 1, 2, ...).
+
+        Используется index[-1 - test_index].
+        """
+        pos = -1 - test_index
+
+        # Защита от некорректных индексов
+        if pos < -len(index):
+            return None
+
+        ts = index[pos]
+        # Pandas Timestamp нормально сериализуется как datetime
+        if hasattr(ts, "to_pydatetime"):
+            return ts.to_pydatetime()
+        return ts  # Timestamp тоже наследуется от datetime
+
+    def _create_test_result(
+            self,
+            std: float,
+            confidence_interval: Tuple[float, float],
+            is_anomalous: bool,
+            dt: Optional[datetime]
+    ) -> TwoSigmaTestResult:
         conclusion = (
             GrowthConclusion.anomalous
             if is_anomalous
@@ -88,7 +133,17 @@ class TwoSigmaTestAdapter:
         )
 
         return TwoSigmaTestResult(
+            datetime=dt,
             std=std,
             confidence_interval=confidence_interval,
             conclusion=conclusion
+        )
+
+    def _create_nan_result(self) -> TwoSigmaTestResult:
+        """Создаёт NaN-результат с None датой"""
+        return TwoSigmaTestResult(
+            datetime=None,
+            std=float('nan'),
+            confidence_interval=(float('nan'), float('nan')),
+            conclusion=GrowthConclusion.normal
         )
