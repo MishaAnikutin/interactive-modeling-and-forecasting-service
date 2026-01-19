@@ -7,6 +7,7 @@ from src.core.domain.stat_test.alternative import Alternative
 from src.core.domain.stat_test.ttest.result import TtestResult
 from src.core.domain.stat_test import Conclusion, SignificanceLevel
 from src.core.domain.stat_test.wilcoxon.params import ZeroMethod
+from src.core.domain.stat_test.wilcoxon.result import WilcoxonResult
 
 
 class WilcoxonAdapter:
@@ -20,7 +21,7 @@ class WilcoxonAdapter:
             nan_policy: NanPolicy = NanPolicy.PROPAGATE,
             method: Method = Method.AUTO,
             zero_method: ZeroMethod = ZeroMethod.wilcox
-    ) -> TtestResult:
+    ) -> WilcoxonResult:
         result = stats.wilcoxon(
             forecast, actual,
             alternative=alternative.value,
@@ -32,7 +33,7 @@ class WilcoxonAdapter:
 
         conclusion = Conclusion.fail_to_reject if result.pvalue < significance_level else Conclusion.reject
 
-        return TtestResult(
+        return WilcoxonResult(
             p_value=result.pvalue,
             statistic=result.statistic,
             conclusion=conclusion
