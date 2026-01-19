@@ -1,11 +1,13 @@
+from typing import Optional
+
 from pydantic import model_validator, BaseModel
 from src.core.domain.stat_test import Conclusion
 from src.shared.utils import validate_float_param
 
 
 class DmTestResult(BaseModel):
-    statistic: float
-    p_value: float
+    statistic: Optional[float]
+    p_value: Optional[float]
     conclusion: Conclusion
 
     @model_validator(mode="after")

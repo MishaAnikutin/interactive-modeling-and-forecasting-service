@@ -6,7 +6,7 @@ from src.core.domain.stat_test.hegy import TrendType, CriteriaType
 
 
 class HegyRequest(BaseModel):
-    y: Timeseries
+    timeseries: Timeseries
     max_lag: Optional[int] = Field(default=None, ge=0,
                                    description="максимальное число лагов в регрессии теста. Если `None`, то используется "
                                                "$12 {\left\lfloor\frac{T}{100}\right\rfloor}^{1/4}$")

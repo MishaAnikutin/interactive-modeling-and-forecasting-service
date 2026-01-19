@@ -8,7 +8,7 @@ from src.core.domain.structural_shift.break_criterion import BreakCriterion
 
 
 class BreakFinderRequest(BaseModel):
-    endog: Timeseries
+    timeseries: Timeseries
     trim: tuple[Union[float, int], Union[float, int]] = (0.15, 0.15)
     gap: float = 0.15
 
