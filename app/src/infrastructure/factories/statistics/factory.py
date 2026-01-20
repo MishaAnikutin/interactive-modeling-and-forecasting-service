@@ -2,7 +2,7 @@ import time
 
 import numpy as np
 
-from src.core.application.preliminary_diagnosis.schemas.statistics import StatisticsEnum
+from src.core.application.preliminary_diagnosis.schemas.statistics import StatisticsEnum, StatisticResult
 from src.core.domain.statistics import StatisticsServiceI
 
 
@@ -18,5 +18,5 @@ class StatisticsFactory:
         return wrapper
 
     @classmethod
-    def get_value(cls, ts: np.ndarray, statistic: StatisticsEnum) -> float:
+    def get_value(cls, ts: np.ndarray, statistic: StatisticsEnum) -> StatisticResult:
         return cls.registry[statistic]().get_value(ts)
