@@ -47,10 +47,49 @@ class RusStatMetricEnum(Enum):
     ENTROPY = 'Энтропия'
 
 
+class SplitOption(Enum):
+    """
+    Вариант разбиения данных:
+        - SplitOption.NONE: обработка всего ряда без разбиения
+        - SplitOption.QUARTILE: разбиение на 4 группы (квартили)
+        - SplitOption.QUINTILE: разбиение на 5 групп (квинтили)
+        - SplitOption.DECILE: разбиение на 10 групп (децили)
+    """
+    NONE = None
+    QUARTILE = 'квартили'
+    QUINTILE = 'квинтили'
+    DECILE = 'децили'
+
 class StatisticsRequest(BaseModel):
-    metrics: List[RusStatMetricEnum]
-    timeseries: Timeseries
+    metrics: List[RusStatMetricEnum] = Field(
+        ..., title="Список статистик для расчета",
+        examples=[[RusStatMetricEnum.N_OBS, RusStatMetricEnum.VAR, RusStatMetricEnum.KURTOSIS],]
+    )
+    split_option: SplitOption = Field(
+        ..., title="Вариант разбиения данных",
+        description=(
+            """
+            Вариант разбиения данных:
+                - SplitOption.NONE: обработка всего ряда без разбиения:
+                - SplitOption.QUARTILE: разбиение на 4 группы (квартили),
+                - SplitOption.QUINTILE: разбиение на 5 групп (квинтили),
+                - SplitOption.DECILE: разбиение на 10 групп (децили),
+            """
+        ),
+        examples=[SplitOption.NONE, SplitOption.QUINTILE]
+    )
+    timeseries: Timeseries = Field(..., title="Временной ряд")
 
 class StatisticsResponse(BaseModel):
-    results: Dict[RusStatMetricEnum, StatisticResult]
+    results: Dict[str, Dict[RusStatMetricEnum, StatisticResult]] = Field(
+        ..., title="Результаты расчетов",
+        examples=[
+            {
+                "квартиль 1": {"Минимум": {"value": 1.2}},
+                "квартиль 2": {"Минимум": {"value": 2.2}},
+                "квартиль 3": {"Минимум": {"value": 3.2}},
+                "квартиль 4": {"Минимум": {"value": 4.2}},
+            }
+        ]
+    )
 

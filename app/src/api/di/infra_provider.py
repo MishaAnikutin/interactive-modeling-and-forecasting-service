@@ -13,6 +13,7 @@ from src.infrastructure.adapters.predicting_2.models import PredictNhitsAdapter_
     PredictGruAdapter_V2
 from src.infrastructure.adapters.preliminary_diagnosis.fao import FaoAdapter
 from src.infrastructure.adapters.preliminary_diagnosis.kim_andrews import KimAndrewsAdapter
+from src.infrastructure.adapters.preliminary_diagnosis.statistics import StatisticsAdapter
 from src.infrastructure.adapters.stat_tests.fisher import FisherTestAdapter
 from src.infrastructure.adapters.stat_tests.student import StudentTestAdapter
 from src.infrastructure.adapters.stat_tests.two_sigma import TwoSigmaTestAdapter
@@ -126,3 +127,5 @@ class InfraProvider(Provider):
     dm = provide(DmTestAdapter, provides=DmTestAdapter)
 
     forecast_aligner = provide(ForecastTargetAligner, provides=ForecastTargetAligner)
+
+    stats_adapter = provide(StatisticsAdapter, provides=StatisticsAdapter)
