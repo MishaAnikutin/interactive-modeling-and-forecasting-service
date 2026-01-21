@@ -2,6 +2,7 @@ from dishka import Provider, Scope, provide
 
 from src.core.domain.archiver import ModelArchiver
 from src.core.domain.serializer.interface import ModelSerializer
+from src.infrastructure.adapters.correlation.interactor import CorrelationInteractor
 from src.infrastructure.adapters.distributions import HistogramEstimator, DensityEstimator, EmpiricalDistribution
 from src.infrastructure.adapters.equality_of_distribution.mann_whitney import MannWhitneyAdapter
 from src.infrastructure.adapters.equality_of_distribution.ttest import TtestAdapter
@@ -16,6 +17,7 @@ from src.infrastructure.adapters.predicting_2.models import PredictNhitsAdapter_
 from src.infrastructure.adapters.preliminary_diagnosis.fao import FaoAdapter
 from src.infrastructure.adapters.preliminary_diagnosis.kim_andrews import KimAndrewsAdapter
 from src.infrastructure.adapters.preliminary_diagnosis.statistics import StatisticsAdapter
+from src.infrastructure.adapters.regression_checker.spurious import SpuriousRegressionChecker
 from src.infrastructure.adapters.stat_tests.fisher import FisherTestAdapter
 from src.infrastructure.adapters.stat_tests.student import StudentTestAdapter
 from src.infrastructure.adapters.stat_tests.two_sigma import TwoSigmaTestAdapter
@@ -48,9 +50,7 @@ from src.infrastructure.adapters.timeseries import (
     TimeseriesExtender
 )
 from src.infrastructure.adapters.dist_fit.dist_fit import DistFit
-from src.infrastructure.interactors.correlation import CorrelationInteractor
 from src.infrastructure.adapters.structural_shifts.break_finder import BreakFinderAdapter
-from src.infrastructure.interactors.spurious_regression_checker.checker import SpuriousRegressionChecker
 
 
 class InfraProvider(Provider):

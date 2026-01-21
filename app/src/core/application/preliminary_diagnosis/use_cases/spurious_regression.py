@@ -1,7 +1,7 @@
 from src.core.application.preliminary_diagnosis.schemas.spurious_regression import SpuriousRegressionRequest, \
     SpuriousRegressionResponse
+from src.infrastructure.adapters.regression_checker.spurious import SpuriousRegressionChecker
 from src.infrastructure.adapters.timeseries import TimeseriesAlignment, PandasTimeseriesAdapter
-from src.infrastructure.interactors.spurious_regression_checker.checker import SpuriousRegressionChecker
 
 
 class SpuriousRegressionUC:

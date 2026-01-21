@@ -3,8 +3,8 @@ import pandas as pd
 from src.core.application.preliminary_diagnosis.schemas.corr import (CorrelationAnalysisResponse,
                                                                      CorrelationAnalysisRequest)
 from src.core.domain.correlation.correlation import CorrelationMatrix
+from src.infrastructure.adapters.correlation.interactor import CorrelationInteractor
 from src.infrastructure.adapters.timeseries import TimeseriesAlignment
-from src.infrastructure.interactors.correlation import CorrelationInteractor
 
 
 class CorrelationMatrixUC:
