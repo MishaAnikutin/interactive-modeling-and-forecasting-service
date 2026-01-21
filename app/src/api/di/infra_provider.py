@@ -6,6 +6,7 @@ from src.infrastructure.adapters.equality_of_distribution.ttest import TtestAdap
 from src.infrastructure.adapters.equality_of_distribution.wilcoxon import WilcoxonAdapter
 from src.infrastructure.adapters.forecast_accuracy_comparison.dm_test import DmTestAdapter
 from src.infrastructure.adapters.model_parameters_selection.arima_gridsearch import ArimaGridsearch
+from src.infrastructure.adapters.model_parameters_selection.parallel_arima_gridsearch import ParallelArimaGridsearch
 from src.infrastructure.adapters.modeling_2.nhits import NhitsAdapter_V2
 from src.infrastructure.adapters.modeling_2.lstm import LstmAdapter_V2
 from src.infrastructure.adapters.modeling_2.gru import GruAdapter_V2
@@ -117,6 +118,7 @@ class InfraProvider(Provider):
     spurious_regression_checker = provide(SpuriousRegressionChecker, provides=SpuriousRegressionChecker)
 
     arima_gridsearch = provide(ArimaGridsearch, provides=ArimaGridsearch)
+    parallel_sarimax_gridsearch = provide(ParallelArimaGridsearch, provides=ParallelArimaGridsearch)
 
     stat_tests_factory = provide(StationaryTestsFactory, provides=StationaryTestsFactory)
 

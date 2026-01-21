@@ -16,3 +16,5 @@ class Config:
 
     APP_CORS_ORIGINS_LIST = os.getenv('APP_CORS_ORIGINS_LIST', default='').split(',')
     APP_NGINX_PREFIX = os.getenv('APP_NGINX_PREFIX', default='/')
+
+    PARAMETER_SELECTION_N_JOBS: int = 4

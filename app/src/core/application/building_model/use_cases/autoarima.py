@@ -4,6 +4,7 @@ from src.core.domain.stat_test import SignificanceLevel
 from src.core.domain.stat_test.supported_stat_tests import SupportedStationaryTests
 from src.infrastructure.adapters.archiver import ModelArchiver
 from src.infrastructure.adapters.model_parameters_selection.arima_gridsearch import ArimaGridsearch
+from src.infrastructure.adapters.model_parameters_selection.parallel_arima_gridsearch import ParallelArimaGridsearch
 from src.infrastructure.adapters.modeling import ArimaxAdapter
 from src.infrastructure.adapters.serializer import ModelSerializer
 from src.infrastructure.adapters.timeseries import TimeseriesAlignment
@@ -26,7 +27,7 @@ from src.infrastructure.factories.stationarity.factory import StationaryTestsFac
 class AutoArimaUC:
     def __init__(
             self,
-            gridsearch:    ArimaGridsearch,
+            gridsearch:    ParallelArimaGridsearch,
             ts_aligner:    TimeseriesAlignment,
             archiver:      ModelArchiver,
             serializer:    ModelSerializer,

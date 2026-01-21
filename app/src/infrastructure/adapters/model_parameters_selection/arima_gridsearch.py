@@ -46,9 +46,11 @@ class ArimaGridsearch:
             try:
                 scores.append(self._score(p_, d, q_, P_, D_, Q_, m))
             except:
-                continue
+                scores.append(float('inf'))
 
         results = np.array(scores)
+
+        print(f'{results = }')
 
         best_scoring = np.min(results)
         best_combination_idx = np.argmin(results)
