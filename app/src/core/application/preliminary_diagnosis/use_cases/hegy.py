@@ -10,7 +10,7 @@ class HegyUC:
         self._timeseries_adapter = timeseries_adapter
 
     def execute(self, request: HegyRequest) -> HegyResponse:
-        y = self._timeseries_adapter.to_series(request.y)
+        y = self._timeseries_adapter.to_series(request.timeseries)
 
         result = seasonalURoot(
             y=y,
