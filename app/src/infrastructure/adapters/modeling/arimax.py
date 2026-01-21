@@ -6,17 +6,17 @@ from statsmodels.tsa.statespace.sarimax import SARIMAXResultsWrapper
 
 # FIXME: схемки это конечно ничего, но получается что инфра зависит от слоя приложения
 from src.core.application.building_model.schemas.arimax import ArimaxParams, ArimaxFitResult
+from src.core.domain.modeling import ModelingInterface
 
 from .errors.arimax import ConstantInExogAndSpecification
 from src.infrastructure.logs import logger
 from src.infrastructure.factories.metrics import MetricsFactory
-from src.infrastructure.adapters.modeling.interface import MlAdapterInterface
 from src.infrastructure.adapters.timeseries import TimeseriesTrainTestSplit, TimeseriesExtender
 
 from src.core.domain import FitParams, Coefficient, DataFrequency
 
 
-class ArimaxAdapter(MlAdapterInterface):
+class ArimaxAdapter(ModelingInterface):
     metrics = ("RMSE", "MAPE", "R2")
 
     def __init__(

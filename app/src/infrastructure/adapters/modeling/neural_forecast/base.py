@@ -6,8 +6,8 @@ from neuralforecast import NeuralForecast
 from pydantic import BaseModel
 
 from src.core.domain import DataFrequency, FitParams
+from src.core.domain.modeling import ModelingInterface
 from src.infrastructure.factories.metrics import MetricsFactory
-from src.infrastructure.adapters.modeling.interface import MlAdapterInterface
 from src.infrastructure.adapters.modeling.neural_forecast.utils import form_train_df, form_future_df, \
     full_train_predict, full_predict
 from src.infrastructure.adapters.timeseries import TimeseriesTrainTestSplit
@@ -24,7 +24,7 @@ TModel = TypeVar("TModel", bound=ModelProtocol)
 TParams = TypeVar("TParams", bound=BaseModel)
 
 
-class NeuralForecastInterface(Generic[TParams], MlAdapterInterface, ABC):
+class NeuralForecastInterface(Generic[TParams], ModelingInterface, ABC):
     metrics = ("RMSE", "MAPE", "R2")
     model_name = ""
 
