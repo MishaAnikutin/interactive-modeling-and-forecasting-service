@@ -8,9 +8,9 @@ from neuralforecast import NeuralForecast
 from pydantic import BaseModel
 
 from src.core.domain import DataFrequency, FitParams, Timeseries, ModelMetrics
-from src.infrastructure.adapters.modeling.interface import MlAdapterInterface
 from typing import Generic, TypeVar
 
+from src.core.domain.modeling import ModelingInterface
 from src.infrastructure.adapters.modeling.neural_forecast.utils import form_train_df
 from src.infrastructure.adapters.modeling_2.neural_models_errors import TrainSizeError, LSTM_GRU_TrainSizeError, \
     ValSizeError, PatienceStepsError
@@ -25,7 +25,7 @@ TResult = TypeVar("TResult", bound=BaseModel)
 TParams = TypeVar("TParams", bound=BaseModel)
 
 
-class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
+class BaseNeuralForecast(Generic[TParams], ModelingInterface, ABC):
     metrics = ("RMSE", "MAPE", "R2")
     model_class = None
     model_name = ""
