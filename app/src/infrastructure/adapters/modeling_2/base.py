@@ -45,6 +45,8 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
         self.nf = None
         self.model = None
         self.target: pd.Series = None
+
+        self.last_dt = None
         self.exog: pd.DataFrame = None
 
         self.exog_train = None
@@ -196,10 +198,6 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
             input_size: int,
             forecast_horizon: int
     ) -> List[pd.Series]:
-        output_size = start_predictions.shape[0]
-        if output_size >= forecast_horizon: # если мы уже получили все предсказания, то можно не делать ничего
-            return [start_predictions.iloc[:forecast_horizon]]
-
         forecast_list = [start_predictions]
         for _ in range(forecast_horizon):
             # нужно продлить exog на 1 точку
@@ -234,7 +232,7 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
         out_of_sample_predictions = self._predict_out_of_sample(insample_predictions[-1], input_size, forecast_horizon)
         # срез, так как последний прогноз внутри выборки входит во вневыборочный прогноз
         forecasts = insample_predictions[:-1] + out_of_sample_predictions
-        forecasts_ts = self._format_forecasts(forecasts)
+        forecasts_ts = self._format_forecasts(forecasts, forecast_horizon)
         return forecasts_ts
 
     def _split_dataset(self, train_boundary: date, val_boundary: date) -> None:
@@ -256,9 +254,19 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
             self.exog_train, self.exog_val
         )
 
-    def _format_forecasts(self, forecasts: List[pd.Series]) -> List[Timeseries]:
+    def _crop_forecasts(self, forecast: pd.Series, forecast_horizon: int) -> pd.Series:
+        last_dt = pd.date_range(
+            start=self.last_dt,
+            periods=forecast_horizon + 1,
+            freq=self.nf.freq
+        )[-1]
+        return forecast[forecast.index <= last_dt]
+
+    def _format_forecasts(self, forecasts: List[pd.Series], forecast_horizon: int) -> List[Timeseries]:
         result_forecasts = []
         for forecast in forecasts:
+            # обрезать прогноз, если он выходит за все возможные границы
+            forecast = self._crop_forecasts(forecast, forecast_horizon)
             ts_forecast = self.ts_adapter.from_series(forecast, self.nf.freq)
             result_forecasts.append(ts_forecast)
 
@@ -331,6 +339,7 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
             data_frequency: DataFrequency
     ) -> tuple[TResult, NeuralForecast]:
         self.target = target
+        self.last_dt = target.index[-1]
         self.exog = exog
         self._split_dataset(fit_params.train_boundary, fit_params.val_boundary)
         self._prepare_train_df()
@@ -345,6 +354,7 @@ class BaseNeuralForecast(Generic[TParams], MlAdapterInterface, ABC):
             input_size=hyperparameters.input_size,
             forecast_horizon=fit_params.forecast_horizon
         )
+        print(forecasts)
 
         # поделить этот прогноз на train/val/test
         split_forecasts = self.windows_splitter.split(
