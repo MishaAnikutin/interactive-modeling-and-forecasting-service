@@ -43,10 +43,6 @@ class EOSResult:
             self.substats[v] = []
 
 
-class ModelError(Exception):
-    pass
-
-
 def to_array(x: pd.Series | np.ndarray | list) -> NDArray[floating[Any]]:
     """
     Данная функция предназначена для преобразования объекта в вектор-столбец

@@ -6,7 +6,7 @@ from neuralforecast import NeuralForecast
 
 from src.core.domain import DataFrequency, ModelMetrics, FitParams, Timeseries, ForecastResult_V2
 from src.core.domain.predicting.interface import BasePredictor
-from src.infrastructure.adapters.serializer import ModelSerializer
+from src.core.domain.serializer.interface import ModelSerializer
 from src.infrastructure.adapters.timeseries import PandasTimeseriesAdapter, TimeseriesTrainTestSplit
 from src.infrastructure.adapters.timeseries.split_windows import WindowSplitter
 from src.infrastructure.adapters.timeseries.windows_creation import WindowsCreation

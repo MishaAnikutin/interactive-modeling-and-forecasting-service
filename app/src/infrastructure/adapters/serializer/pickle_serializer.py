@@ -1,5 +1,6 @@
 import pickle
-from .interface import ModelSerializer, T
+
+from src.core.domain.serializer.interface import ModelSerializer, T
 
 
 class PickleSerializer(ModelSerializer):

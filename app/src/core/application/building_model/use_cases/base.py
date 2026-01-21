@@ -3,7 +3,7 @@ from typing import Generic, Protocol, TypeVar
 from pydantic import BaseModel
 
 from src.core.domain.archiver import ModelArchiver
-from src.infrastructure.adapters.serializer import ModelSerializer
+from src.core.domain.serializer.interface import ModelSerializer
 from src.infrastructure.adapters.timeseries import (
     PandasTimeseriesAdapter,
     TimeseriesAlignment,

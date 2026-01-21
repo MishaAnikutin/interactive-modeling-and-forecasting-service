@@ -1,6 +1,7 @@
 from dishka import Provider, Scope, provide
 
 from src.core.domain.archiver import ModelArchiver
+from src.core.domain.serializer.interface import ModelSerializer
 from src.infrastructure.adapters.distributions import HistogramEstimator, DensityEstimator, EmpiricalDistribution
 from src.infrastructure.adapters.equality_of_distribution.mann_whitney import MannWhitneyAdapter
 from src.infrastructure.adapters.equality_of_distribution.ttest import TtestAdapter
@@ -36,7 +37,7 @@ from src.infrastructure.adapters.predicting.neural_predict.models import Predict
 from src.infrastructure.factories.stationarity import StationaryTestsFactory
 from src.infrastructure.factories.statistics import StatisticsFactory
 from src.infrastructure.factories.preprocessing import PreprocessFactory
-from src.infrastructure.adapters.serializer import PickleSerializer, ModelSerializer
+from src.infrastructure.adapters.serializer import PickleSerializer
 from src.infrastructure.adapters.archiver import ZipArchiver
 from src.infrastructure.factories.validation import ValidationVisitor
 from src.infrastructure.adapters.timeseries import (

@@ -1,11 +1,11 @@
 from src.core.application.building_model.schemas.autoarima import AutoArimaRequest, AutoArimaResult
 from src.core.domain.archiver import ModelArchiver
 from src.core.domain.parameter_selection.gridsearch_result.arimax import ArimaxGridsearchResult
+from src.core.domain.serializer.interface import ModelSerializer
 from src.core.domain.stat_test import SignificanceLevel
 from src.core.domain.stat_test.supported_stat_tests import SupportedStationaryTests
 from src.infrastructure.adapters.model_parameters_selection.arima_gridsearch import ArimaGridsearch
 from src.infrastructure.adapters.modeling import ArimaxAdapter
-from src.infrastructure.adapters.serializer import ModelSerializer
 from src.infrastructure.adapters.timeseries import TimeseriesAlignment
 from src.infrastructure.factories.stationarity.factory import StationaryTestsFactory
 
