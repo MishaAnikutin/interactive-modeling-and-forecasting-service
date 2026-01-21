@@ -36,14 +36,14 @@ class Timeseries(BaseModel):
 
     def __str__(self):
         s = (f'Timeseries({self.name}, {self.data_frequency})\n'
-             f'\tdates = {[str(el) for el in self.dates[:3]]}...\n'
-             f'\tvalues = {self.values[:3]}...')
+             f'\tdates = {[str(el) for el in self.dates]}\n'
+             f'\tvalues = {self.values[:3]}...\n')
         return s
 
     def __repr__(self):
         s = (f'Timeseries({self.name}, {self.data_frequency})\n'
-             f'\tdates = {[str(el) for el in self.dates[:3]]}...\n'
-             f'\tvalues = {self.values[:3]}...')
+             f'\tdates = {[str(el) for el in self.dates]}\n'
+             f'\tvalues = {self.values[:3]}...\n')
         return s
 
     @model_validator(mode="after")
