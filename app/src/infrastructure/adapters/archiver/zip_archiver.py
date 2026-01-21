@@ -2,7 +2,7 @@ import json
 import zipfile
 from io import BytesIO
 
-from .interface import ModelArchiver
+from src.core.domain.archiver import ModelArchiver
 
 
 class ZipArchiver(ModelArchiver):
