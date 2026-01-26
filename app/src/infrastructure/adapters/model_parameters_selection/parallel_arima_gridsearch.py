@@ -8,7 +8,7 @@ from src.core.application.building_model.schemas.arimax import ArimaxParams
 from src.core.domain.parameter_selection.gridsearch_result.arimax import ArimaxGridsearchResult, SARIMAXGridsearchUnit
 from src.core.domain.parameter_selection.scoring.information_criteria import InformationCriteriaScoring
 from config import Config
-
+from src.infrastructure.logs import logger
 
 
 class ParallelArimaGridsearch:
@@ -22,6 +22,7 @@ class ParallelArimaGridsearch:
         self.endog: Optional[pd.Series] = None
         self.exog: Optional[pd.DataFrame] = None
         self.scoring: InformationCriteriaScoring = InformationCriteriaScoring.aic
+        self._log = logger.getChild(self.__class__.__name__)
 
     def fit(
             self,
@@ -41,8 +42,8 @@ class ParallelArimaGridsearch:
         self.scoring = scoring
 
         n_jobs = Config.PARAMETER_SELECTION_N_JOBS
-
-        # Генерируем сетку параметров
+        self._log.info(msg=f'Генерируем сетку параметров:\n'
+                            f'{max_p=} {max_q=} {max_P=} {max_D=} {max_Q=}')
         p_range = np.arange(0, max_p + 1)
         q_range = np.arange(0, max_q + 1)
         P_range = np.arange(0, max_P + 1)
@@ -52,14 +53,14 @@ class ParallelArimaGridsearch:
         grid = (np.array(
             np.meshgrid(p_range, q_range, P_range, D_range, Q_range))
                 .T.reshape(-1, 5))
+        self._log.info(msg=f'Создали сетку: {grid}')
 
-        # Подготавливаем аргументы для параллельного выполнения
         task_args = [
             (p_, d, q_, P_, D_, Q_, m, endog, exog, scoring)
             for p_, q_, P_, D_, Q_ in grid
         ]
 
-        # Выполняем параллельный расчёт скоров
+        self._log.info(msg=f'Начинаем выполнять параллельный расчёт скоров. {n_jobs=}')
         with Pool(processes=n_jobs) as pool:
             results = pool.starmap(self._score_static, task_args)
 
@@ -75,8 +76,8 @@ class ParallelArimaGridsearch:
         return (f'SARIMAX({best_result.params.p},{best_result.params.d},{best_result.params.q})'
                 f'({best_result.params.P},{best_result.params.D},{best_result.params.Q})[{best_result.params.m}]')
 
-    @staticmethod
     def _score_static(
+            self,
             p: int,
             d: int,
             q: int,
@@ -89,6 +90,9 @@ class ParallelArimaGridsearch:
             scoring: InformationCriteriaScoring,
     ) -> Optional[float]:
         try:
+            task_id = hash((p, d, q, P, D, Q, m))
+            self._log.info(msg=f'Создаем модель {task_id=}:\n'
+                                f'order={(p, d, q)}, seasonal_order={(P, D, Q, m)}')
             model = SARIMAX(
                 endog,
                 exog=exog,
@@ -97,7 +101,7 @@ class ParallelArimaGridsearch:
                 enforce_stationarity=False,
                 enforce_invertibility=False
             )
-
+            self._log.info(msg=f'Обучаем модель {task_id=}...')
             result = model.fit(
                 disp=False,
                 method='lbfgs',
@@ -109,6 +113,7 @@ class ParallelArimaGridsearch:
             else:
                 score = result.bic
 
+            self._log.info(msg=f'Результат модели {task_id=}: {score=}')
             return SARIMAXGridsearchUnit(
                 params=ArimaxParams(
                     p=p, d=d, q=q,
@@ -117,7 +122,8 @@ class ParallelArimaGridsearch:
                 score=score
             )
 
-        except:
+        except Exception as exc:
+            self._log.info(msg=f'Не удалось обучить модель {task_id=}: {exc=}')
             return SARIMAXGridsearchUnit(
                 params=ArimaxParams(
                     p=p, d=d, q=q,
