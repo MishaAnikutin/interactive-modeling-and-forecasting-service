@@ -53,7 +53,7 @@ class StudentTestAdapter:
     ) -> List[StudentTestResult]:
         points_after = len(df) - boundary_idx  # исправлено: int - int
         if points_after <= series_size + 1:
-            return self._perform_short_series_tests(df, boundary_idx, equal_var, alpha)
+            return self._perform_short_series_tests(df, boundary_idx, series_size, equal_var, alpha)
         else:
             return self._perform_long_series_tests(df, boundary_idx, series_size, equal_var, alpha)
 
@@ -61,6 +61,7 @@ class StudentTestAdapter:
             self,
             df: pd.DataFrame,
             boundary_idx: int,
+            series_size: int,
             equal_var: bool,
             alpha: float
     ) -> List[StudentTestResult]:
@@ -82,7 +83,8 @@ class StudentTestAdapter:
             test_result = ttest_1samp(df.obs.iloc[boundary_idx + 1:-1], df.obs.iloc[boundary_idx])
             results.append(self._create_test_result(test_result, alpha, df.iloc[boundary_idx, 0]))
 
-        return self._pad_results(results, series_size)
+        return results
+        # return self._pad_results(results, series_size)
 
     def _perform_long_series_tests(
             self,
@@ -110,7 +112,7 @@ class StudentTestAdapter:
     def _create_test_result(self, test_result, alpha: float, date: datetime) -> StudentTestResult:
         conclusion = Conclusion.reject if test_result.pvalue < alpha else Conclusion.fail_to_reject
         return StudentTestResult(
-            date=pd.to_datetime(date),
+            datetime=pd.to_datetime(date),
             p_value=float(test_result.pvalue),
             statistic=float(test_result.statistic),
             conclusion=conclusion
@@ -119,7 +121,7 @@ class StudentTestAdapter:
     def _pad_results(self, results: List[StudentTestResult], series_size: int) -> List[StudentTestResult]:
         while len(results) < series_size:
             results.append(StudentTestResult(
-                date=pd.NaT,
+                datetime=pd.NaT,
                 p_value=float('nan'),
                 statistic=float('nan'),
                 conclusion=Conclusion.fail_to_reject

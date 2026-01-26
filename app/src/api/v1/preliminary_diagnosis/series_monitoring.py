@@ -16,6 +16,7 @@ from src.core.application.preliminary_diagnosis.schemas.series_monitoring import
     TwoSigmaTestRequest,
     TwoSigmaTestResponse
 )
+from src.core.domain.stat_test.student import InvalidDateError
 
 series_monitoring_router = APIRouter(prefix="/series_monitoring", tags=["Мониторинг и детекция структурных сдвигов у рядов"])
 
@@ -26,7 +27,10 @@ def student_test(
     request: StudentTestRequest,
     uc: FromDishka[StudentTestUC]
 ) -> StudentTestResponse:
-    return uc.execute(request=request)
+    try:
+        return uc.execute(request=request)
+    except InvalidDateError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
 
 @series_monitoring_router.post(path="/fisher_test")

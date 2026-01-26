@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from src.core.application.building_model.schemas.arimax import ArimaxFitResult
 from src.core.domain import Timeseries, FitParams
@@ -30,6 +30,19 @@ class AutoArimaRequest(BaseModel):
 
     fit_params: FitParams
     # TODO: добавить стратегию кросс-валидации
+
+    @model_validator(mode='after')
+    def validate_params(self):
+        if (
+            self.max_p == 0 and
+            self.max_q == 0 and
+            self.max_P == 0 and
+            self.max_D == 0 and
+            self.max_Q == 0
+        ):
+            raise ValueError("Все границы перебора параметров равны нулю."
+                             "Поставьте какой нибудь из параметров max_* больше нуля")
+        return self
 
 
 class AutoArimaResult(BaseModel):
