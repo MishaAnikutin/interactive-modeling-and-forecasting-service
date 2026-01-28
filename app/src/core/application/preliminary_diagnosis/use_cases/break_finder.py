@@ -9,7 +9,7 @@ class BreakFinderUC:
         self._timeseries_adapter = timeseries_adapter
 
     def execute(self, request: BreakFinderRequest) -> BreakFinderResponse:
-        endog = self._timeseries_adapter.to_series(request.endog)
+        endog = self._timeseries_adapter.to_series(request.timeseries)
 
         breakpoints = self._break_finder_adapter.fit(
             endog=endog,
