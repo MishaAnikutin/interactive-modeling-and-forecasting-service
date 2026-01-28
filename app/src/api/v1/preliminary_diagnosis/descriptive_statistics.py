@@ -3,7 +3,7 @@ from dishka import FromDishka
 from dishka.integrations.fastapi import inject_sync
 from src.core.application.preliminary_diagnosis.schemas.quantiles import QuantilesResult, QuantilesParams
 from src.core.application.preliminary_diagnosis.schemas.statistics import StatisticResult, \
-    StatisticsResponse, StatisticsRequest, RusStatMetricEnum
+    StatisticsResponse, StatisticsRequest, StatMetricEnum, get_russian_metric
 from src.core.application.preliminary_diagnosis.use_cases.quantiles import QuantilesUC
 from src.core.application.preliminary_diagnosis.use_cases.statistics import StatisticsUC
 from src.core.domain import Timeseries
@@ -23,11 +23,12 @@ def quantiles(
 @descriptive_statistics_router.post(path="/{statistic}/")
 @inject_sync
 def statistic_value(
-    statistic: RusStatMetricEnum,
+    statistic: StatMetricEnum,
     request: Timeseries,
     statistics_uc: FromDishka[StatisticsUC],
 ) -> StatisticResult:
-    return statistics_uc.execute(request=request, statistic=statistic)
+    rus_name = get_russian_metric(statistic)
+    return statistics_uc.execute(request=request, statistic=rus_name)
 
 
 @descriptive_statistics_router.post(path="/statistics")

@@ -1,7 +1,7 @@
 import pandas as pd
 
 from src.core.application.preliminary_diagnosis.schemas.statistics import StatisticResult, \
-    StatisticsRequest, StatisticsResponse, RusStatMetricEnum, SplitOption
+    StatisticsRequest, StatisticsResponse, RusStatMetricEnum, SplitOption, get_russian_metric
 from src.core.domain import Timeseries
 from src.infrastructure.adapters.timeseries import PandasTimeseriesAdapter
 from src.infrastructure.factories.statistics.factory import StatisticsFactory
@@ -22,6 +22,7 @@ class StatisticsAdapter:
         return self._statistics_fabric.get_value(ts=ts, statistic=statistic)
 
     def execute_many(self, request: StatisticsRequest) -> StatisticsResponse:
+        rus_metrics = [get_russian_metric(m) for m in request.metrics]
         ts = self._pandas_adapter.to_dataframe(request.timeseries)
 
         split_map = {  # Словарь для выбора числа групп по варианту split
@@ -46,7 +47,7 @@ class StatisticsAdapter:
                 self._statistics_fabric.get_value(
                     ts=df,
                     statistic=stat
-                ) for stat in request.metrics
+                ) for stat in rus_metrics
             ]
-            result_dict[group_name] = dict(zip(request.metrics, values))
+            result_dict[group_name] = dict(zip(rus_metrics, values))
         return StatisticsResponse(results=result_dict)

@@ -46,6 +46,64 @@ class RusStatMetricEnum(Enum):
     LAST_Z = 'Последний z-показатель'
     ENTROPY = 'Энтропия'
 
+class StatMetricEnum(Enum):
+    N_OBS = 'Number of observations'
+    VAR_COEFF = 'Coefficient of variation'
+    MEAN = 'Mean'
+    MEAN_CONF_INT = 'Mean confidence interval'
+    CR_BOUND_MEAN = 'Rao-Cramer inequality lower bound mean for normal distribution'
+    STD_ERR = 'Standard error'
+    MEDIAN = 'Median'
+    MODE = 'Mode'
+    MEDIAN_WOLSH = 'Median Wolsh'
+    TRIMMED_MEAN = 'Trimmed Mean'
+    STD = 'Standard Deviation'
+    GEOM_MEAN = 'Geometric mean'
+    VAR = 'Variance'
+    VAR_CONF_INT = 'Variance confident interval'
+    CR_BOUND_VAR = 'Rao-Cramer inequality lower bound variance for normal distribution'
+    KURTOSIS = 'Excess kurtosis'
+    SKEW = 'Skewness'
+    MIN = 'Minimum'
+    MAX = 'Maximum'
+    RANGE = 'Range'
+    SUM = 'Sum'
+    Q25 = '25% quantile'
+    Q75 = '75% quantile'
+    LAST_Z = 'Last z-score'
+    ENTROPY = 'Entropy'
+
+STAT_METRIC_TO_RUS = {
+    StatMetricEnum.N_OBS: RusStatMetricEnum.N_OBS,
+    StatMetricEnum.VAR_COEFF: RusStatMetricEnum.VAR_COEFF,
+    StatMetricEnum.MEAN: RusStatMetricEnum.MEAN,
+    StatMetricEnum.MEAN_CONF_INT: RusStatMetricEnum.MEAN_CONF_INT,
+    StatMetricEnum.CR_BOUND_MEAN: RusStatMetricEnum.CR_BOUND_MEAN,
+    StatMetricEnum.STD_ERR: RusStatMetricEnum.STD_ERR,
+    StatMetricEnum.MEDIAN: RusStatMetricEnum.MEDIAN,
+    StatMetricEnum.MODE: RusStatMetricEnum.MODE,
+    StatMetricEnum.MEDIAN_WOLSH: RusStatMetricEnum.MEDIAN_WOLSH,
+    StatMetricEnum.TRIMMED_MEAN: RusStatMetricEnum.TRIMMED_MEAN,
+    StatMetricEnum.STD: RusStatMetricEnum.STD,
+    StatMetricEnum.GEOM_MEAN: RusStatMetricEnum.GEOM_MEAN,
+    StatMetricEnum.VAR: RusStatMetricEnum.VAR,
+    StatMetricEnum.VAR_CONF_INT: RusStatMetricEnum.VAR_CONF_INT,
+    StatMetricEnum.CR_BOUND_VAR: RusStatMetricEnum.CR_BOUND_VAR,
+    StatMetricEnum.KURTOSIS: RusStatMetricEnum.KURTOSIS,
+    StatMetricEnum.SKEW: RusStatMetricEnum.SKEW,
+    StatMetricEnum.MIN: RusStatMetricEnum.MIN,
+    StatMetricEnum.MAX: RusStatMetricEnum.MAX,
+    StatMetricEnum.RANGE: RusStatMetricEnum.RANGE,
+    StatMetricEnum.SUM: RusStatMetricEnum.SUM,
+    StatMetricEnum.Q25: RusStatMetricEnum.Q25,
+    StatMetricEnum.Q75: RusStatMetricEnum.Q75,
+    StatMetricEnum.LAST_Z: RusStatMetricEnum.LAST_Z,
+    StatMetricEnum.ENTROPY: RusStatMetricEnum.ENTROPY,
+}
+
+def get_russian_metric(metric: StatMetricEnum) -> RusStatMetricEnum:
+    """Конвертирует английскую метрику в русскую."""
+    return STAT_METRIC_TO_RUS.get(metric, f"Неизвестная метрика {metric}")
 
 class SplitOption(Enum):
     """
@@ -61,9 +119,9 @@ class SplitOption(Enum):
     DECILE = 'децили'
 
 class StatisticsRequest(BaseModel):
-    metrics: List[RusStatMetricEnum] = Field(
+    metrics: List[StatMetricEnum] = Field(
         ..., title="Список статистик для расчета",
-        examples=[[RusStatMetricEnum.N_OBS, RusStatMetricEnum.VAR, RusStatMetricEnum.KURTOSIS],]
+        examples=[[StatMetricEnum.N_OBS, StatMetricEnum.VAR, StatMetricEnum.KURTOSIS],]
     )
     split_option: SplitOption = Field(
         ..., title="Вариант разбиения данных",
