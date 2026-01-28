@@ -34,14 +34,14 @@ class StatisticsAdapter:
         if parts:
             ts['group'] = pd.qcut(ts[request.timeseries.name], q=parts, labels=False, duplicates='drop')
         else:
-            ts['group'] = 'Весь ряд'
+            ts['group'] = 'full series'
 
         result_dict = {}
         for group_num, group_df in ts.groupby('group'):
             if parts:
                 group_name = f"{group_num + 1} {request.split_option.value}"
             else:
-                group_name = 'Весь ряд'
+                group_name = 'full series'
             df = group_df[request.timeseries.name].to_numpy()
             values = [
                 self._statistics_fabric.get_value(
@@ -49,5 +49,5 @@ class StatisticsAdapter:
                     statistic=stat
                 ) for stat in rus_metrics
             ]
-            result_dict[group_name] = dict(zip(rus_metrics, values))
+            result_dict[group_name] = dict(zip(request.metrics, values))
         return StatisticsResponse(results=result_dict)

@@ -114,9 +114,9 @@ class SplitOption(Enum):
         - SplitOption.DECILE: разбиение на 10 групп (децили)
     """
     NONE = None
-    QUARTILE = 'квартили'
-    QUINTILE = 'квинтили'
-    DECILE = 'децили'
+    QUARTILE = 'QUARTILE'
+    QUINTILE = 'QUINTILE'
+    DECILE = 'DECILE'
 
 class StatisticsRequest(BaseModel):
     metrics: List[StatMetricEnum] = Field(
@@ -139,14 +139,14 @@ class StatisticsRequest(BaseModel):
     timeseries: Timeseries = Field(..., title="Временной ряд")
 
 class StatisticsResponse(BaseModel):
-    results: Dict[str, Dict[RusStatMetricEnum, StatisticResult]] = Field(
+    results: Dict[str, Dict[StatMetricEnum, StatisticResult]] = Field(
         ..., title="Результаты расчетов",
         examples=[
             {
-                "квартиль 1": {"Минимум": {"value": 1.2}},
-                "квартиль 2": {"Минимум": {"value": 2.2}},
-                "квартиль 3": {"Минимум": {"value": 3.2}},
-                "квартиль 4": {"Минимум": {"value": 4.2}},
+                "QUARTILE 1": {"Minimum": {"value": 1.2}},
+                "QUARTILE 2": {"Minimum": {"value": 2.2}},
+                "QUARTILE 3": {"Minimum": {"value": 3.2}},
+                "QUARTILE 4": {"Minimum": {"value": 4.2}},
             }
         ]
     )
