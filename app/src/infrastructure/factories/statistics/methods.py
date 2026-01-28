@@ -1,4 +1,4 @@
-from itertools import combinations
+from itertools import combinations, combinations_with_replacement
 
 import numpy as np
 import pandas as pd
@@ -169,3 +169,9 @@ class VariationCoefficient(StatisticsServiceI):
         mean = np.mean(ts)
         std = np.std(ts, ddof=1)
         return StatisticResult(value=100 * std / mean)
+
+@StatisticsFactory.register(name=RusStatMetricEnum.HODGES_LEHMANN)
+class HodgesLehmann(StatisticsServiceI):
+    def get_value(self, ts: np.ndarray) -> StatisticResult:
+        value = round(np.median([(x + y) / 2 for x, y in combinations_with_replacement(ts, 2)]))
+        return StatisticResult(value=value)

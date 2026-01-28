@@ -45,6 +45,7 @@ class RusStatMetricEnum(Enum):
     Q75 = '75% квантиль'
     LAST_Z = 'Последний z-показатель'
     ENTROPY = 'Энтропия'
+    HODGES_LEHMANN = 'Оценка Ходжеса-Лемана'
 
 class StatMetricEnum(Enum):
     N_OBS = 'Number of observations'
@@ -72,6 +73,7 @@ class StatMetricEnum(Enum):
     Q75 = '75% quantile'
     LAST_Z = 'Last z-score'
     ENTROPY = 'Entropy'
+    HODGES_LEHMANN = 'Hodges Lehmann estimator'
 
 STAT_METRIC_TO_RUS = {
     StatMetricEnum.N_OBS: RusStatMetricEnum.N_OBS,
@@ -99,6 +101,7 @@ STAT_METRIC_TO_RUS = {
     StatMetricEnum.Q75: RusStatMetricEnum.Q75,
     StatMetricEnum.LAST_Z: RusStatMetricEnum.LAST_Z,
     StatMetricEnum.ENTROPY: RusStatMetricEnum.ENTROPY,
+    StatMetricEnum.HODGES_LEHMANN: RusStatMetricEnum.HODGES_LEHMANN
 }
 
 def get_russian_metric(metric: StatMetricEnum) -> RusStatMetricEnum:
