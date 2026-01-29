@@ -5,10 +5,14 @@ from statsmodels.tsa.stattools import adfuller, kpss
 from .factory import StationaryTestsFactory
 from src.core.domain.stat_test.interface import StatTestService, TestStatistic, PValue
 from src.core.domain.stat_test.supported_stat_tests import SupportedStationaryTests
+from src.infrastructure.logs import logger
 
 
 @StationaryTestsFactory.register(SupportedStationaryTests.DickeyFuller)
 class DickeyFuller(StatTestService):
+    def __init__(self):
+        self._log = logger.getChild(self.__class__.__name__)
+
     def calculate(
             self,
             series: pd.Series,
@@ -24,6 +28,8 @@ class DickeyFuller(StatTestService):
             autolag=autolag
         )
 
+        self._log.info(msg=f'{result = }')
+
         test_statistic = result[0]
         p_value = result[1]
 
@@ -32,6 +38,9 @@ class DickeyFuller(StatTestService):
 
 @StationaryTestsFactory.register(SupportedStationaryTests.KPSS)
 class KPSS(StatTestService):
+    def __init__(self):
+        self._log = logger.getChild(self.__class__.__name__)
+
     def calculate(
             self,
             series: pd.Series,
@@ -45,6 +54,8 @@ class KPSS(StatTestService):
             regression=regression,
             nlags=nlags
         )
+
+        self._log.info(msg=f'{result = }')
 
         test_statistic = result[0]
         p_value = result[1]

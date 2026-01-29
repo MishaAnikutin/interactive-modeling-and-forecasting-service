@@ -1,3 +1,6 @@
+# TODO:
+# from profilehooks import profile
+
 from src.core.application.building_model.schemas.autoarima import AutoArimaRequest, AutoArimaResult
 from src.core.domain.parameter_selection.gridsearch_result.arimax import ArimaxGridsearchResult
 from src.core.domain.stat_test import SignificanceLevel
@@ -27,7 +30,7 @@ from src.infrastructure.factories.stationarity.factory import StationaryTestsFac
 class AutoArimaUC:
     def __init__(
             self,
-            gridsearch:    ParallelArimaGridsearch,
+            gridsearch:    ArimaGridsearch,
             ts_aligner:    TimeseriesAlignment,
             archiver:      ModelArchiver,
             serializer:    ModelSerializer,
@@ -41,12 +44,18 @@ class AutoArimaUC:
         self._arima_adapter = arima_adapter
         self._stationary_factory = stationary_factory
 
+    # Для профилирования:
+    # @profile(filename='autoarima.prof', stdout=False)
     def execute(self, request: AutoArimaRequest) -> bytes:
         target, exog = self._ts_aligner.align(request.model_data)
+        current = target.copy()
 
         # TODO: перебрать d до стационарности
         d = 0
-        while self._is_not_stationary(target, request.stationary_test):
+        while self._is_not_stationary(current):
+            # FIXME: ну как бы ынфраааааааааа. Надо сделать адаптер CalculateStationaryOrder
+            # FIXME: ограничить d каким нибудь максимальным
+            current = current.diff().dropna()
             d += 1
 
         # TODO: оценивать параметры надо только на обучающей и валидационной выборке НА КРОСС ВАЛИДАЦИИ
@@ -87,9 +96,7 @@ class AutoArimaUC:
     def _is_not_stationary(
             self,
             series,
-            stat_test: SupportedStationaryTests,
             significance_level: SignificanceLevel = 0.05
     ) -> bool:
-        _, p_value = self._stationary_factory.calculate(test=stat_test, series=series)
-
+        _, p_value = self._stationary_factory.calculate(test=SupportedStationaryTests.DickeyFuller, series=series)
         return p_value > significance_level

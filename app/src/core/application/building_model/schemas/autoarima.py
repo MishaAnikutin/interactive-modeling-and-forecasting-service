@@ -18,10 +18,6 @@ class AutoArimaRequest(BaseModel):
     max_D: int = Field(default=1, description='максимальное значение порядка сезонной интеграции для перебора')
     max_Q: int = Field(default=1, description='максимальное значение порядка сезонного скользящего среднего для перебора')
     m: int = Field(default=0, description='Длина сезонного перидоа. Задается вручную')
-    stationary_test: SupportedStationaryTests = Field(
-        default=SupportedStationaryTests.KPSS,
-        description='Какой критерий использовать для подбора параметра d'
-    )
 
     scoring: InformationCriteriaScoring = Field(
         default=InformationCriteriaScoring.aic,
