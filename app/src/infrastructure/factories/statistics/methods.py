@@ -1,3 +1,4 @@
+import warnings
 from itertools import combinations, combinations_with_replacement
 
 import numpy as np
@@ -99,12 +100,31 @@ class CRVariance(StatisticsServiceI):
 @StatisticsFactory.register(name=RusStatMetricEnum.KURTOSIS)
 class Kurtosis(StatisticsServiceI):
     def get_value(self, ts: np.ndarray) -> StatisticResult:
-        return StatisticResult(value=kurtosis(ts, bias=False, fisher=True))
+        with warnings.catch_warnings():
+            warnings.filterwarnings('error', category=RuntimeWarning)
+            try:
+                val = kurtosis(ts, bias=False, fisher=True)
+            except RuntimeWarning:
+                # Если произошла потеря точности, возвращаем None
+                return StatisticResult(value=None)
+
+            if np.isnan(val) or not np.isfinite(val):
+                return StatisticResult(value=None)
+
+        return StatisticResult(value=round(val, 2))
 
 @StatisticsFactory.register(name=RusStatMetricEnum.SKEW)
 class Skewness(StatisticsServiceI):
     def get_value(self, ts: np.ndarray) -> StatisticResult:
-        return StatisticResult(value=skew(ts, bias=False))
+        with warnings.catch_warnings():
+            warnings.filterwarnings('error', category=RuntimeWarning)
+            try:
+                val = skew(ts, bias=False)
+                if np.isnan(val) or not np.isfinite(val):
+                    return StatisticResult(value=None)
+            except RuntimeWarning:
+                return StatisticResult(value=None)
+        return StatisticResult(value=round(skew(ts, bias=False), 2))
 
 @StatisticsFactory.register(name=RusStatMetricEnum.MIN)
 class Min(StatisticsServiceI):
@@ -141,8 +161,16 @@ class LastZ(StatisticsServiceI):
     def get_value(self, ts: np.ndarray) -> StatisticResult:
         if len(ts) == 0:
             return StatisticResult(value=0.0)
-        z_scores = stats.zscore(ts, nan_policy='omit')
-        return StatisticResult(value=float(round(z_scores[-1])))
+        with warnings.catch_warnings():
+            warnings.filterwarnings('error', category=RuntimeWarning)
+            try:
+                z_scores = stats.zscore(ts, nan_policy='omit')
+                val = z_scores[-1]
+                if np.isnan(val) or not np.isfinite(val):
+                    return StatisticResult(value=None)
+            except RuntimeWarning:
+                return StatisticResult(value=None)
+        return StatisticResult(value=float(round(val, 2)))
 
 @StatisticsFactory.register(name=RusStatMetricEnum.MEDIAN_WOLSH)
 class MedianWolsh(StatisticsServiceI):
